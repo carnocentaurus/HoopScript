@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LoadingScreen from './src/screens/LoadingScreen';
 import SelectSave from './src/screens/SelectSave';
 import TeamSelection from './src/screens/TeamSelection';
 import TeamOverview from './src/screens/TeamOverview';
 import HomeScreen from './src/screens/HomeScreen';
-import QuickSimScreen from './src/screens/QuickSimScreen'; // Ensure this is created
+import QuickSimScreen from './src/screens/QuickSimScreen';
 import { GameSave } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
-import { GameResult } from './src/utils/gameSim'; // We will refine this next
+import { GameResult } from './src/utils/gameSim';
 
-// Added 'quickSim' to the view states
 type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim';
+
+const STORAGE_KEY = '@hoopscript_saves';
 
 export default function App() {
   const [view, setView] = useState<ViewState>('loading');
@@ -18,7 +20,10 @@ export default function App() {
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [tempCity, setTempCity] = useState<string | null>(null);
 
-  // Placeholder for the next opponent logic
+  // Loading States
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
+  const [isTimerDone, setIsTimerDone] = useState(false);
+
   const [currentOpponent] = useState({
     city: "Chicago",
     record: "12-8",
@@ -26,14 +31,49 @@ export default function App() {
     isHome: false
   });
 
+  // 1. App Initialization: Load Data & Run Timer
   useEffect(() => {
-    const timer = setTimeout(() => setView('saveSelection'), 3000);
+    const loadSaves = async () => {
+      try {
+        const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
+        if (storedSaves) {
+          setSaves(JSON.parse(storedSaves));
+        }
+      } catch (e) {
+        console.error("Failed to load saves from storage", e);
+      } finally {
+        setIsStorageLoaded(true);
+      }
+    };
+
+    loadSaves();
+
+    const timer = setTimeout(() => {
+      setIsTimerDone(true);
+    }, 3000);
+
     return () => clearTimeout(timer);
   }, []);
 
+  // 2. Wait for BOTH the 3-second timer and storage to finish loading
+  useEffect(() => {
+    if (isStorageLoaded && isTimerDone) {
+      setView('saveSelection');
+    }
+  }, [isStorageLoaded, isTimerDone]);
+
+  // Helper to save data to the phone
+  const persistSaves = async (newSaves: (GameSave | null)[]) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newSaves));
+    } catch (e) {
+      console.error("Failed to save data to storage", e);
+    }
+  };
+
   const handleSelectSlot = (slotId: number) => {
     setActiveSlot(slotId);
-    const existingSave = saves[slotId - 1]; // Array is 0-indexed, slots are 1-3
+    const existingSave = saves[slotId - 1];
     if (existingSave) {
       setView('home');
     } else {
@@ -57,18 +97,18 @@ export default function App() {
       gamesPlayed: 0,
       totalGames: 82,
       rank: 15,
-      // Simple logic: add more teams here as you expand
-      conference: ['Toronto', 'Boston', 'New York', 'Brooklyn', 'Philadelphia'].includes(tempCity) ? 'East' : 'West', 
+      conference: ['Toronto', 'Boston', 'New York', 'Brooklyn', 'Philadelphia'].includes(tempCity) ? 'East' : 'West',
       roster: generateRoster()
     };
 
     const newSaves = [...saves];
     newSaves[activeSlot - 1] = newSave;
+    
     setSaves(newSaves);
+    persistSaves(newSaves); // Write to device storage
     setView('home');
   };
 
-  // Logic to process the game result and update the save state
   const handleGameFinish = (result: GameResult) => {
     if (activeSlot === null) return;
 
@@ -78,16 +118,15 @@ export default function App() {
     if (currentSave) {
       const isWin = result.myScore > result.oppScore;
       
-      // Update W-L Record
       currentSave.wins += isWin ? 1 : 0;
       currentSave.losses += isWin ? 0 : 1;
       currentSave.gamesPlayed += 1;
 
-      // Simple Rank Logic: Up 1 on win, down 1 on loss (capped 1-15)
       if (isWin && currentSave.rank > 1) currentSave.rank -= 1;
       if (!isWin && currentSave.rank < 15) currentSave.rank += 1;
 
       setSaves(updatedSaves);
+      persistSaves(updatedSaves); // Write to device storage
       setView('home'); 
     }
   };
