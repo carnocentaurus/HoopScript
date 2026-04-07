@@ -2,14 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { GameSave } from '../types/save';
 
-const HomeScreen = ({ save, onQuickSim }: { save: GameSave, onQuickSim: () => void }) => {
-  // Dummy data for next opponent - later this will come from a schedule engine
-  const opponent = {
-    city: "Chicago",
-    record: "12-8",
-    rank: "4th",
-    isHome: false
-  };
+// Added 'opponent' to the props definition
+const HomeScreen = ({ save, opponent, onQuickSim }: { 
+  save: GameSave, 
+  opponent: any, 
+  onQuickSim: () => void 
+}) => {
 
   const getRankSuffix = (n: number) => {
     if (n === 1) return "1st";
@@ -32,8 +30,11 @@ const HomeScreen = ({ save, onQuickSim }: { save: GameSave, onQuickSim: () => vo
         <Text style={styles.sectionLabel}>NEXT OPPONENT</Text>
         <View style={styles.oppRow}>
           <View>
+            {/* These now use the dynamic 'opponent' prop from App.tsx */}
             <Text style={styles.oppCity}>{opponent.city}</Text>
-            <Text style={styles.oppSub}>{opponent.rank} | {opponent.record}</Text>
+            <Text style={styles.oppSub}>
+               {opponent.rank !== "TBD" ? `${opponent.rank} | ` : ""}{opponent.record}
+            </Text>
           </View>
           <Text style={styles.venueText}>{opponent.isHome ? "HOME" : "AWAY"}</Text>
         </View>
@@ -42,7 +43,7 @@ const HomeScreen = ({ save, onQuickSim }: { save: GameSave, onQuickSim: () => vo
      {/* Progress */}
       <View style={styles.progressSection}>
         <Text style={styles.progressText}>SEASON PROGRESS</Text>
-        {/* Updated to keep GL static at the totalGames value (82) */}
+        {/* GL is now static at 82 */}
         <Text style={styles.statsText}>{save.gamesPlayed} GP / {save.totalGames} GL</Text>
       </View>
 

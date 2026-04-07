@@ -9,6 +9,7 @@ import QuickSimScreen from './src/screens/QuickSimScreen';
 import { GameSave } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult } from './src/utils/gameSim';
+import { ALL_CITIES, generateSchedule, generateInitialStandings } from './src/utils/leagueEngine';
 
 type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim';
 
@@ -23,13 +24,6 @@ export default function App() {
   // Loading States
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
-
-  const [currentOpponent] = useState({
-    city: "Chicago",
-    record: "12-8",
-    rank: "4th",
-    isHome: false
-  });
 
   // 1. App Initialization: Load Data & Run Timer
   useEffect(() => {
@@ -55,14 +49,14 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 2. Wait for BOTH the 3-second timer and storage to finish loading
+  // 2. Navigation Control
   useEffect(() => {
     if (isStorageLoaded && isTimerDone) {
       setView('saveSelection');
     }
   }, [isStorageLoaded, isTimerDone]);
 
-  // Helper to save data to the phone
+  // Storage Helper
   const persistSaves = async (newSaves: (GameSave | null)[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newSaves));
@@ -97,15 +91,16 @@ export default function App() {
       gamesPlayed: 0,
       totalGames: 82,
       rank: 15,
-      conference: ['Toronto', 'Boston', 'New York', 'Brooklyn', 'Philadelphia'].includes(tempCity) ? 'East' : 'West',
-      roster: generateRoster()
+      conference: ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West',
+      roster: generateRoster(),
+      schedule: generateSchedule(tempCity),
+      standings: generateInitialStandings()
     };
 
     const newSaves = [...saves];
     newSaves[activeSlot - 1] = newSave;
-    
     setSaves(newSaves);
-    persistSaves(newSaves); // Write to device storage
+    persistSaves(newSaves);
     setView('home');
   };
 
@@ -117,16 +112,33 @@ export default function App() {
 
     if (currentSave) {
       const isWin = result.myScore > result.oppScore;
-      
+      const opponentCity = currentSave.schedule[currentSave.gamesPlayed];
+
       currentSave.wins += isWin ? 1 : 0;
       currentSave.losses += isWin ? 0 : 1;
+
+      currentSave.standings.forEach(team => {
+        if (team.city === currentSave.city) {
+          team.wins += isWin ? 1 : 0;
+          team.losses += isWin ? 0 : 1;
+        } else if (team.city === opponentCity) {
+          team.wins += isWin ? 0 : 1;
+          team.losses += isWin ? 1 : 0;
+        } else {
+          if (Math.random() > 0.5) team.wins += 1;
+          else team.losses += 1;
+        }
+      });
+
+      const myConf = currentSave.standings
+        .filter(t => t.conf === currentSave.conference)
+        .sort((a, b) => b.wins - a.wins);
+      
+      currentSave.rank = myConf.findIndex(t => t.city === currentSave.city) + 1;
       currentSave.gamesPlayed += 1;
 
-      if (isWin && currentSave.rank > 1) currentSave.rank -= 1;
-      if (!isWin && currentSave.rank < 15) currentSave.rank += 1;
-
       setSaves(updatedSaves);
-      persistSaves(updatedSaves); // Write to device storage
+      persistSaves(updatedSaves);
       setView('home'); 
     }
   };
@@ -149,23 +161,48 @@ export default function App() {
 
   if (view === 'home' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
-    return activeSave ? (
+    if (!activeSave || !activeSave.schedule) return null;
+
+    const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
+    const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
+
+    const dynamicOpponent = {
+      city: nextOpponentCity,
+      record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
+      rank: "TBD",
+      isHome: activeSave.gamesPlayed % 2 === 0
+    };
+
+    return (
       <HomeScreen 
         save={activeSave} 
+        opponent={dynamicOpponent} 
         onQuickSim={() => setView('quickSim')} 
       />
-    ) : null;
+    );
   }
 
   if (view === 'quickSim' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
-    return activeSave ? (
+    if (!activeSave || !activeSave.schedule) return null;
+
+    const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
+    const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
+
+    const dynamicOpponent = {
+      city: nextOpponentCity,
+      record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
+      rank: "TBD",
+      isHome: activeSave.gamesPlayed % 2 === 0
+    };
+
+    return (
       <QuickSimScreen 
         save={activeSave} 
-        opponent={currentOpponent} 
+        opponent={dynamicOpponent} 
         onFinish={handleGameFinish} 
       />
-    ) : null;
+    );
   }
 
   return null;
