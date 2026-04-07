@@ -1,45 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import LoadingScreen from './src/screens/LoadingScreen';
+import SelectSave from './src/screens/SelectSave';
 import TeamSelection from './src/screens/TeamSelection';
 import TeamOverview from './src/screens/TeamOverview';
+import HomeScreen from './src/screens/HomeScreen';
+import { GameSave } from './src/types/save';
+import { generateRoster } from './src/utils/rosterGenerator';
+
+type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home';
 
 export default function App() {
-  const [view, setView] = useState<'loading' | 'selection' | 'overview'>('loading');
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [view, setView] = useState<ViewState>('loading');
+  const [saves, setSaves] = useState<(GameSave | null)[]>([null, null, null]);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
+  const [tempCity, setTempCity] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setView('selection');
-    }, 3000); // 3-second delay for the splash screen
-    return () => clearTimeout(timer);
+    setTimeout(() => setView('saveSelection'), 3000);
   }, []);
 
-  const handleTeamSelect = (team: string) => {
-    setSelectedTeam(team);
-    setView('overview'); // Navigate to the Overview screen
+  const handleSelectSlot = (slotId: number) => {
+    setActiveSlot(slotId);
+    const existingSave = saves.find(s => s?.slotId === slotId);
+    if (existingSave) {
+      setView('home');
+    } else {
+      setView('teamSelection');
+    }
+  };
+
+  const handleTeamSelect = (city: string) => {
+    setTempCity(city);
+    setView('teamOverview');
   };
 
   const handleConfirmTeam = () => {
-    // This will eventually lead to your "Home" or "Dashboard" screen
-    console.log(`Confirmed team: ${selectedTeam}`);
-    alert(`Welcome to the league, ${selectedTeam}!`);
+    if (!tempCity || activeSlot === null) return;
+
+    const newSave: GameSave = {
+      slotId: activeSlot,
+      city: tempCity,
+      wins: 0,
+      losses: 0,
+      gamesPlayed: 0,
+      totalGames: 82,
+      rank: 15,
+      conference: ['Toronto', 'Boston', 'New York'].includes(tempCity) ? 'East' : 'West', // Simplified logic
+      roster: generateRoster()
+    };
+
+    const newSaves = [...saves];
+    newSaves[activeSlot - 1] = newSave;
+    setSaves(newSaves);
+    setView('home');
   };
 
-  // Screen 1: Loading
-  if (view === 'loading') {
-    return <LoadingScreen />;
+  if (view === 'loading') return <LoadingScreen />;
+  if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
+  if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
+  if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} />;
+  if (view === 'home' && activeSlot) {
+    const activeSave = saves[activeSlot - 1];
+    return activeSave ? <HomeScreen save={activeSave} onQuickSim={() => console.log("Simulating...")} /> : null;
   }
 
-  // Screen 3: Team Overview (Selected Team)
-  if (view === 'overview' && selectedTeam) {
-    return (
-      <TeamOverview 
-        city={selectedTeam} 
-        onConfirm={handleConfirmTeam} 
-      />
-    );
-  }
-
-  // Screen 2: Team Selection (Default)
-  return <TeamSelection onSelectTeam={handleTeamSelect} />;
+  return null;
 }
