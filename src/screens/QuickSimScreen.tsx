@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { GameResult, generateBestPlayer } from '../utils/gameSim';
+import { GameResult, generateBestPlayer, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
 
 const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void }) => {
@@ -10,24 +10,23 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
   const [result, setResult] = useState<GameResult | null>(null);
 
   useEffect(() => {
-    // 1. Pre-calculate the final result
-    const finalMy = Math.floor(Math.random() * 40) + 85;
-    const finalOpp = Math.floor(Math.random() * 40) + 85;
-    
-    const myBest = generateBestPlayer(save.roster[0].lastName, finalMy > finalOpp);
-    const oppBest = generateBestPlayer("Opponent", finalOpp > finalMy);
-
-    const gameResult = { myScore: finalMy, oppScore: finalOpp, myBestPlayer: myBest, oppBestPlayer: oppBest };
+    // 1. Call our new Bell Curve simulation engine
+    // Make sure to import simulateGame at the top of the file!
+    const gameResult = simulateGame(save, opponent);
     setResult(gameResult);
+
+    const finalMy = gameResult.myScore;
+    const finalOpp = gameResult.oppScore;
 
     // 2. Animate the score "Ticking"
     let count = 0;
     const interval = setInterval(() => {
       count++;
-      setMyScore(prev => Math.min(finalMy, prev + Math.floor(Math.random() * 5)));
-      setOppScore(prev => Math.min(finalOpp, prev + Math.floor(Math.random() * 5)));
+      // Tick up towards the final score safely
+      setMyScore(prev => Math.min(finalMy, prev + Math.floor(Math.random() * 8)));
+      setOppScore(prev => Math.min(finalOpp, prev + Math.floor(Math.random() * 8)));
       
-      if (count > 25) { // Roughly 2.5 seconds of ticking
+      if (count > 30) { // roughly 3 seconds of ticking
         clearInterval(interval);
         setMyScore(finalMy);
         setOppScore(finalOpp);
@@ -36,7 +35,7 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
     }, 100);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [save, opponent]);
 
   const PlayerStats = ({ player }: { player: any }) => (
     <View style={styles.statCard}>

@@ -39,10 +39,11 @@ const HomeScreen = ({ save, onQuickSim }: { save: GameSave, onQuickSim: () => vo
         </View>
       </View>
 
-      {/* Progress */}
+     {/* Progress */}
       <View style={styles.progressSection}>
         <Text style={styles.progressText}>SEASON PROGRESS</Text>
-        <Text style={styles.statsText}>{save.gamesPlayed} GP / {save.totalGames - save.gamesPlayed} GL</Text>
+        {/* Updated to keep GL static at the totalGames value (82) */}
+        <Text style={styles.statsText}>{save.gamesPlayed} GP / {save.totalGames} GL</Text>
       </View>
 
       <TouchableOpacity style={styles.simButton} onPress={onQuickSim}>
