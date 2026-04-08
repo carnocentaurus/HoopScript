@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { GameResult, generateBestPlayer, simulateGame } from '../utils/gameSim';
+import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
 
 const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void }) => {
@@ -10,23 +10,19 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
   const [result, setResult] = useState<GameResult | null>(null);
 
   useEffect(() => {
-    // 1. Call our new Bell Curve simulation engine
-    // Make sure to import simulateGame at the top of the file!
     const gameResult = simulateGame(save, opponent);
     setResult(gameResult);
 
     const finalMy = gameResult.myScore;
     const finalOpp = gameResult.oppScore;
 
-    // 2. Animate the score "Ticking"
     let count = 0;
     const interval = setInterval(() => {
       count++;
-      // Tick up towards the final score safely
       setMyScore(prev => Math.min(finalMy, prev + Math.floor(Math.random() * 8)));
       setOppScore(prev => Math.min(finalOpp, prev + Math.floor(Math.random() * 8)));
       
-      if (count > 30) { // roughly 3 seconds of ticking
+      if (count > 30) {
         clearInterval(interval);
         setMyScore(finalMy);
         setOppScore(finalOpp);
@@ -49,30 +45,50 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
     </View>
   );
 
+  // Sub-components to keep the render clean
+  const UserTeam = () => (
+    <View style={styles.teamSide}>
+      <Text style={styles.logoPlaceholder}>{save.city.charAt(0)}</Text>
+      <Text style={styles.cityName}>{save.city}</Text>
+      <Text style={[styles.score, isFinished && myScore > oppScore && styles.winner]}>{myScore}</Text>
+    </View>
+  );
+
+  const OpponentTeam = () => (
+    <View style={styles.teamSide}>
+      <Text style={styles.logoPlaceholder}>{opponent.city.charAt(0)}</Text>
+      <Text style={styles.cityName}>{opponent.city}</Text>
+      <Text style={[styles.score, isFinished && oppScore > myScore && styles.winner]}>{oppScore}</Text>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.scoreBoard}>
-        <View style={styles.teamSide}>
-          <Text style={styles.logoPlaceholder}>{opponent.city.charAt(0)}</Text>
-          <Text style={styles.cityName}>{opponent.city}</Text>
-          <Text style={[styles.score, isFinished && oppScore > myScore && styles.winner]}>{oppScore}</Text>
-        </View>
-
+        {/* Away team on left, Home team on right */}
+        {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
+        
         <Text style={styles.vs}>VS</Text>
 
-        <View style={styles.teamSide}>
-          <Text style={styles.logoPlaceholder}>{save.city.charAt(0)}</Text>
-          <Text style={styles.cityName}>{save.city}</Text>
-          <Text style={[styles.score, isFinished && myScore > oppScore && styles.winner]}>{myScore}</Text>
-        </View>
+        {opponent.isHome ? <OpponentTeam /> : <UserTeam />}
       </View>
 
       {isFinished && result && (
         <View style={styles.postGame}>
           <Text style={styles.sectionTitle}>PLAYERS OF THE GAME</Text>
           <View style={styles.bestPlayersRow}>
-            <PlayerStats player={result.oppBestPlayer} />
-            <PlayerStats player={result.myBestPlayer} />
+            {/* Keeping player cards consistent with scoreboard order */}
+            {opponent.isHome ? (
+                <>
+                  <PlayerStats player={result.myBestPlayer} />
+                  <PlayerStats player={result.oppBestPlayer} />
+                </>
+            ) : (
+                <>
+                  <PlayerStats player={result.oppBestPlayer} />
+                  <PlayerStats player={result.myBestPlayer} />
+                </>
+            )}
           </View>
           
           <TouchableOpacity style={styles.continueButton} onPress={() => onFinish(result)}>

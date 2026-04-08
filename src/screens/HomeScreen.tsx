@@ -30,12 +30,12 @@ const HomeScreen = ({ save, opponent, onQuickSim }: {
         <Text style={styles.sectionLabel}>NEXT OPPONENT</Text>
         <View style={styles.oppRow}>
           <View>
-            {/* These now use the dynamic 'opponent' prop from App.tsx */}
             <Text style={styles.oppCity}>{opponent.city}</Text>
-            <Text style={styles.oppSub}>
-               {opponent.rank !== "TBD" ? `${opponent.rank} | ` : ""}{opponent.record}
-            </Text>
-          </View>
+              <Text style={styles.oppSub}>
+                {/* This will now show "4th | 12-8" instead of just "12-8" */}
+                {opponent.rank} | {opponent.record}
+              </Text>
+            </View>
           <Text style={styles.venueText}>{opponent.isHome ? "HOME" : "AWAY"}</Text>
         </View>
       </View>

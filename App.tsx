@@ -21,11 +21,17 @@ export default function App() {
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [tempCity, setTempCity] = useState<string | null>(null);
 
-  // Loading States
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
 
-  // 1. App Initialization: Load Data & Run Timer
+  // Helper for formatting ranks (1st, 2nd, 3rd, etc.)
+  const getRankSuffix = (n: number) => {
+    if (n === 1) return "1st";
+    if (n === 2) return "2nd";
+    if (n === 3) return "3rd";
+    return `${n}th`;
+  };
+
   useEffect(() => {
     const loadSaves = async () => {
       try {
@@ -39,24 +45,15 @@ export default function App() {
         setIsStorageLoaded(true);
       }
     };
-
     loadSaves();
-
-    const timer = setTimeout(() => {
-      setIsTimerDone(true);
-    }, 3000);
-
+    const timer = setTimeout(() => setIsTimerDone(true), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  // 2. Navigation Control
   useEffect(() => {
-    if (isStorageLoaded && isTimerDone) {
-      setView('saveSelection');
-    }
+    if (isStorageLoaded && isTimerDone) setView('saveSelection');
   }, [isStorageLoaded, isTimerDone]);
 
-  // Storage Helper
   const persistSaves = async (newSaves: (GameSave | null)[]) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newSaves));
@@ -67,12 +64,8 @@ export default function App() {
 
   const handleSelectSlot = (slotId: number) => {
     setActiveSlot(slotId);
-    const existingSave = saves[slotId - 1];
-    if (existingSave) {
-      setView('home');
-    } else {
-      setView('teamSelection');
-    }
+    if (saves[slotId - 1]) setView('home');
+    else setView('teamSelection');
   };
 
   const handleTeamSelect = (city: string) => {
@@ -82,7 +75,6 @@ export default function App() {
 
   const handleConfirmTeam = () => {
     if (!tempCity || activeSlot === null) return;
-
     const newSave: GameSave = {
       slotId: activeSlot,
       city: tempCity,
@@ -96,7 +88,6 @@ export default function App() {
       schedule: generateSchedule(tempCity),
       standings: generateInitialStandings()
     };
-
     const newSaves = [...saves];
     newSaves[activeSlot - 1] = newSave;
     setSaves(newSaves);
@@ -106,7 +97,6 @@ export default function App() {
 
   const handleGameFinish = (result: GameResult) => {
     if (activeSlot === null) return;
-
     const updatedSaves = [...saves];
     const currentSave = updatedSaves[activeSlot - 1];
 
@@ -143,21 +133,10 @@ export default function App() {
     }
   };
 
-  // --- Rendering Logic ---
-
   if (view === 'loading') return <LoadingScreen />;
-  
-  if (view === 'saveSelection') {
-    return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
-  }
-
-  if (view === 'teamSelection') {
-    return <TeamSelection onSelectTeam={handleTeamSelect} />;
-  }
-
-  if (view === 'teamOverview' && tempCity) {
-    return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} />;
-  }
+  if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
+  if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
+  if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} />;
 
   if (view === 'home' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
@@ -166,10 +145,20 @@ export default function App() {
     const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
     const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
 
+    // Calculate Opponent Rank dynamically for the Home Screen
+    let opponentRankDisplay = "TBD";
+    if (oppData) {
+      const oppConfTeams = activeSave.standings
+        .filter(t => t.conf === oppData.conf)
+        .sort((a, b) => b.wins - a.wins);
+      const rankIndex = oppConfTeams.findIndex(t => t.city === nextOpponentCity) + 1;
+      opponentRankDisplay = getRankSuffix(rankIndex);
+    }
+
     const dynamicOpponent = {
       city: nextOpponentCity,
       record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
-      rank: "TBD",
+      rank: opponentRankDisplay,
       isHome: activeSave.gamesPlayed % 2 === 0
     };
 
@@ -192,7 +181,7 @@ export default function App() {
     const dynamicOpponent = {
       city: nextOpponentCity,
       record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
-      rank: "TBD",
+      rank: "TBD", // Rank isn't usually shown on the sim screen scoreboard
       isHome: activeSave.gamesPlayed % 2 === 0
     };
 
