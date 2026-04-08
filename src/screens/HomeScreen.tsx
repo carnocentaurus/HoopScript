@@ -2,11 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { GameSave } from '../types/save';
 
-// Added 'opponent' to the props definition
-const HomeScreen = ({ save, opponent, onQuickSim }: { 
+const HomeScreen = ({ 
+  save, 
+  opponent, 
+  onQuickSim, 
+  onViewStandings 
+}: { 
   save: GameSave, 
   opponent: any, 
-  onQuickSim: () => void 
+  onQuickSim: () => void,
+  onViewStandings: () => void // Added this prop
 }) => {
 
   const getRankSuffix = (n: number) => {
@@ -18,6 +23,13 @@ const HomeScreen = ({ save, opponent, onQuickSim }: {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Top Navigation Bar */}
+      <View style={styles.topNav}>
+        <TouchableOpacity style={styles.standingsBtn} onPress={onViewStandings}>
+          <Text style={styles.standingsBtnText}>STANDINGS</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* My Team Section */}
       <View style={styles.teamHeader}>
         <Text style={styles.teamName}>{save.city}</Text>
@@ -31,11 +43,10 @@ const HomeScreen = ({ save, opponent, onQuickSim }: {
         <View style={styles.oppRow}>
           <View>
             <Text style={styles.oppCity}>{opponent.city}</Text>
-              <Text style={styles.oppSub}>
-                {/* This will now show "4th | 12-8" instead of just "12-8" */}
-                {opponent.rank} | {opponent.record}
-              </Text>
-            </View>
+            <Text style={styles.oppSub}>
+              {opponent.rank} | {opponent.record}
+            </Text>
+          </View>
           <Text style={styles.venueText}>{opponent.isHome ? "HOME" : "AWAY"}</Text>
         </View>
       </View>
@@ -43,7 +54,6 @@ const HomeScreen = ({ save, opponent, onQuickSim }: {
      {/* Progress */}
       <View style={styles.progressSection}>
         <Text style={styles.progressText}>SEASON PROGRESS</Text>
-        {/* GL is now static at 82 */}
         <Text style={styles.statsText}>{save.gamesPlayed} GP / {save.totalGames} GL</Text>
       </View>
 
@@ -56,6 +66,9 @@ const HomeScreen = ({ save, opponent, onQuickSim }: {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
+  topNav: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 10 },
+  standingsBtn: { padding: 10, backgroundColor: '#F0F0F0', borderRadius: 8 },
+  standingsBtnText: { fontSize: 12, fontWeight: 'bold', color: '#000', letterSpacing: 0.5 },
   teamHeader: { padding: 40, alignItems: 'center', backgroundColor: '#F9F9F9' },
   teamName: { fontSize: 32, fontWeight: '900' },
   teamSub: { color: '#666', marginTop: 5 },

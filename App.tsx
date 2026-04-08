@@ -6,12 +6,13 @@ import TeamSelection from './src/screens/TeamSelection';
 import TeamOverview from './src/screens/TeamOverview';
 import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
+import StandingsScreen from './src/screens/StandingsScreen'; // NEW IMPORT
 import { GameSave } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim';
+type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -24,7 +25,6 @@ export default function App() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
 
-  // Helper for formatting ranks (1st, 2nd, 3rd, etc.)
   const getRankSuffix = (n: number) => {
     if (n === 1) return "1st";
     if (n === 2) return "2nd";
@@ -115,6 +115,7 @@ export default function App() {
           team.wins += isWin ? 0 : 1;
           team.losses += isWin ? 1 : 0;
         } else {
+          // Simulate other league games
           if (Math.random() > 0.5) team.wins += 1;
           else team.losses += 1;
         }
@@ -133,6 +134,8 @@ export default function App() {
     }
   };
 
+  // --- Rendering Logic ---
+
   if (view === 'loading') return <LoadingScreen />;
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
   if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
@@ -145,7 +148,6 @@ export default function App() {
     const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
     const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
 
-    // Calculate Opponent Rank dynamically for the Home Screen
     let opponentRankDisplay = "TBD";
     if (oppData) {
       const oppConfTeams = activeSave.standings
@@ -166,7 +168,8 @@ export default function App() {
       <HomeScreen 
         save={activeSave} 
         opponent={dynamicOpponent} 
-        onQuickSim={() => setView('quickSim')} 
+        onQuickSim={() => setView('quickSim')}
+        onViewStandings={() => setView('standings')} // ADDED PROP
       />
     );
   }
@@ -181,7 +184,7 @@ export default function App() {
     const dynamicOpponent = {
       city: nextOpponentCity,
       record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
-      rank: "TBD", // Rank isn't usually shown on the sim screen scoreboard
+      rank: "TBD",
       isHome: activeSave.gamesPlayed % 2 === 0
     };
 
@@ -192,6 +195,16 @@ export default function App() {
         onFinish={handleGameFinish} 
       />
     );
+  }
+
+  if (view === 'standings' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    return activeSave ? (
+      <StandingsScreen 
+        save={activeSave} 
+        onBack={() => setView('home')} 
+      />
+    ) : null;
   }
 
   return null;
