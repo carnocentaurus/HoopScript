@@ -8,6 +8,15 @@ export interface LeagueTeam {
   roster: Player[];
 }
 
+export interface PlayoffSeries {
+  round: number;
+  opponentCity: string;
+  myWins: number;    // Changed from mySeriesWins
+  oppWins: number;   // Changed from oppSeriesWins
+  isEliminated: boolean;
+  isChampion: boolean;
+}
+
 export interface GameSave {
   slotId: number;
   city: string;
@@ -18,7 +27,7 @@ export interface GameSave {
   roster: Player[];
   conference: 'East' | 'West';
   rank: number;
-  // NEW FIELDS
   schedule: string[]; // List of city names for all 82 games
   standings: LeagueTeam[]; // Record of every team in the league
+  playoffs: PlayoffSeries | null;
 }

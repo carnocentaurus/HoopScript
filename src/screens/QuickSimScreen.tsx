@@ -78,9 +78,9 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
       )}
 
       <View style={styles.scoreBoard}>
-        {opponent.isHome ? <OpponentTeam /> : <UserTeam />}
-        <Text style={styles.vs}>AT</Text>
         {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
+        <Text style={styles.vs}>AT</Text>
+        {opponent.isHome ? <OpponentTeam /> : <UserTeam />}
       </View>
 
       {isFinished && result && (
@@ -89,13 +89,13 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
           <View style={styles.bestPlayersRow}>
             {opponent.isHome ? (
                 <>
-                  <PlayerStats player={result.oppBestPlayer} />
                   <PlayerStats player={result.myBestPlayer} />
+                  <PlayerStats player={result.oppBestPlayer} />
                 </>
             ) : (
                 <>
-                  <PlayerStats player={result.myBestPlayer} />
                   <PlayerStats player={result.oppBestPlayer} />
+                  <PlayerStats player={result.myBestPlayer} />
                 </>
             )}
           </View>
