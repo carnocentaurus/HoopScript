@@ -34,6 +34,7 @@ export default function App() {
 
   useEffect(() => {
     const loadSaves = async () => {
+      await AsyncStorage.removeItem('@hoopscript_saves');
       try {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedSaves) {
@@ -74,26 +75,28 @@ export default function App() {
   };
 
   const handleConfirmTeam = () => {
-    if (!tempCity || activeSlot === null) return;
-    const newSave: GameSave = {
-      slotId: activeSlot,
-      city: tempCity,
-      wins: 0,
-      losses: 0,
-      gamesPlayed: 0,
-      totalGames: 82,
-      rank: 15,
-      conference: ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West',
-      roster: generateRoster(),
-      schedule: generateSchedule(tempCity),
-      standings: generateInitialStandings()
-    };
-    const newSaves = [...saves];
-    newSaves[activeSlot - 1] = newSave;
-    setSaves(newSaves);
-    persistSaves(newSaves);
-    setView('home');
+  if (!tempCity || activeSlot === null) return;
+
+  const newSave: GameSave = {
+    slotId: activeSlot,
+    city: tempCity,
+    wins: 0,
+    losses: 0,
+    gamesPlayed: 0,
+    totalGames: 82,
+    rank: 15,
+    conference: ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West',
+    roster: generateRoster(), // Your team's roster
+    schedule: generateSchedule(tempCity),
+    standings: generateInitialStandings() // THIS generates the other 29 rosters
   };
+
+  const newSaves = [...saves];
+  newSaves[activeSlot - 1] = newSave;
+  setSaves(newSaves);
+  persistSaves(newSaves);
+  setView('home');
+};
 
   const handleGameFinish = (result: GameResult) => {
     if (activeSlot === null) return;
@@ -175,27 +178,28 @@ export default function App() {
   }
 
   if (view === 'quickSim' && activeSlot !== null) {
-    const activeSave = saves[activeSlot - 1];
-    if (!activeSave || !activeSave.schedule) return null;
+  const activeSave = saves[activeSlot - 1];
+  if (!activeSave || !activeSave.schedule) return null;
 
-    const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
-    const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
+  const nextOpponentCity = activeSave.schedule[activeSave.gamesPlayed] || "TBD";
+  const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
 
-    const dynamicOpponent = {
-      city: nextOpponentCity,
-      record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
-      rank: "TBD",
-      isHome: activeSave.gamesPlayed % 2 === 0
-    };
+  // THIS IS THE CRITICAL PART
+  const dynamicOpponent = {
+    ...oppData,           // <--- This "spreads" the whole object, including the ROSTER
+    city: nextOpponentCity,
+    record: oppData ? `${oppData.wins}-${oppData.losses}` : "0-0",
+    isHome: activeSave.gamesPlayed % 2 === 0
+  };
 
-    return (
-      <QuickSimScreen 
-        save={activeSave} 
-        opponent={dynamicOpponent} 
-        onFinish={handleGameFinish} 
-      />
-    );
-  }
+  return (
+    <QuickSimScreen 
+      save={activeSave} 
+      opponent={dynamicOpponent} // Now the roster actually travels to the screen
+      onFinish={handleGameFinish} 
+    />
+  );
+}
 
   if (view === 'standings' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];

@@ -5,6 +5,7 @@ export interface LeagueTeam {
   wins: number;
   losses: number;
   conf: 'East' | 'West';
+  roster: Player[];
 }
 
 export interface GameSave {

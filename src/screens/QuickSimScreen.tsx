@@ -68,7 +68,7 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
         {/* Away team on left, Home team on right */}
         {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
         
-        <Text style={styles.vs}>VS</Text>
+        <Text style={styles.vs}>AT</Text>
 
         {opponent.isHome ? <OpponentTeam /> : <UserTeam />}
       </View>

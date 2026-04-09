@@ -28,34 +28,48 @@ const randomNormal = (mean: number, stdDev: number): number => {
   return num * stdDev + mean;
 };
 
-// Update: Pass the opponent object to access the city name
+/**
+ * @param myTeam The User's Save data
+ * @param opponent The opponent object from the standings (including their unique roster)
+ */
+
 export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
-  const sortedRoster = [...myTeam.roster].sort((a, b) => b.rating - a.rating);
-  const top8 = sortedRoster.slice(0, 8);
-  const myOvr = top8.reduce((sum, p) => sum + p.rating, 0) / 8;
+  // 1. Process My Team
+  const mySorted = [...myTeam.roster].sort((a, b) => b.rating - a.rating);
+  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.rating, 0) / 8;
   
-  // Later we can make this pull from the actual opponent's standing/strength
-  const oppOvr = 82; 
+  // 2. Process Opponent Team (Accessing the roster we just added to standings)
+  const oppRoster = opponent.roster || [];
+  const oppSorted = [...oppRoster].sort((a: any, b: any) => b.rating - a.rating);
+  
+  const oppOvr = oppSorted.length > 0
+    ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.rating, 0) / 8
+    : 80; 
 
-  const myBaseAverage = 110 + (myOvr - oppOvr);
-  const oppBaseAverage = 110 + (oppOvr - myOvr);
+  // 3. Score Engine (Bell Curve)
+  const myBase = 110 + (myOvr - oppOvr);
+  const oppBase = 110 + (oppOvr - myOvr);
+  let myScore = Math.round(randomNormal(myBase, 10));
+  let oppScore = Math.round(randomNormal(oppBase, 10));
 
-  let myScore = Math.round(randomNormal(myBaseAverage, 10));
-  let oppScore = Math.round(randomNormal(oppBaseAverage, 10));
-
-  if (myScore === oppScore) {
-    myScore += Math.random() > 0.5 ? Math.floor(Math.random() * 5) + 1 : 0;
-    oppScore += myScore === oppScore ? Math.floor(Math.random() * 5) + 1 : 0;
-  }
+  // 4. "Player of the Game" Logic (Randomness)
+  // Instead of always index 0, we give the top 3 players a chance to be the star
+  const getTopPerformer = (roster: any[]) => {
+    if (roster.length === 0) return "Unknown";
+    const roll = Math.random();
+    if (roll > 0.4) return roster[0].lastName; // 60% chance it's the #1 star
+    if (roll > 0.1) return roster[1]?.lastName || roster[0].lastName; // 30% chance it's the #2 guy
+    return roster[2]?.lastName || roster[0].lastName; // 10% chance for the #3 guy
+  };
 
   const isMyWin = myScore > oppScore;
-
-  // Generate Best Players
-  // myBest uses the top rated player from your generated roster
-  const myBest = generateBestPlayer(sortedRoster[0].lastName, isMyWin);
+  const myBest = generateBestPlayer(getTopPerformer(mySorted), isMyWin);
   
-  // oppBest now uses the opponent's city name (e.g., "Chicago Star")
-  const oppName = opponent.city ? `${opponent.city} Star` : "Opponent";
+  // Fallback for names if roster is missing (only happens if storage isn't wiped)
+  const oppName = oppSorted.length > 0 
+    ? getTopPerformer(oppSorted) 
+    : `${opponent.city} Star`;
+
   const oppBest = generateBestPlayer(oppName, !isMyWin);
 
   return { myScore, oppScore, myBestPlayer: myBest, oppBestPlayer: oppBest };

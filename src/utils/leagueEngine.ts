@@ -1,4 +1,5 @@
 import { LeagueTeam } from '../types/save';
+import { generateRoster } from './rosterGenerator';
 
 export const ALL_CITIES = [
   "Toronto", "Boston", "New York", "Brooklyn", "Philadelphia",
@@ -10,11 +11,12 @@ export const ALL_CITIES = [
 ];
 
 export const generateInitialStandings = (): LeagueTeam[] => {
-  return ALL_CITIES.map(city => ({
+  return ALL_CITIES.map((city, index) => ({
     city,
+    conf: (index < 15 ? 'East' : 'West') as 'East' | 'West', // <--- CAST THIS HERE
     wins: 0,
     losses: 0,
-    conf: ALL_CITIES.indexOf(city) < 15 ? 'East' : 'West'
+    roster: generateRoster(),
   }));
 };
 
