@@ -35,21 +35,21 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
   const PlayerStats = ({ player }: { player: any }) => (
     <View style={styles.statCard}>
-      {/* Position and Number Badge */}
       <View style={styles.badgeRow}>
         <Text style={styles.playerMeta}>#{player.number}</Text>
         <Text style={styles.playerPos}>{player.position}</Text>
       </View>
       <Text style={styles.statName} numberOfLines={1}>{player.lastName}</Text>
-      <Text style={styles.statLine}>
-        {player.pts} PTS | {player.reb} REB | {player.ast} AST
-      </Text>
-      <Text style={styles.statLine}>
-        {player.fgm}/{player.fga} FG
-      </Text>
-      <Text style={styles.statLineSmall}>
-        {player.min} MIN | {player.stl} STL | {player.blk} BLK
-      </Text>
+      
+      <View style={styles.verticalStats}>
+        <Text style={styles.statValue}>{player.min} MIN</Text>
+        <Text style={styles.statValue}>{player.fgm}/{player.fga} FG</Text>
+        <Text style={styles.statValueMain}>{player.pts} PTS</Text>
+        <Text style={styles.statValue}>{player.reb} REB</Text>
+        <Text style={styles.statValue}>{player.ast} AST</Text>
+        <Text style={styles.statValue}>{player.stl} STL</Text>
+        <Text style={styles.statValue}>{player.blk} BLK</Text>
+      </View>
     </View>
   );
 
@@ -71,7 +71,6 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Overtime Badge - Shows only if score exceeded 120 (loose logic) or passed from sim */}
       {isFinished && (result?.myScore! > 125 || result?.oppScore! > 125) && (
         <View style={styles.otBadge}>
            <Text style={styles.otText}>OVERTIME</Text>
@@ -111,27 +110,28 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#111', justifyContent: 'center' },
+  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center' },
   scoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   teamSide: { alignItems: 'center', flex: 1 },
-  logoPlaceholder: { fontSize: 40, color: '#FFF', fontWeight: '900', backgroundColor: '#333', width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
-  cityName: { color: '#AAA', fontSize: 12, fontWeight: 'bold' },
-  score: { color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 10 },
-  vs: { color: '#444', fontWeight: '900', fontSize: 18 },
+  logoPlaceholder: { fontSize: 40, color: '#FFF', fontWeight: '900', backgroundColor: '#222', width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
+  cityName: { color: '#888', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
+  score: { color: '#FFF', fontSize: 54, fontWeight: '900', marginTop: 10 },
+  vs: { color: '#333', fontWeight: '900', fontSize: 18 },
   winner: { color: '#4CAF50' },
-  otBadge: { alignSelf: 'center', backgroundColor: '#C41E3A', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
-  otText: { color: '#FFF', fontWeight: 'bold', fontSize: 10 },
-  postGame: { marginTop: 40, paddingHorizontal: 20 },
-  sectionTitle: { color: '#555', textAlign: 'center', fontSize: 10, letterSpacing: 2, marginBottom: 20 },
+  otBadge: { alignSelf: 'center', backgroundColor: '#C41E3A', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
+  otText: { color: '#FFF', fontWeight: 'bold', fontSize: 11 },
+  postGame: { marginTop: 20, paddingHorizontal: 20 },
+  sectionTitle: { color: '#444', textAlign: 'center', fontSize: 10, letterSpacing: 2, marginBottom: 15 },
   bestPlayersRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  statCard: { backgroundColor: '#222', padding: 12, borderRadius: 10, width: '48%' },
-  badgeRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
-  playerMeta: { color: '#666', fontSize: 10, fontWeight: 'bold' },
-  playerPos: { color: '#444', fontSize: 10, fontWeight: 'bold' },
-  statName: { color: '#FFF', fontWeight: 'bold', fontSize: 15, marginBottom: 5 },
-  statLine: { color: '#CCC', fontSize: 11, lineHeight: 16 },
-  statLineSmall: { color: '#777', fontSize: 10, marginTop: 4 },
-  continueButton: { backgroundColor: '#FFF', padding: 20, borderRadius: 10, alignItems: 'center', marginTop: 40 },
+  statCard: { backgroundColor: '#111', padding: 15, borderRadius: 12, width: '48%', borderWidth: 1, borderColor: '#222' },
+  badgeRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
+  playerMeta: { color: '#C41E3A', fontSize: 10, fontWeight: '900' },
+  playerPos: { color: '#555', fontSize: 10, fontWeight: 'bold' },
+  statName: { color: '#FFF', fontWeight: '900', fontSize: 17, marginBottom: 10, textTransform: 'uppercase' },
+  verticalStats: { gap: 2 },
+  statValue: { color: '#777', fontSize: 13, fontWeight: '600' },
+  statValueMain: { color: '#FFF', fontSize: 15, fontWeight: '900', marginVertical: 2 },
+  continueButton: { backgroundColor: '#FFF', padding: 18, borderRadius: 12, alignItems: 'center', marginTop: 30 },
   continueText: { fontWeight: '900', fontSize: 16, color: '#000' }
 });
 

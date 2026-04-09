@@ -32,16 +32,17 @@ const StandingsScreen = ({ save, onBack }: { save: GameSave, onBack: () => void 
 
       <View style={styles.tabBar}>
         <TouchableOpacity 
-          style={[styles.tab, activeConf === 'East' && styles.activeTab]} 
-          onPress={() => setActiveConf('East')}
-        >
-          <Text style={[styles.tabText, activeConf === 'East' && styles.activeTabText]}>EAST</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
           style={[styles.tab, activeConf === 'West' && styles.activeTab]} 
           onPress={() => setActiveConf('West')}
         >
           <Text style={[styles.tabText, activeConf === 'West' && styles.activeTabText]}>WEST</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.tab, activeConf === 'East' && styles.activeTab]} 
+          onPress={() => setActiveConf('East')}
+        >
+          <Text style={[styles.tabText, activeConf === 'East' && styles.activeTabText]}>EAST</Text>
         </TouchableOpacity>
       </View>
 
