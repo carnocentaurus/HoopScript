@@ -34,7 +34,7 @@ export default function App() {
 
   useEffect(() => {
     const loadSaves = async () => {
-      await AsyncStorage.removeItem('@hoopscript_saves');
+      //await AsyncStorage.removeItem('@hoopscript_saves');
       try {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedSaves) {

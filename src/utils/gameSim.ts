@@ -10,6 +10,8 @@ export interface GameResult {
 
 export interface PlayerStat {
   lastName: string;
+  number: number;
+  position: string;
   min: number;
   pts: number;
   reb: number;
@@ -34,60 +36,69 @@ const randomNormal = (mean: number, stdDev: number): number => {
  */
 
 export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
-  // 1. Process My Team
   const mySorted = [...myTeam.roster].sort((a, b) => b.rating - a.rating);
-  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.rating, 0) / 8;
-  
-  // 2. Process Opponent Team (Accessing the roster we just added to standings)
   const oppRoster = opponent.roster || [];
   const oppSorted = [...oppRoster].sort((a: any, b: any) => b.rating - a.rating);
-  
+
+  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.rating, 0) / 8;
   const oppOvr = oppSorted.length > 0
     ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.rating, 0) / 8
-    : 80; 
+    : 80;
 
-  // 3. Score Engine (Bell Curve)
   const myBase = 110 + (myOvr - oppOvr);
   const oppBase = 110 + (oppOvr - myOvr);
+
   let myScore = Math.round(randomNormal(myBase, 10));
   let oppScore = Math.round(randomNormal(oppBase, 10));
 
-  // 4. "Player of the Game" Logic (Randomness)
-  // Instead of always index 0, we give the top 3 players a chance to be the star
-  const getTopPerformer = (roster: any[]) => {
-    if (roster.length === 0) return "Unknown";
+  // --- OVERTIME LOGIC ---
+  let otCount = 0;
+  while (myScore === oppScore) {
+    otCount++;
+    // Simulate a 5-minute OT period (lower scores)
+    myScore += Math.round(randomNormal(10 + (myOvr - oppOvr), 4));
+    oppScore += Math.round(randomNormal(10 + (oppOvr - myOvr), 4));
+    
+    // Safety check to prevent infinite loops (rare but possible in sims)
+    if (otCount > 10) {
+        myScore > oppScore ? myScore++ : oppScore++;
+    }
+  }
+
+  const getTopPerformer = (roster: Player[]) => {
+    if (!roster || roster.length === 0) return null;
     const roll = Math.random();
-    if (roll > 0.4) return roster[0].lastName; // 60% chance it's the #1 star
-    if (roll > 0.1) return roster[1]?.lastName || roster[0].lastName; // 30% chance it's the #2 guy
-    return roster[2]?.lastName || roster[0].lastName; // 10% chance for the #3 guy
+    if (roll > 0.4) return roster[0];
+    if (roll > 0.1) return roster[1] || roster[0];
+    return roster[2] || roster[0];
   };
 
-  const isMyWin = myScore > oppScore;
-  const myBest = generateBestPlayer(getTopPerformer(mySorted), isMyWin);
-  
-  // Fallback for names if roster is missing (only happens if storage isn't wiped)
-  const oppName = oppSorted.length > 0 
-    ? getTopPerformer(oppSorted) 
-    : `${opponent.city} Star`;
+  const myWinner = getTopPerformer(mySorted);
+  const oppWinner = getTopPerformer(oppSorted);
 
-  const oppBest = generateBestPlayer(oppName, !isMyWin);
-
-  return { myScore, oppScore, myBestPlayer: myBest, oppBestPlayer: oppBest };
+  return {
+    myScore,
+    oppScore,
+    myBestPlayer: generateBestPlayer(myWinner!, myScore > oppScore, otCount),
+    oppBestPlayer: generateBestPlayer(oppWinner!, oppScore > myScore, otCount)
+  };
 };
 
-export const generateBestPlayer = (lastName: string, isWinner: boolean): PlayerStat => {
-  const pts = isWinner 
-    ? Math.floor(Math.random() * 15) + 22 
-    : Math.floor(Math.random() * 10) + 18;
+export const generateBestPlayer = (player: Player, isWinner: boolean, otCount: number): PlayerStat => {
+  // Boost stats slightly if there was overtime
+  const otBoost = otCount * 5;
+  const pts = (isWinner ? Math.floor(Math.random() * 15) + 22 : Math.floor(Math.random() * 10) + 18) + (otCount * 2);
   
   const fga = Math.floor(pts / 2) + Math.floor(Math.random() * 6);
   
   return {
-    lastName,
-    min: Math.floor(Math.random() * 8) + 32,
+    lastName: player.lastName,
+    number: player.number,
+    position: player.position,
+    min: Math.floor(Math.random() * 8) + 32 + (otCount * 5),
     pts,
-    reb: Math.floor(Math.random() * 12),
-    ast: Math.floor(Math.random() * 10),
+    reb: Math.floor(Math.random() * 12) + Math.floor(otCount * 1.5),
+    ast: Math.floor(Math.random() * 10) + Math.floor(otCount * 1.2),
     stl: Math.floor(Math.random() * 4),
     blk: Math.floor(Math.random() * 3),
     fgm: Math.floor(fga * (Math.random() * 0.2 + 0.45)),

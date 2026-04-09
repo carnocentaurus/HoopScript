@@ -35,9 +35,17 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
   const PlayerStats = ({ player }: { player: any }) => (
     <View style={styles.statCard}>
-      <Text style={styles.statName}>{player.lastName}</Text>
+      {/* Position and Number Badge */}
+      <View style={styles.badgeRow}>
+        <Text style={styles.playerMeta}>#{player.number}</Text>
+        <Text style={styles.playerPos}>{player.position}</Text>
+      </View>
+      <Text style={styles.statName} numberOfLines={1}>{player.lastName}</Text>
       <Text style={styles.statLine}>
-        {player.pts} PTS | {player.reb} REB | {player.ast} AST | {player.fgm}/{player.fga} FG
+        {player.pts} PTS | {player.reb} REB | {player.ast} AST
+      </Text>
+      <Text style={styles.statLine}>
+        {player.fgm}/{player.fga} FG
       </Text>
       <Text style={styles.statLineSmall}>
         {player.min} MIN | {player.stl} STL | {player.blk} BLK
@@ -45,7 +53,6 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
     </View>
   );
 
-  // Sub-components to keep the render clean
   const UserTeam = () => (
     <View style={styles.teamSide}>
       <Text style={styles.logoPlaceholder}>{save.city.charAt(0)}</Text>
@@ -64,29 +71,32 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.scoreBoard}>
-        {/* Away team on left, Home team on right */}
-        {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
-        
-        <Text style={styles.vs}>AT</Text>
+      {/* Overtime Badge - Shows only if score exceeded 120 (loose logic) or passed from sim */}
+      {isFinished && (result?.myScore! > 125 || result?.oppScore! > 125) && (
+        <View style={styles.otBadge}>
+           <Text style={styles.otText}>OVERTIME</Text>
+        </View>
+      )}
 
+      <View style={styles.scoreBoard}>
         {opponent.isHome ? <OpponentTeam /> : <UserTeam />}
+        <Text style={styles.vs}>AT</Text>
+        {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
       </View>
 
       {isFinished && result && (
         <View style={styles.postGame}>
           <Text style={styles.sectionTitle}>PLAYERS OF THE GAME</Text>
           <View style={styles.bestPlayersRow}>
-            {/* Keeping player cards consistent with scoreboard order */}
             {opponent.isHome ? (
                 <>
-                  <PlayerStats player={result.myBestPlayer} />
                   <PlayerStats player={result.oppBestPlayer} />
+                  <PlayerStats player={result.myBestPlayer} />
                 </>
             ) : (
                 <>
-                  <PlayerStats player={result.oppBestPlayer} />
                   <PlayerStats player={result.myBestPlayer} />
+                  <PlayerStats player={result.oppBestPlayer} />
                 </>
             )}
           </View>
@@ -109,15 +119,20 @@ const styles = StyleSheet.create({
   score: { color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 10 },
   vs: { color: '#444', fontWeight: '900', fontSize: 18 },
   winner: { color: '#4CAF50' },
+  otBadge: { alignSelf: 'center', backgroundColor: '#C41E3A', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
+  otText: { color: '#FFF', fontWeight: 'bold', fontSize: 10 },
   postGame: { marginTop: 40, paddingHorizontal: 20 },
   sectionTitle: { color: '#555', textAlign: 'center', fontSize: 10, letterSpacing: 2, marginBottom: 20 },
   bestPlayersRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  statCard: { backgroundColor: '#222', padding: 15, borderRadius: 10, width: '48%' },
-  statName: { color: '#FFF', fontWeight: 'bold', fontSize: 16, marginBottom: 5 },
-  statLine: { color: '#CCC', fontSize: 11 },
+  statCard: { backgroundColor: '#222', padding: 12, borderRadius: 10, width: '48%' },
+  badgeRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
+  playerMeta: { color: '#666', fontSize: 10, fontWeight: 'bold' },
+  playerPos: { color: '#444', fontSize: 10, fontWeight: 'bold' },
+  statName: { color: '#FFF', fontWeight: 'bold', fontSize: 15, marginBottom: 5 },
+  statLine: { color: '#CCC', fontSize: 11, lineHeight: 16 },
   statLineSmall: { color: '#777', fontSize: 10, marginTop: 4 },
   continueButton: { backgroundColor: '#FFF', padding: 20, borderRadius: 10, alignItems: 'center', marginTop: 40 },
-  continueText: { fontWeight: '900', fontSize: 16 }
+  continueText: { fontWeight: '900', fontSize: 16, color: '#000' }
 });
 
 export default QuickSimScreen;
