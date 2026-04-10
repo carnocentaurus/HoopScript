@@ -241,48 +241,81 @@ export default function App() {
 
   const currentRound = currentSave.playoffs?.round || 1;
 
-  // 1. Sim existing games for the current round
+  // 1. Sim existing games
   currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
     if (series.round !== currentRound || series.isCompleted) return series;
-    
     if (Math.random() > 0.5) series.highSeedWins += 1;
     else series.lowSeedWins += 1;
-    
     if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
     return series;
   });
 
-  // 2. Check if all series in this round are done
   const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
   const allFinished = roundSeries.every(s => s.isCompleted);
 
-  if (allFinished && currentRound < 4) {
-    const nextRound = currentRound + 1;
-    const winners = roundSeries.map(s => s.highSeedWins === 4 ? s.highSeed : s.lowSeed);
-    
-    // Create new series for the next round (pairing winners 1v2, 3v4, etc.)
-    const nextMatches: SeriesMatchup[] = [];
-    for (let i = 0; i < winners.length; i += 2) {
-      nextMatches.push({
-        id: `R${nextRound}-${i}`,
-        round: nextRound,
-        highSeed: winners[i],
-        lowSeed: winners[i + 1],
-        highSeedWins: 0,
-        lowSeedWins: 0,
-        isCompleted: false,
-        conference: roundSeries[i].conference
-      });
+  if (allFinished) {
+    if (currentRound < 4) {
+      // Advance to next round (same logic as before)
+      const nextRound = currentRound + 1;
+      const winners = roundSeries.map(s => s.highSeedWins === 4 ? s.highSeed : s.lowSeed);
+      const nextMatches: SeriesMatchup[] = [];
+      for (let i = 0; i < winners.length; i += 2) {
+        nextMatches.push({
+          id: `R${nextRound}-${i}`,
+          round: nextRound,
+          highSeed: winners[i],
+          lowSeed: winners[i + 1],
+          highSeedWins: 0,
+          lowSeedWins: 0,
+          isCompleted: false,
+          conference: roundSeries[i].conference
+        });
+      }
+      currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
+      if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
+    } else {
+      // FINALS ARE OVER
+      const champion = roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
+      if (currentSave.playoffs) {
+        currentSave.playoffs.isChampion = (champion === currentSave.city);
+        // We set a flag to show the "Start Offseason" button
+        alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+      }
     }
-
-    currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
-    if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
-    
-    alert(`Round ${currentRound} Complete! Moving to Round ${nextRound}.`);
   }
 
   setSaves(updatedSaves);
   persistSaves(updatedSaves);
+};
+
+const handleStartNewSeason = () => {
+  if (activeSlot === null) return;
+  const updatedSaves = [...saves];
+  const currentSave = updatedSaves[activeSlot - 1];
+
+  if (currentSave) {
+    // Reset User Stats
+    currentSave.wins = 0;
+    currentSave.losses = 0;
+    currentSave.gamesPlayed = 0;
+    
+    // Reset Standings
+    currentSave.standings = currentSave.standings.map(team => ({
+      ...team,
+      wins: 0,
+      losses: 0
+    }));
+
+    // Generate New Schedule and Clear Postseason
+    currentSave.schedule = generateSchedule(currentSave.city);
+    currentSave.playoffs = null;
+    currentSave.playoffBracket = null;
+
+    setSaves(updatedSaves);
+    persistSaves(updatedSaves);
+    setView('home'); // Go back to home to start Game 1
+    alert("New Season Started!");
+  }
 };
 
   if (view === 'loading') return <LoadingScreen />;
@@ -344,9 +377,16 @@ export default function App() {
   }
 
   if (view === 'bracket' && activeSlot !== null) {
-    const activeSave = saves[activeSlot - 1];
-    return <PlayoffBracketScreen save={activeSave!} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} />;
-  }
+  const activeSave = saves[activeSlot - 1];
+  return (
+    <PlayoffBracketScreen 
+      save={activeSave!} 
+      onSimDay={handleSimulateLeagueDay} 
+      onBack={() => setView('home')} 
+      onStartNewSeason={handleStartNewSeason} // Pass the handler here!
+    />
+  );
+}
 
   return null;
 }

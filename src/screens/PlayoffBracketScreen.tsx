@@ -2,11 +2,21 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { GameSave } from '../types/save';
 
-const PlayoffBracketScreen = ({ save, onSimDay, onBack }: { save: GameSave, onSimDay: () => void, onBack: () => void }) => {
+// Added onStartNewSeason to the props interface
+interface PlayoffProps {
+  save: GameSave;
+  onSimDay: () => void;
+  onBack: () => void;
+  onStartNewSeason: () => void;
+}
+
+const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: PlayoffProps) => {
   const currentRound = save.playoffs?.round || 1;
   const roundMatchups = save.playoffBracket?.filter(s => s.round === currentRound) || [];
+  
+  // Check if the Finals (Round 4) are completed
+  const isFinalsOver = currentRound === 4 && roundMatchups.length > 0 && roundMatchups[0].isCompleted;
 
-  // Helper to find rank from standings
   const getRank = (city: string) => {
     const team = save.standings.find(t => t.city === city);
     if (!team) return "";
@@ -23,14 +33,13 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack }: { save: GameSave, onSi
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
-        <Text style={styles.title}>ROUND {currentRound}</Text>
+        <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
         <View style={{ width: 50 }} />
       </View>
 
       <ScrollView style={styles.content}>
         {roundMatchups.map((series) => (
           <View key={series.id} style={styles.seriesCard}>
-            {/* High Seed Row */}
             <View style={styles.teamRow}>
               <View style={styles.teamInfo}>
                 <Text style={styles.rankLabel}>{getRank(series.highSeed)}</Text>
@@ -41,7 +50,6 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack }: { save: GameSave, onSi
               <Text style={styles.score}>{series.highSeedWins}</Text>
             </View>
 
-            {/* Low Seed Row */}
             <View style={styles.teamRow}>
               <View style={styles.teamInfo}>
                 <Text style={styles.rankLabel}>{getRank(series.lowSeed)}</Text>
@@ -53,12 +61,27 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack }: { save: GameSave, onSi
             </View>
           </View>
         ))}
+        
+        {isFinalsOver && (
+          <View style={styles.champContainer}>
+            <Text style={styles.champText}>
+              🏆 {roundMatchups[0].highSeedWins === 4 ? roundMatchups[0].highSeed : roundMatchups[0].lowSeed} CHAMPIONS
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
-      {save.playoffs?.isEliminated && (
-        <TouchableOpacity style={styles.simDayBtn} onPress={onSimDay}>
-          <Text style={styles.simDayBtnText}>SIMULATE DAY</Text>
+      {/* Button Logic: Show "Start New Season" if Finals are over, otherwise "Simulate Day" */}
+      {isFinalsOver ? (
+        <TouchableOpacity style={[styles.simDayBtn, styles.nextSeasonBtn]} onPress={onStartNewSeason}>
+          <Text style={styles.simDayBtnText}>START NEW SEASON</Text>
         </TouchableOpacity>
+      ) : (
+        save.playoffs?.isEliminated && (
+          <TouchableOpacity style={styles.simDayBtn} onPress={onSimDay}>
+            <Text style={styles.simDayBtnText}>SIMULATE DAY</Text>
+          </TouchableOpacity>
+        )
       )}
     </SafeAreaView>
   );
@@ -78,7 +101,10 @@ const styles = StyleSheet.create({
   winner: { color: '#4A90E2' },
   score: { fontSize: 16, fontWeight: '900', color: '#2D3748' },
   simDayBtn: { backgroundColor: '#2D3748', margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
-  simDayBtnText: { color: '#FFF', fontWeight: 'bold' }
+  nextSeasonBtn: { backgroundColor: '#48BB78' }, // Green for the new start
+  simDayBtnText: { color: '#FFF', fontWeight: 'bold' },
+  champContainer: { alignItems: 'center', marginTop: 20, padding: 20 },
+  champText: { fontSize: 20, fontWeight: '900', color: '#2D3748' }
 });
 
 export default PlayoffBracketScreen;
