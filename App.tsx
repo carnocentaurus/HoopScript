@@ -54,16 +54,16 @@ const getRankSuffix = (n: number) => {
 };
 
 const calculateRank = (city: string, standings: any[]) => {
-  if (!standings || standings.length === 0) return "15th";
+  if (!standings || standings.length === 0) return "15"; // Removed suffix
   const team = standings.find(t => t.city === city);
-  if (!team) return "15th";
+  if (!team) return "15";
   
   const confTeams = standings
     .filter(t => t.conf === team.conf)
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
     
   const index = confTeams.findIndex(t => t.city === city);
-  return getRankSuffix(index + 1);
+  return (index + 1).toString(); // Returns "1", "2", etc.
 };
 
 export default function App() {
@@ -234,21 +234,56 @@ export default function App() {
   };
 
   const handleSimulateLeagueDay = () => {
-    if (activeSlot === null) return;
-    const updatedSaves = [...saves];
-    const currentSave = updatedSaves[activeSlot - 1];
-    if (currentSave && currentSave.playoffBracket) {
-      currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
-        if (series.isCompleted) return series;
-        if (Math.random() > 0.5) series.highSeedWins += 1;
-        else series.lowSeedWins += 1;
-        if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
-        return series;
+  if (activeSlot === null) return;
+  const updatedSaves = [...saves];
+  const currentSave = updatedSaves[activeSlot - 1];
+  if (!currentSave || !currentSave.playoffBracket) return;
+
+  const currentRound = currentSave.playoffs?.round || 1;
+
+  // 1. Sim existing games for the current round
+  currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
+    if (series.round !== currentRound || series.isCompleted) return series;
+    
+    if (Math.random() > 0.5) series.highSeedWins += 1;
+    else series.lowSeedWins += 1;
+    
+    if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
+    return series;
+  });
+
+  // 2. Check if all series in this round are done
+  const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
+  const allFinished = roundSeries.every(s => s.isCompleted);
+
+  if (allFinished && currentRound < 4) {
+    const nextRound = currentRound + 1;
+    const winners = roundSeries.map(s => s.highSeedWins === 4 ? s.highSeed : s.lowSeed);
+    
+    // Create new series for the next round (pairing winners 1v2, 3v4, etc.)
+    const nextMatches: SeriesMatchup[] = [];
+    for (let i = 0; i < winners.length; i += 2) {
+      nextMatches.push({
+        id: `R${nextRound}-${i}`,
+        round: nextRound,
+        highSeed: winners[i],
+        lowSeed: winners[i + 1],
+        highSeedWins: 0,
+        lowSeedWins: 0,
+        isCompleted: false,
+        conference: roundSeries[i].conference
       });
-      setSaves(updatedSaves);
-      persistSaves(updatedSaves);
     }
-  };
+
+    currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
+    if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
+    
+    alert(`Round ${currentRound} Complete! Moving to Round ${nextRound}.`);
+  }
+
+  setSaves(updatedSaves);
+  persistSaves(updatedSaves);
+};
 
   if (view === 'loading') return <LoadingScreen />;
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
