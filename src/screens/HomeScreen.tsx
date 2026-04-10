@@ -26,20 +26,21 @@ const HomeScreen = ({
   userTeam, 
   opponent, 
   onQuickSim, 
-  onViewStandings 
+  onViewStandings,
+  onViewBracket // NEW PROP
 }: { 
   save: GameSave, 
   userTeam: any, 
   opponent: any, 
   onQuickSim: () => void,
-  onViewStandings: () => void 
+  onViewStandings: () => void,
+  onViewBracket: () => void // NEW PROP
 }) => {
 
   const isEndOfSeason = save.gamesPlayed === 82;
   const isEliminated = save.playoffs?.isEliminated;
   const isChampion = save.playoffs?.isChampion;
   
-  // If user missed playoffs entirely after game 82
   const missedPlayoffs = isEndOfSeason && !save.playoffs;
 
   const LeftTeam = opponent.isHome ? userTeam : opponent;
@@ -56,6 +57,13 @@ const HomeScreen = ({
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topNav}>
+        {/* Playoff Bracket button appears as soon as playoffs start or if season is over */}
+        {(save.playoffs || isEndOfSeason) && (
+          <TouchableOpacity style={[styles.standingsBtn, { marginRight: 8 }]} onPress={onViewBracket}>
+            <Text style={styles.standingsBtnText}>PLAYOFF BRACKET</Text>
+          </TouchableOpacity>
+        )}
+        
         <TouchableOpacity style={styles.standingsBtn} onPress={onViewStandings}>
           <Text style={styles.standingsBtnText}>
             {isEndOfSeason ? "FINAL STANDINGS" : "LEAGUE STANDINGS"}
@@ -64,7 +72,6 @@ const HomeScreen = ({
       </View>
 
       <View style={styles.mainContent}>
-        {/* CONDITION 1: Season over (Eliminated, Champion, or Missed Playoffs) */}
         {(isEliminated || isChampion || missedPlayoffs) ? (
           <View style={styles.endSeasonContainer}>
             <Text style={styles.endSeasonIcon}>{isChampion ? "🏆" : "🏀"}</Text>
@@ -78,9 +85,13 @@ const HomeScreen = ({
                   ? "You didn't qualify for the playoffs this year." 
                   : "Tough loss. The journey ends here."}
             </Text>
+            
+            {/* View Bracket Button for when the matchup UI is gone */}
+            <TouchableOpacity style={styles.viewBracketInline} onPress={onViewBracket}>
+                <Text style={styles.viewBracketInlineText}>VIEW FULL BRACKET</Text>
+            </TouchableOpacity>
           </View>
         ) : (
-          /* CONDITION 2: Active Season or Active Playoff Run */
           <>
             <Text style={styles.sectionLabelCenter}>
               {save.playoffs 
@@ -192,11 +203,12 @@ const styles = StyleSheet.create({
   seriesScoreText: { color: '#2D3748', fontSize: 32, fontWeight: '900', letterSpacing: 10 },
   seriesSubText: { color: '#718096', fontSize: 10, fontWeight: '700', marginTop: 8 },
 
-  // End of Season Styles
   endSeasonContainer: { alignItems: 'center', padding: 20 },
   endSeasonIcon: { fontSize: 64, marginBottom: 20 },
   endSeasonTitle: { fontSize: 22, fontWeight: '900', color: '#2D3748', textAlign: 'center' },
   endSeasonSub: { fontSize: 14, color: '#718096', textAlign: 'center', marginTop: 10, lineHeight: 20 },
+  viewBracketInline: { marginTop: 25, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, backgroundColor: '#F0F4F8' },
+  viewBracketInlineText: { color: '#4A90E2', fontWeight: '800', fontSize: 12 },
 
   simButton: { backgroundColor: '#2D3748', margin: 20, padding: 20, borderRadius: 16, alignItems: 'center', position: 'absolute', bottom: 40, left: 0, right: 0, elevation: 8 },
   simButtonText: { color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }

@@ -1,20 +1,37 @@
-import { Player } from '../utils/rosterGenerator';
+export interface Player {
+  lastName: string;
+  position: string;
+  rating: number;
+}
 
-export interface LeagueTeam {
+export interface TeamStanding {
   city: string;
   wins: number;
   losses: number;
   conf: 'East' | 'West';
-  roster: Player[];
+  roster?: Player[];
 }
 
+// Fixed PlayoffSeries definition
 export interface PlayoffSeries {
   round: number;
   opponentCity: string;
-  myWins: number;    // Changed from mySeriesWins
-  oppWins: number;   // Changed from oppSeriesWins
+  myWins: number;
+  oppWins: number;
   isEliminated: boolean;
   isChampion: boolean;
+}
+
+// Added the missing SeriesMatchup interface
+export interface SeriesMatchup {
+  id: string;
+  round: number;
+  highSeed: string;
+  lowSeed: string;
+  highSeedWins: number;
+  lowSeedWins: number;
+  isCompleted: boolean;
+  conference: 'East' | 'West' | 'Finals';
 }
 
 export interface GameSave {
@@ -24,10 +41,11 @@ export interface GameSave {
   losses: number;
   gamesPlayed: number;
   totalGames: number;
-  roster: Player[];
-  conference: 'East' | 'West';
   rank: number;
-  schedule: string[]; // List of city names for all 82 games
-  standings: LeagueTeam[]; // Record of every team in the league
+  conference: 'East' | 'West';
+  roster: Player[];
+  schedule: string[];
+  standings: TeamStanding[];
   playoffs: PlayoffSeries | null;
+  playoffBracket: SeriesMatchup[] | null; // Added this property
 }

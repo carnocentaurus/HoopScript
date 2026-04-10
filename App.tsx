@@ -7,50 +7,63 @@ import TeamOverview from './src/screens/TeamOverview';
 import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
-import { GameSave, PlayoffSeries } from './src/types/save';
+import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
+import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings';
+type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
-// Helper function to start playoffs
-const startPlayoffs = (currentSave: GameSave): PlayoffSeries | null => {
-  const myConf = currentSave.standings
-    .filter(t => t.conf === currentSave.conference)
-    .sort((a, b) => b.wins - a.wins);
+// --- HELPERS ---
+const generateFullBracket = (currentSave: GameSave): SeriesMatchup[] => {
+  const bracket: SeriesMatchup[] = [];
+  const conferences: ('East' | 'West')[] = ['East', 'West'];
 
-  const userRank = myConf.findIndex(t => t.city === currentSave.city) + 1;
-  
-  if (userRank > 8) {
-    alert("Season Over: You missed the playoffs.");
-    return null; 
-  }
+  conferences.forEach(conf => {
+    const teams = currentSave.standings
+      .filter(t => t.conf === conf)
+      .sort((a, b) => b.wins - a.wins)
+      .slice(0, 8);
 
-  const opponentIndex = 8 - userRank; 
-  const opponent = myConf[opponentIndex];
-
-  return {
-    round: 1,
-    opponentCity: opponent.city,
-    myWins: 0,
-    oppWins: 0,
-    isEliminated: false, 
-    isChampion: false,   
-  };
+    const matchups = [[0, 7], [3, 4], [1, 6], [2, 5]];
+    
+    matchups.forEach((pair, index) => {
+      bracket.push({
+        id: `${conf.charAt(0)}${index + 1}`,
+        round: 1,
+        highSeed: teams[pair[0]].city,
+        lowSeed: teams[pair[1]].city,
+        highSeedWins: 0,
+        lowSeedWins: 0,
+        isCompleted: false,
+        conference: conf
+      });
+    });
+  });
+  return bracket;
 };
 
-// Simplified opponent generator for rounds 2-4
-const getNextPlayoffOpponent = (save: GameSave, round: number) => {
-  const myConf = save.standings.filter(t => t.conf === save.conference).sort((a, b) => b.wins - a.wins);
-  const oppConf = save.standings.filter(t => t.conf !== save.conference).sort((a, b) => b.wins - a.wins);
+const getRankSuffix = (n: number) => {
+  if (n === 1) return "1st";
+  if (n === 2) return "2nd";
+  if (n === 3) return "3rd";
+  return `${n}th`;
+};
+
+const calculateRank = (city: string, standings: any[]) => {
+  if (!standings || standings.length === 0) return "15th";
+  const team = standings.find(t => t.city === city);
+  if (!team) return "15th";
   
-  if (round === 2) return myConf.find(t => t.city !== save.city)?.city || "TBD"; 
-  if (round === 3) return myConf[1].city === save.city ? myConf[0].city : myConf[1].city; 
-  if (round === 4) return oppConf[0].city; 
-  return "TBD";
+  const confTeams = standings
+    .filter(t => t.conf === team.conf)
+    .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+    
+  const index = confTeams.findIndex(t => t.city === city);
+  return getRankSuffix(index + 1);
 };
 
 export default function App() {
@@ -58,16 +71,8 @@ export default function App() {
   const [saves, setSaves] = useState<(GameSave | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [tempCity, setTempCity] = useState<string | null>(null);
-
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
-
-  const getRankSuffix = (n: number) => {
-    if (n === 1) return "1st";
-    if (n === 2) return "2nd";
-    if (n === 3) return "3rd";
-    return `${n}th`;
-  };
 
   useEffect(() => {
     const loadSaves = async () => {
@@ -111,6 +116,16 @@ export default function App() {
   const handleConfirmTeam = () => {
     if (!tempCity || activeSlot === null) return;
 
+    // Fix 1: Generate proper standings where EVERY team has a roster
+    const initialStandingsWithRosters = generateInitialStandings().map(team => ({
+      ...team,
+      roster: generateRoster().map((p: any) => ({
+        lastName: p?.lastName || "Player",
+        position: p?.position || "G",
+        rating: p?.rating || 70
+      }))
+    }));
+
     const newSave: GameSave = {
       slotId: activeSlot,
       city: tempCity,
@@ -120,10 +135,16 @@ export default function App() {
       totalGames: 82,
       rank: 15,
       conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West') as 'East' | 'West',
-      roster: generateRoster(),
+      // Fix 2: User roster mapping
+      roster: generateRoster().map((p: any) => ({
+        lastName: p?.lastName || "Player",
+        position: p?.position || "G",
+        rating: p?.rating || 70
+      })),
       schedule: generateSchedule(tempCity),
-      standings: generateInitialStandings(),
-      playoffs: null
+      standings: initialStandingsWithRosters,
+      playoffs: null,
+      playoffBracket: null
     };
 
     const newSaves = [...saves];
@@ -139,36 +160,43 @@ export default function App() {
     const currentSave = updatedSaves[activeSlot - 1];
 
     if (currentSave) {
-      const isWin = result.myScore > result.oppScore;
-
-      // --- PLAYOFF LOGIC ---
       if (currentSave.playoffs) {
-        if (isWin) currentSave.playoffs.myWins += 1;
-        else currentSave.playoffs.oppWins += 1;
+        const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
+          s.highSeed === currentSave.city || s.lowSeed === currentSave.city
+        )?.id;
 
-        if (currentSave.playoffs.myWins === 4) {
-          if (currentSave.playoffs.round === 4) {
-            currentSave.playoffs.isChampion = true; // Mark as Champion
-            alert("CONGRATULATIONS! YOU WON THE CHAMPIONSHIP!");
-          } else {
-            alert(`You won the series! Advancing to Round ${currentSave.playoffs.round + 1}`);
-            currentSave.playoffs.round += 1;
-            currentSave.playoffs.myWins = 0;
-            currentSave.playoffs.oppWins = 0;
-            currentSave.playoffs.opponentCity = getNextPlayoffOpponent(currentSave, currentSave.playoffs.round);
+        currentSave.playoffBracket = currentSave.playoffBracket?.map((series: SeriesMatchup) => {
+          if (series.isCompleted) return series;
+          let highWon = Math.random() > 0.5;
+          if (series.id === userSeriesId) {
+            const isUserHighSeed = series.highSeed === currentSave.city;
+            const userWon = result.myScore > result.oppScore;
+            highWon = isUserHighSeed ? userWon : !userWon;
+            if (userWon) currentSave.playoffs!.myWins += 1;
+            else currentSave.playoffs!.oppWins += 1;
           }
-        } else if (currentSave.playoffs.oppWins === 4) {
-          currentSave.playoffs.isEliminated = true; // Mark as Eliminated
-          alert("Eliminated from the playoffs!");
+          if (highWon) series.highSeedWins += 1;
+          else series.lowSeedWins += 1;
+          if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
+          return series;
+        }) || null;
+
+        const mySeries = currentSave.playoffBracket?.find((s: SeriesMatchup) => s.id === userSeriesId);
+        if (mySeries?.isCompleted) {
+           const won = (mySeries.highSeed === currentSave.city && mySeries.highSeedWins === 4) || (mySeries.lowSeed === currentSave.city && mySeries.lowSeedWins === 4);
+           if (!won) {
+             currentSave.playoffs.isEliminated = true;
+           } else {
+             alert("Series Won!");
+           }
         }
-      } 
-      // --- REGULAR SEASON LOGIC ---
-      else {
+      } else {
+        const isWin = result.myScore > result.oppScore;
         const opponentCity = currentSave.schedule[currentSave.gamesPlayed];
         currentSave.wins += isWin ? 1 : 0;
         currentSave.losses += isWin ? 0 : 1;
 
-        currentSave.standings.forEach(team => {
+        currentSave.standings.forEach((team: any) => {
           if (team.city === currentSave.city) {
             team.wins += isWin ? 1 : 0;
             team.losses += isWin ? 0 : 1;
@@ -181,15 +209,21 @@ export default function App() {
           }
         });
 
-        const myConf = currentSave.standings
-          .filter(t => t.conf === currentSave.conference)
-          .sort((a, b) => b.wins - a.wins);
-        
-        currentSave.rank = myConf.findIndex(t => t.city === currentSave.city) + 1;
         currentSave.gamesPlayed += 1;
 
         if (currentSave.gamesPlayed === 82) {
-          currentSave.playoffs = startPlayoffs(currentSave);
+          const bracket = generateFullBracket(currentSave);
+          currentSave.playoffBracket = bracket;
+          const userSeries = bracket.find((s: SeriesMatchup) => s.highSeed === currentSave.city || s.lowSeed === currentSave.city);
+          
+          currentSave.playoffs = {
+            round: 1,
+            opponentCity: userSeries ? (userSeries.highSeed === currentSave.city ? userSeries.lowSeed : userSeries.highSeed) : "NONE",
+            myWins: 0,
+            oppWins: 0,
+            isEliminated: !userSeries,
+            isChampion: false,
+          };
         }
       }
 
@@ -199,7 +233,22 @@ export default function App() {
     }
   };
 
-  // --- Rendering Logic (Simplified home/quickSim for brevity) ---
+  const handleSimulateLeagueDay = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (currentSave && currentSave.playoffBracket) {
+      currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
+        if (series.isCompleted) return series;
+        if (Math.random() > 0.5) series.highSeedWins += 1;
+        else series.lowSeedWins += 1;
+        if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
+        return series;
+      });
+      setSaves(updatedSaves);
+      persistSaves(updatedSaves);
+    }
+  };
 
   if (view === 'loading') return <LoadingScreen />;
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
@@ -212,52 +261,56 @@ export default function App() {
 
     const nextOpponentCity = activeSave.playoffs 
       ? activeSave.playoffs.opponentCity 
-      : (activeSave.schedule[activeSave.gamesPlayed] || "TBD");
-      
-    const oppData = activeSave.standings?.find(t => t.city === nextOpponentCity);
-    const seriesGamesPlayed = activeSave.playoffs ? (activeSave.playoffs.myWins + activeSave.playoffs.oppWins) : 0;
+      : (activeSave.schedule[activeSave.gamesPlayed] || "Free Agent");
 
-    const userTeam = {
-      city: activeSave.city,
-      record: activeSave.playoffs ? `WINS: ${activeSave.playoffs.myWins}` : `${activeSave.wins}-${activeSave.losses}`,
-      rank: getRankSuffix(activeSave.rank),
-      isHome: activeSave.playoffs ? (seriesGamesPlayed % 2 !== 0) : (activeSave.gamesPlayed % 2 !== 0),
-      isUser: true
-    };
+    const oppData = activeSave.standings?.find((t: any) => t.city === nextOpponentCity);
+    const isHomeGame = activeSave.playoffs ? (activeSave.playoffs.myWins + activeSave.playoffs.oppWins) % 2 === 0 : activeSave.gamesPlayed % 2 === 0;
 
     const dynamicOpponent = {
-      ...oppData,
       city: nextOpponentCity,
-      record: activeSave.playoffs ? `WINS: ${activeSave.playoffs.oppWins}` : (oppData ? `${oppData.wins}-${oppData.losses}` : "0-0"),
-      rank: activeSave.playoffs ? "TBD" : "TBD", // Rank display logic can be added here
-      isHome: activeSave.playoffs ? (seriesGamesPlayed % 2 === 0) : (activeSave.gamesPlayed % 2 === 0),
-      isUser: false
+      record: activeSave.playoffs 
+        ? `${activeSave.playoffs.oppWins} WINS` 
+        : (oppData ? `${oppData.wins}-${oppData.losses}` : "0-0"),
+      rank: calculateRank(nextOpponentCity, activeSave.standings), 
+      isHome: !isHomeGame,
+      isUser: false,
+      roster: oppData?.roster || [] // Crucial safety check
+    };
+
+    const dynamicUserTeam = {
+      city: activeSave.city,
+      record: activeSave.playoffs 
+        ? `${activeSave.playoffs.myWins} WINS` 
+        : `${activeSave.wins}-${activeSave.losses}`,
+      rank: calculateRank(activeSave.city, activeSave.standings),
+      isHome: isHomeGame,
+      isUser: true,
+      roster: activeSave.roster
     };
 
     if (view === 'home') {
       return (
         <HomeScreen 
           save={activeSave} 
-          userTeam={userTeam}
+          userTeam={dynamicUserTeam} 
           opponent={dynamicOpponent} 
-          onQuickSim={() => setView('quickSim')}
+          onQuickSim={() => setView('quickSim')} 
           onViewStandings={() => setView('standings')}
+          onViewBracket={() => setView('bracket')}
         />
       );
     }
-
-    return (
-      <QuickSimScreen 
-        save={activeSave} 
-        opponent={dynamicOpponent} 
-        onFinish={handleGameFinish} 
-      />
-    );
+    return <QuickSimScreen save={activeSave} opponent={dynamicOpponent} onFinish={handleGameFinish} />;
   }
 
   if (view === 'standings' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
     return activeSave ? <StandingsScreen save={activeSave} onBack={() => setView('home')} /> : null;
+  }
+
+  if (view === 'bracket' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    return <PlayoffBracketScreen save={activeSave!} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} />;
   }
 
   return null;
