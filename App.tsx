@@ -75,6 +75,7 @@ function MainApp() {
 
   useEffect(() => {
     const loadSaves = async () => {
+      //await AsyncStorage.removeItem('@hoopscript_saves');
       try {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedSaves) setSaves(JSON.parse(storedSaves));
@@ -188,23 +189,56 @@ function MainApp() {
            }
         }
       } else {
+        // --- REALISTIC PAIRED DAILY SIMULATION ---
         const isWin = result.myScore > result.oppScore;
         const opponentCity = currentSave.schedule[currentSave.gamesPlayed];
         currentSave.wins += isWin ? 1 : 0;
         currentSave.losses += isWin ? 0 : 1;
 
-        currentSave.standings.forEach((team: any) => {
-          if (team.city === currentSave.city) {
-            team.wins += isWin ? 1 : 0;
-            team.losses += isWin ? 0 : 1;
-          } else if (team.city === opponentCity) {
-            team.wins += isWin ? 0 : 1;
-            team.losses += isWin ? 1 : 0;
-          } else {
-            if (Math.random() > 0.5) team.wins += 1;
-            else team.losses += 1;
+        // 1. Get all AI teams not involved in the user's game today
+        const aiTeams = currentSave.standings.filter(
+          (t: any) => t.city !== currentSave.city && t.city !== opponentCity
+        );
+
+        // 2. Shuffle them to randomize matchups
+        for (let i = aiTeams.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [aiTeams[i], aiTeams[j]] = [aiTeams[j], aiTeams[i]];
+        }
+
+        // 3. Create a dictionary to hold the results of today's games
+        const todayResults: Record<string, 'W' | 'L'> = {};
+        
+        // Record the User's game results
+        todayResults[currentSave.city] = isWin ? 'W' : 'L';
+        todayResults[opponentCity] = isWin ? 'L' : 'W';
+
+        // 4. Pair up the remaining teams 1v1 and simulate
+        for (let i = 0; i < aiTeams.length; i += 2) {
+          const teamA = aiTeams[i];
+          const teamB = aiTeams[i + 1];
+
+          if (teamB) { // Ensure there is a pair
+            if (Math.random() > 0.5) {
+              todayResults[teamA.city] = 'W';
+              todayResults[teamB.city] = 'L';
+            } else {
+              todayResults[teamA.city] = 'L';
+              todayResults[teamB.city] = 'W';
+            }
           }
+        }
+
+        // 5. Apply all mapped results mathematically to the standings
+        currentSave.standings = currentSave.standings.map((team: any) => {
+          const gameResult = todayResults[team.city];
+          return {
+            ...team,
+            wins: team.wins + (gameResult === 'W' ? 1 : 0),
+            losses: team.losses + (gameResult === 'L' ? 1 : 0)
+          };
         });
+        // -----------------------------------------
 
         currentSave.gamesPlayed += 1;
 

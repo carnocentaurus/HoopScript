@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   teamSide: { alignItems: 'center', flex: 1 },
   logoPlaceholder: { fontSize: 40, color: '#FFF', fontWeight: '900', backgroundColor: '#222', width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
   cityName: { color: '#888', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
-  score: { color: '#FFF', fontSize: 54, fontWeight: '900', marginTop: 10 },
+  score: { color: '#2D3748', fontSize: 54, fontWeight: '900', marginTop: 10 },
   vs: { color: '#333', fontWeight: '900', fontSize: 18 },
   winner: { color: '#4CAF50' },
   otBadge: { alignSelf: 'center', backgroundColor: '#C41E3A', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
