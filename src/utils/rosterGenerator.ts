@@ -104,15 +104,21 @@ const LAST_NAMES = [
   "Eriksson", "Larsson", "Olsson", "Persson", "Svensson", "Gustafsson", "Pettersson", "Jonsson", "Jansson", "Hansson"
 ];
 
-const POSITIONS = ["PG", "SG", "SF", "PF", "C"];
+const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 
 export interface Player {
   id: string;
   lastName: string;
   number: number;
-  rating: number;
   position: string;
   isStarter: boolean;
+  // Visual Ratings
+  offense: number;
+  defense: number;
+  overall: number;
+  // Logic Driving Stats (Hidden or for Sim logic)
+  heightFactor: number; // 0-100: Influences Rebounds/Blocks
+  speedFactor: number;  // 0-100: Influences Steals/Assists
 }
 
 export const generateRoster = (): Player[] => {
@@ -120,16 +126,67 @@ export const generateRoster = (): Player[] => {
   
   for (let i = 0; i < 15; i++) {
     const isStarter = i < 5;
+    const pos = isStarter ? POSITIONS[i] : POSITIONS[Math.floor(Math.random() * 5)];
+    
+    // 1. Determine Archetype Factors based on Position
+    let heightBase = 50;
+    let speedBase = 50;
+    let offBonus = 0;
+    let defBonus = 0;
+
+    switch (pos) {
+      case "PG":
+        heightBase = Math.floor(Math.random() * 20) + 10; // Short
+        speedBase = Math.floor(Math.random() * 20) + 75;  // Very Fast
+        offBonus = 5; // Playmaking focus
+        break;
+      case "SG":
+        heightBase = Math.floor(Math.random() * 20) + 30;
+        speedBase = Math.floor(Math.random() * 20) + 70;
+        offBonus = 7; // Scoring focus
+        break;
+      case "SF":
+        heightBase = Math.floor(Math.random() * 20) + 50;
+        speedBase = Math.floor(Math.random() * 20) + 50;
+        break; // Balanced
+      case "PF":
+        heightBase = Math.floor(Math.random() * 20) + 70;
+        speedBase = Math.floor(Math.random() * 20) + 30;
+        defBonus = 5;
+        break;
+      case "C":
+        heightBase = Math.floor(Math.random() * 20) + 80; // Tall
+        speedBase = Math.floor(Math.random() * 20) + 15;  // Slow
+        defBonus = 8; // Rim protection focus
+        break;
+    }
+
+    // 2. Generate Base Ratings (Starters vs Bench)
+    const baseOff = isStarter 
+      ? Math.floor(Math.random() * 15) + 78 
+      : Math.floor(Math.random() * 15) + 65;
+      
+    const baseDef = isStarter 
+      ? Math.floor(Math.random() * 15) + 78 
+      : Math.floor(Math.random() * 15) + 65;
+
+    // 3. Final Calculations
+    const finalOffense = Math.min(99, baseOff + offBonus);
+    const finalDefense = Math.min(99, baseDef + defBonus);
+
     roster.push({
       id: Math.random().toString(36).substr(2, 9),
       lastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
-      number: Math.floor(Math.random() * 100), // 0-99
-      rating: isStarter 
-        ? Math.floor(Math.random() * 15) + 80  // Starters: 80-95
-        : Math.floor(Math.random() * 15) + 65, // Bench: 65-80
-      position: isStarter ? POSITIONS[i] : POSITIONS[Math.floor(Math.random() * 5)],
+      number: Math.floor(Math.random() * 100),
+      position: pos,
       isStarter,
+      offense: finalOffense,
+      defense: finalDefense,
+      overall: Math.round((finalOffense + finalDefense) / 2),
+      heightFactor: heightBase,
+      speedFactor: speedBase,
     });
   }
+  
   return roster;
 };

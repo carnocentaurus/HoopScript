@@ -1,11 +1,12 @@
-import { Player } from './rosterGenerator';
-import { GameSave } from '../types/save';
+import { Player, GameSave } from '../types/save';
 
 export interface GameResult {
   myScore: number;
   oppScore: number;
   myBestPlayer: PlayerStat;
   oppBestPlayer: PlayerStat;
+  myTeamStats: PlayerStat[]; // Now required for the full box score
+  oppTeamStats: PlayerStat[]; // Now required for the full box score
 }
 
 export interface PlayerStat {
@@ -20,29 +21,25 @@ export interface PlayerStat {
   blk: number;
   fgm: number;
   fga: number;
+  overall: number;
 }
 
 const randomNormal = (mean: number, stdDev: number): number => {
   let u = 0, v = 0;
-  while(u === 0) u = Math.random();
-  while(v === 0) v = Math.random();
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
   let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   return num * stdDev + mean;
 };
 
-/**
- * @param myTeam The User's Save data
- * @param opponent The opponent object from the standings (including their unique roster)
- */
-
 export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
-  const mySorted = [...myTeam.roster].sort((a, b) => b.rating - a.rating);
+  const mySorted = [...myTeam.roster].sort((a, b) => b.overall - a.overall);
   const oppRoster = opponent.roster || [];
-  const oppSorted = [...oppRoster].sort((a: any, b: any) => b.rating - a.rating);
+  const oppSorted = [...oppRoster].sort((a: any, b: any) => b.overall - a.overall);
 
-  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.rating, 0) / 8;
+  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.overall, 0) / 8;
   const oppOvr = oppSorted.length > 0
-    ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.rating, 0) / 8
+    ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.overall, 0) / 8
     : 80;
 
   const myBase = 110 + (myOvr - oppOvr);
@@ -51,57 +48,95 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   let myScore = Math.round(randomNormal(myBase, 10));
   let oppScore = Math.round(randomNormal(oppBase, 10));
 
-  // --- OVERTIME LOGIC ---
   let otCount = 0;
   while (myScore === oppScore) {
     otCount++;
-    // Simulate a 5-minute OT period (lower scores)
     myScore += Math.round(randomNormal(10 + (myOvr - oppOvr), 4));
     oppScore += Math.round(randomNormal(10 + (oppOvr - myOvr), 4));
-    
-    // Safety check to prevent infinite loops (rare but possible in sims)
-    if (otCount > 10) {
+    if (otCount > 5) {
         myScore > oppScore ? myScore++ : oppScore++;
     }
   }
 
-  const getTopPerformer = (roster: Player[]) => {
-    if (!roster || roster.length === 0) return null;
-    const roll = Math.random();
-    if (roll > 0.4) return roster[0];
-    if (roll > 0.1) return roster[1] || roster[0];
-    return roster[2] || roster[0];
-  };
+  // 1. Simulate Full Team Stats
+  // We pass the target team score so generateBestPlayer can scale contributions
+  const myTeamStats = mySorted.map(p => generateBestPlayer(p, myScore > oppScore, otCount, myScore));
+  const oppTeamStats = oppSorted.map(p => generateBestPlayer(p, oppScore > myScore, otCount, oppScore));
 
-  const myWinner = getTopPerformer(mySorted);
-  const oppWinner = getTopPerformer(oppSorted);
+  // 2. Sort by points for the box score view
+  myTeamStats.sort((a, b) => b.pts - a.pts);
+  oppTeamStats.sort((a, b) => b.pts - a.pts);
 
   return {
     myScore,
     oppScore,
-    myBestPlayer: generateBestPlayer(myWinner!, myScore > oppScore, otCount),
-    oppBestPlayer: generateBestPlayer(oppWinner!, oppScore > myScore, otCount)
+    myBestPlayer: myTeamStats[0],
+    oppBestPlayer: oppTeamStats[0],
+    myTeamStats,
+    oppTeamStats
   };
 };
 
-export const generateBestPlayer = (player: Player, isWinner: boolean, otCount: number): PlayerStat => {
-  // Boost stats slightly if there was overtime
-  const otBoost = otCount * 5;
-  const pts = (isWinner ? Math.floor(Math.random() * 15) + 22 : Math.floor(Math.random() * 10) + 18) + (otCount * 2);
+export const generateBestPlayer = (
+  player: Player, 
+  isWinner: boolean, 
+  otCount: number, 
+  teamScore: number = 100
+): PlayerStat => {
+  const hFactor = player.heightFactor ?? 50;
+  const sFactor = player.speedFactor ?? 50;
+  const offRating = player.offense ?? 75;
+
+  // 1. ALLOCATE MINUTES (Total game is 48 mins + 5 per OT)
+  // Starters: 28-38 mins | Bench: 5-18 mins
+  const isStarter = player.isStarter;
+  const minutesBudget = isStarter 
+    ? Math.floor(randomNormal(32, 4)) + (otCount * 4)
+    : Math.floor(randomNormal(12, 5));
   
-  const fga = Math.floor(pts / 2) + Math.floor(Math.random() * 6);
+  // Hard caps for realism
+  const min = Math.max(2, Math.min(minutesBudget, 48 + (otCount * 5)));
+
+  // 2. SCALE FACTOR (Minutes / 36)
+  // This ensures stats are proportional to time on court
+  const timeScale = min / 36;
+
+  // 3. SCORING SHARE (Weighted by OVR and Minutes)
+  const scoreShare = (player.overall / 85) * timeScale * (isStarter ? 1.1 : 0.9);
+  let pts = Math.floor(teamScore * (scoreShare / 5)) + Math.floor(Math.random() * 3);
   
+  // 4. FIELD GOAL LOGIC (Tied to PTS)
+  const threePM = (player.position.includes('G')) ? Math.floor(pts * 0.35 / 3) : Math.floor(pts * 0.1 / 3);
+  const ftm = Math.floor(pts * 0.2);
+  const fgm = Math.max(0, Math.floor((pts - (threePM * 3) - ftm) / 2) + threePM);
+  const fga = Math.max(fgm, Math.floor(fgm / (0.4 + (offRating / 1000))));
+
+  // 5. PER-MINUTE REBOUNDS (Height + Position + Minutes)
+  // A Center with 90 heightFactor gets ~0.35 reb per minute
+  const rebRate = (hFactor / 300) + (player.position === 'C' ? 0.15 : 0.05);
+  const reb = Math.floor(min * rebRate + (Math.random() * 3));
+
+  // 6. PER-MINUTE ASSISTS (Speed + Position + Minutes)
+  // A PG with 90 speedFactor gets ~0.25 ast per minute
+  const astRate = (sFactor / 400) + (player.position === 'PG' ? 0.18 : 0.02);
+  const ast = Math.floor(min * astRate + (Math.random() * 2));
+
+  // 7. DEFENSIVE STATS
+  const stl = Math.floor((min * 0.04) * (sFactor / 100) + (Math.random() * 1.5));
+  const blk = Math.floor((min * 0.04) * (hFactor / 100) + (Math.random() * 1.5));
+
   return {
     lastName: player.lastName,
-    number: player.number,
+    number: player.number ?? 0,
     position: player.position,
-    min: Math.floor(Math.random() * 8) + 32 + (otCount * 5),
-    pts,
-    reb: Math.floor(Math.random() * 12) + Math.floor(otCount * 1.5),
-    ast: Math.floor(Math.random() * 10) + Math.floor(otCount * 1.2),
-    stl: Math.floor(Math.random() * 4),
-    blk: Math.floor(Math.random() * 3),
-    fgm: Math.floor(fga * (Math.random() * 0.2 + 0.45)),
+    overall: player.overall ?? 75,
+    min,
+    pts: Math.max(0, pts),
+    reb: Math.max(0, reb),
+    ast: Math.max(0, ast),
+    stl,
+    blk,
+    fgm,
     fga,
   };
 };

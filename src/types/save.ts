@@ -1,7 +1,14 @@
 export interface Player {
+  id: string;        // Added
   lastName: string;
+  number: number;    // Added
   position: string;
-  rating: number;
+  isStarter: boolean; // Added
+  offense: number;
+  defense: number;
+  overall: number;
+  heightFactor: number; // Added
+  speedFactor: number;  // Added
 }
 
 export interface TeamStanding {
