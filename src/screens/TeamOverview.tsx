@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { generateRoster, Player } from '../utils/rosterGenerator';
+import Screen from '../components/Screen';
 
 const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void }) => {
   // Memoize the roster so it doesn't re-randomize on every render
@@ -22,7 +23,7 @@ const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <View style={styles.header}>
         <Text style={styles.cityTitle}>{city.toUpperCase()}</Text>
         <View style={styles.statsRow}>
@@ -42,12 +43,11 @@ const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void
       <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
         <Text style={styles.confirmText}>CONFIRM TEAM</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF' },
   header: { padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#EEE' },
   cityTitle: { fontSize: 28, fontWeight: '900', letterSpacing: 2 },
   statsRow: { flexDirection: 'row', marginTop: 15, width: '100%', justifyContent: 'space-around' },

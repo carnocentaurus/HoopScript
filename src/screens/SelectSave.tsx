@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
+import Screen from '../components/Screen';
 
 interface SelectSaveProps {
   saves: (GameSave | null)[];
@@ -9,7 +10,7 @@ interface SelectSaveProps {
 
 const SelectSave = ({ saves, onSelectSlot }: SelectSaveProps) => {
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <Text style={styles.title}>CHOOSE SAVE SLOT</Text>
       {[1, 2, 3].map((slotId) => {
         const saveData = saves.find(s => s?.slotId === slotId);
@@ -31,12 +32,11 @@ const SelectSave = ({ saves, onSelectSlot }: SelectSaveProps) => {
           </TouchableOpacity>
         );
       })}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF', padding: 20, justifyContent: 'center' },
   title: { fontSize: 24, fontWeight: '900', textAlign: 'center', marginBottom: 40, letterSpacing: 2 },
   slotCard: { 
     borderWidth: 2, borderColor: '#EEE', padding: 25, borderRadius: 12, 

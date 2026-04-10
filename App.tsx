@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Screen Imports
 import LoadingScreen from './src/screens/LoadingScreen';
 import SelectSave from './src/screens/SelectSave';
 import TeamSelection from './src/screens/TeamSelection';
@@ -8,6 +11,8 @@ import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
+
+// Logic & Types
 import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult } from './src/utils/gameSim';
@@ -46,15 +51,8 @@ const generateFullBracket = (currentSave: GameSave): SeriesMatchup[] => {
   return bracket;
 };
 
-const getRankSuffix = (n: number) => {
-  if (n === 1) return "1st";
-  if (n === 2) return "2nd";
-  if (n === 3) return "3rd";
-  return `${n}th`;
-};
-
 const calculateRank = (city: string, standings: any[]) => {
-  if (!standings || standings.length === 0) return "15"; // Removed suffix
+  if (!standings || standings.length === 0) return "15";
   const team = standings.find(t => t.city === city);
   if (!team) return "15";
   
@@ -63,10 +61,11 @@ const calculateRank = (city: string, standings: any[]) => {
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
     
   const index = confTeams.findIndex(t => t.city === city);
-  return (index + 1).toString(); // Returns "1", "2", etc.
+  return (index + 1).toString();
 };
 
-export default function App() {
+// --- MAIN CONTENT (State & Routing) ---
+function MainApp() {
   const [view, setView] = useState<ViewState>('loading');
   const [saves, setSaves] = useState<(GameSave | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -116,7 +115,6 @@ export default function App() {
   const handleConfirmTeam = () => {
     if (!tempCity || activeSlot === null) return;
 
-    // Fix 1: Generate proper standings where EVERY team has a roster
     const initialStandingsWithRosters = generateInitialStandings().map(team => ({
       ...team,
       roster: generateRoster().map((p: any) => ({
@@ -135,7 +133,6 @@ export default function App() {
       totalGames: 82,
       rank: 15,
       conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West') as 'East' | 'West',
-      // Fix 2: User roster mapping
       roster: generateRoster().map((p: any) => ({
         lastName: p?.lastName || "Player",
         position: p?.position || "G",
@@ -234,90 +231,82 @@ export default function App() {
   };
 
   const handleSimulateLeagueDay = () => {
-  if (activeSlot === null) return;
-  const updatedSaves = [...saves];
-  const currentSave = updatedSaves[activeSlot - 1];
-  if (!currentSave || !currentSave.playoffBracket) return;
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave || !currentSave.playoffBracket) return;
 
-  const currentRound = currentSave.playoffs?.round || 1;
+    const currentRound = currentSave.playoffs?.round || 1;
 
-  // 1. Sim existing games
-  currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
-    if (series.round !== currentRound || series.isCompleted) return series;
-    if (Math.random() > 0.5) series.highSeedWins += 1;
-    else series.lowSeedWins += 1;
-    if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
-    return series;
-  });
+    currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
+      if (series.round !== currentRound || series.isCompleted) return series;
+      if (Math.random() > 0.5) series.highSeedWins += 1;
+      else series.lowSeedWins += 1;
+      if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
+      return series;
+    });
 
-  const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
-  const allFinished = roundSeries.every(s => s.isCompleted);
+    const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
+    const allFinished = roundSeries.every(s => s.isCompleted);
 
-  if (allFinished) {
-    if (currentRound < 4) {
-      // Advance to next round (same logic as before)
-      const nextRound = currentRound + 1;
-      const winners = roundSeries.map(s => s.highSeedWins === 4 ? s.highSeed : s.lowSeed);
-      const nextMatches: SeriesMatchup[] = [];
-      for (let i = 0; i < winners.length; i += 2) {
-        nextMatches.push({
-          id: `R${nextRound}-${i}`,
-          round: nextRound,
-          highSeed: winners[i],
-          lowSeed: winners[i + 1],
-          highSeedWins: 0,
-          lowSeedWins: 0,
-          isCompleted: false,
-          conference: roundSeries[i].conference
-        });
-      }
-      currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
-      if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
-    } else {
-      // FINALS ARE OVER
-      const champion = roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
-      if (currentSave.playoffs) {
-        currentSave.playoffs.isChampion = (champion === currentSave.city);
-        // We set a flag to show the "Start Offseason" button
-        alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+    if (allFinished) {
+      if (currentRound < 4) {
+        const nextRound = currentRound + 1;
+        const winners = roundSeries.map(s => s.highSeedWins === 4 ? s.highSeed : s.lowSeed);
+        const nextMatches: SeriesMatchup[] = [];
+        for (let i = 0; i < winners.length; i += 2) {
+          nextMatches.push({
+            id: `R${nextRound}-${i}`,
+            round: nextRound,
+            highSeed: winners[i],
+            lowSeed: winners[i + 1],
+            highSeedWins: 0,
+            lowSeedWins: 0,
+            isCompleted: false,
+            conference: roundSeries[i].conference
+          });
+        }
+        currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
+        if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
+      } else {
+        const champion = roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
+        if (currentSave.playoffs) {
+          currentSave.playoffs.isChampion = (champion === currentSave.city);
+          alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+        }
       }
     }
-  }
-
-  setSaves(updatedSaves);
-  persistSaves(updatedSaves);
-};
-
-const handleStartNewSeason = () => {
-  if (activeSlot === null) return;
-  const updatedSaves = [...saves];
-  const currentSave = updatedSaves[activeSlot - 1];
-
-  if (currentSave) {
-    // Reset User Stats
-    currentSave.wins = 0;
-    currentSave.losses = 0;
-    currentSave.gamesPlayed = 0;
-    
-    // Reset Standings
-    currentSave.standings = currentSave.standings.map(team => ({
-      ...team,
-      wins: 0,
-      losses: 0
-    }));
-
-    // Generate New Schedule and Clear Postseason
-    currentSave.schedule = generateSchedule(currentSave.city);
-    currentSave.playoffs = null;
-    currentSave.playoffBracket = null;
 
     setSaves(updatedSaves);
     persistSaves(updatedSaves);
-    setView('home'); // Go back to home to start Game 1
-    alert("New Season Started!");
-  }
-};
+  };
 
+  const handleStartNewSeason = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+
+    if (currentSave) {
+      currentSave.wins = 0;
+      currentSave.losses = 0;
+      currentSave.gamesPlayed = 0;
+      currentSave.standings = currentSave.standings.map(team => ({
+        ...team,
+        wins: 0,
+        losses: 0
+      }));
+      currentSave.schedule = generateSchedule(currentSave.city);
+      currentSave.playoffs = null;
+      currentSave.playoffBracket = null;
+
+      setSaves(updatedSaves);
+      persistSaves(updatedSaves);
+      setView('home');
+      alert("New Season Started!");
+    }
+  };
+
+  // --- RENDERING LOGIC ---
   if (view === 'loading') return <LoadingScreen />;
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
   if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
@@ -342,7 +331,7 @@ const handleStartNewSeason = () => {
       rank: calculateRank(nextOpponentCity, activeSave.standings), 
       isHome: !isHomeGame,
       isUser: false,
-      roster: oppData?.roster || [] // Crucial safety check
+      roster: oppData?.roster || []
     };
 
     const dynamicUserTeam = {
@@ -377,16 +366,25 @@ const handleStartNewSeason = () => {
   }
 
   if (view === 'bracket' && activeSlot !== null) {
-  const activeSave = saves[activeSlot - 1];
-  return (
-    <PlayoffBracketScreen 
-      save={activeSave!} 
-      onSimDay={handleSimulateLeagueDay} 
-      onBack={() => setView('home')} 
-      onStartNewSeason={handleStartNewSeason} // Pass the handler here!
-    />
-  );
-}
+    const activeSave = saves[activeSlot - 1];
+    return (
+      <PlayoffBracketScreen 
+        save={activeSave!} 
+        onSimDay={handleSimulateLeagueDay} 
+        onBack={() => setView('home')} 
+        onStartNewSeason={handleStartNewSeason} 
+      />
+    );
+  }
 
   return null;
+}
+
+// --- APP ENTRY POINT ---
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <MainApp />
+    </SafeAreaProvider>
+  );
 }

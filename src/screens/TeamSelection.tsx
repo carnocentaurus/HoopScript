@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, FlatList, StyleSheet, Text, SafeAreaView } from 'react-native';
+import { FlatList, StyleSheet, Text } from 'react-native';
 import TeamCard from '../components/TeamCard';
+import Screen from '../components/Screen';
 
 const TEAMS = [
   "Atlanta", "Boston", "Brooklyn", "Charlotte", "Chicago", 
@@ -13,7 +14,7 @@ const TEAMS = [
 
 const TeamSelection = ({ onSelectTeam }: { onSelectTeam: (team: string) => void }) => {
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <Text style={styles.header}>Select Your Team</Text>
       <FlatList
         data={TEAMS}
@@ -24,7 +25,7 @@ const TeamSelection = ({ onSelectTeam }: { onSelectTeam: (team: string) => void 
         )}
         contentContainerStyle={styles.listContent}
       />
-    </SafeAreaView>
+    </Screen>
   );
 };
 

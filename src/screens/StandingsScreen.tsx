@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { GameSave, LeagueTeam } from '../types/save';
+import Screen from '../components/Screen';
 
 const StandingsScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   const [activeConf, setActiveConf] = useState<'East' | 'West'>(save.conference);
@@ -21,7 +22,7 @@ const StandingsScreen = ({ save, onBack }: { save: GameSave, onBack: () => void 
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← BACK</Text>
@@ -61,12 +62,11 @@ const StandingsScreen = ({ save, onBack }: { save: GameSave, onBack: () => void 
         renderItem={renderTeam}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
   backButton: { fontWeight: 'bold', color: '#000' },
   title: { fontSize: 18, fontWeight: '900', letterSpacing: 1 },

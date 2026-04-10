@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
+import Screen from '../components/Screen';
 
 const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void }) => {
   const [myScore, setMyScore] = useState(0);
@@ -70,7 +71,7 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       {isFinished && (result?.myScore! > 125 || result?.oppScore! > 125) && (
         <View style={styles.otBadge}>
            <Text style={styles.otText}>OVERTIME</Text>
@@ -105,12 +106,11 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center' },
   scoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   teamSide: { alignItems: 'center', flex: 1 },
   logoPlaceholder: { fontSize: 40, color: '#FFF', fontWeight: '900', backgroundColor: '#222', width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },

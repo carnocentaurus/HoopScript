@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
+import Screen from '../components/Screen';
 
 const TeamMatchupCard = ({ team }: { team: any }) => (
   <View style={[styles.matchupCard, team.isUser && styles.userCard]}>
@@ -55,7 +56,7 @@ const HomeScreen = ({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <View style={styles.topNav}>
         {/* Playoff Bracket button appears as soon as playoffs start or if season is over */}
         {(save.playoffs || isEndOfSeason) && (
@@ -156,12 +157,11 @@ const HomeScreen = ({
           </Text>
         </TouchableOpacity>
       )}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
   topNav: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 10 },
   standingsBtn: { paddingVertical: 8, paddingHorizontal: 15, backgroundColor: '#FFF', borderRadius: 20, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
   standingsBtnText: { fontSize: 10, fontWeight: '800', color: '#66788A', letterSpacing: 1 },

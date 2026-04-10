@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { GameSave } from '../types/save';
+import Screen from '../components/Screen';
 
 // Added onStartNewSeason to the props interface
 interface PlayoffProps {
@@ -30,7 +31,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Screen>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
         <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
@@ -83,12 +84,11 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
           </TouchableOpacity>
         )
       )}
-    </SafeAreaView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F7FA' },
   header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
   backText: { fontWeight: 'bold', color: '#4A90E2' },
   title: { fontSize: 18, fontWeight: '900', color: '#2D3748' },
