@@ -98,43 +98,47 @@ export const generateBestPlayer = (
   const sFactor = player.speedFactor ?? 50;
   const offRating = player.offense ?? 75;
 
-  // 1. ALLOCATE MINUTES (Total game is 48 mins + 5 per OT)
-  // Starters: 28-38 mins | Bench: 5-18 mins
   const isStarter = player.isStarter;
   const minutesBudget = isStarter 
     ? Math.floor(randomNormal(32, 4)) + (otCount * 4)
     : Math.floor(randomNormal(12, 5));
   
-  // Hard caps for realism
   const min = Math.max(2, Math.min(minutesBudget, 48 + (otCount * 5)));
-
-  // 2. SCALE FACTOR (Minutes / 36)
-  // This ensures stats are proportional to time on court
   const timeScale = min / 36;
 
-  // 3. SCORING SHARE (Weighted by OVR and Minutes)
+  // 1. IMPROVED SCORING & FG% (Adding Variance)
+  // Determine base FG% by position: Bigs shoot higher %, Guards shoot lower %
+  let baseFG = 0.42; 
+  if (player.position === 'C') baseFG = 0.54;
+  if (player.position === 'PF') baseFG = 0.48;
+  
+  // Add variance so it's not always the same (e.g., +/- 10%)
+  const fgVariance = (Math.random() * 0.2) - 0.1; 
+  const actualFG = baseFG + (offRating / 2000) + fgVariance;
+
   const scoreShare = (player.overall / 85) * timeScale * (isStarter ? 1.1 : 0.9);
   let pts = Math.floor(teamScore * (scoreShare / 5)) + Math.floor(Math.random() * 3);
   
-  // 4. FIELD GOAL LOGIC (Tied to PTS)
-  const threePM = (player.position.includes('G')) ? Math.floor(pts * 0.35 / 3) : Math.floor(pts * 0.1 / 3);
-  const ftm = Math.floor(pts * 0.2);
-  const fgm = Math.max(0, Math.floor((pts - (threePM * 3) - ftm) / 2) + threePM);
-  const fga = Math.max(fgm, Math.floor(fgm / (0.4 + (offRating / 1000))));
+  // 2. TIE PTS TO FGM/FGA LOGICALLY
+  const ftm = Math.floor(Math.random() * (pts * 0.2));
+  const remainingPts = pts - ftm;
+  
+  // Logic: 2PT vs 3PT based on position
+  const threePointFreq = player.position.includes('G') ? 0.4 : 0.05;
+  const estThreePM = Math.floor((remainingPts / 2.5) * threePointFreq);
+  const estTwoPM = Math.floor((remainingPts - (estThreePM * 3)) / 2);
+  
+  const fgm = estTwoPM + estThreePM;
+  // Use our actualFG to find attempts (FGA), adding a floor to prevent 0 attempts
+  const fga = Math.max(fgm + 1, Math.round(fgm / actualFG) + Math.floor(Math.random() * 3));
 
-  // 5. PER-MINUTE REBOUNDS (Height + Position + Minutes)
-  // A Center with 90 heightFactor gets ~0.35 reb per minute
-  const rebRate = (hFactor / 300) + (player.position === 'C' ? 0.15 : 0.05);
-  const reb = Math.floor(min * rebRate + (Math.random() * 3));
+  // 3. TONING DOWN REB/AST (Introducing a "Harder" ceiling)
+  // Instead of high linear multipliers, use a square root or lower base
+  const rebRate = (Math.sqrt(hFactor) / 35) + (player.position === 'C' ? 0.1 : 0.02);
+  const reb = Math.floor(min * rebRate + (Math.random() * 2));
 
-  // 6. PER-MINUTE ASSISTS (Speed + Position + Minutes)
-  // A PG with 90 speedFactor gets ~0.25 ast per minute
-  const astRate = (sFactor / 400) + (player.position === 'PG' ? 0.18 : 0.02);
+  const astRate = (Math.sqrt(sFactor) / 45) + (player.position === 'PG' ? 0.12 : 0.01);
   const ast = Math.floor(min * astRate + (Math.random() * 2));
-
-  // 7. DEFENSIVE STATS
-  const stl = Math.floor((min * 0.04) * (sFactor / 100) + (Math.random() * 1.5));
-  const blk = Math.floor((min * 0.04) * (hFactor / 100) + (Math.random() * 1.5));
 
   return {
     lastName: player.lastName,
@@ -142,11 +146,11 @@ export const generateBestPlayer = (
     position: player.position,
     overall: player.overall ?? 75,
     min,
-    pts: Math.max(0, pts),
-    reb: Math.max(0, reb),
-    ast: Math.max(0, ast),
-    stl,
-    blk,
+    pts: (estTwoPM * 2) + (estThreePM * 3) + ftm, // Summing back for absolute accuracy
+    reb,
+    ast,
+    stl: Math.floor((min * 0.03) * (sFactor / 100) + (Math.random() * 1.5)),
+    blk: Math.floor((min * 0.03) * (hFactor / 100) + (Math.random() * 1.5)),
     fgm,
     fga,
   };

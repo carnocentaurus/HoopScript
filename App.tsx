@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -18,7 +19,7 @@ import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -70,6 +71,7 @@ function MainApp() {
   const [saves, setSaves] = useState<(GameSave | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [tempCity, setTempCity] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(2024);
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
 
@@ -104,8 +106,16 @@ function MainApp() {
 
   const handleSelectSlot = (slotId: number) => {
     setActiveSlot(slotId);
-    if (saves[slotId - 1]) setView('home');
-    else setView('teamSelection');
+    if (saves[slotId - 1]) {
+      setView('home');
+    } else {
+      setView('yearSelection');
+    }
+  };
+
+  const handleYearSelect = (year: number) => {
+    setSelectedYear(year);
+    setView('teamSelection');
   };
 
   const handleTeamSelect = (city: string) => {
@@ -114,39 +124,44 @@ function MainApp() {
   };
 
   const handleConfirmTeam = () => {
-  if (!tempCity || activeSlot === null) return;
+    if (!tempCity || activeSlot === null) return;
 
-  // Generate rosters for ALL teams once. These are now PERMANENT to this save.
-  const initialStandingsWithPermanentRosters = generateInitialStandings().map(team => ({
-    ...team,
-    roster: generateRoster() // Each team gets a unique, weighted roster
-  }));
+    // Generate rosters for ALL teams once. These are permanent to this save.
+    const initialStandingsWithPermanentRosters = generateInitialStandings().map(team => ({
+      ...team,
+      roster: generateRoster() 
+    }));
 
-  // Find the roster for the team the user chose
-  const userTeamData = initialStandingsWithPermanentRosters.find(t => t.city === tempCity);
+    // Find the roster for the user's team
+    const userTeamData = initialStandingsWithPermanentRosters.find(t => t.city === tempCity);
 
-  const newSave: GameSave = {
-    slotId: activeSlot,
-    city: tempCity,
-    wins: 0,
-    losses: 0,
-    gamesPlayed: 0,
-    totalGames: 82,
-    rank: 15,
-    conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West') as 'East' | 'West',
-    roster: userTeamData?.roster || [], // Store the permanent roster here
-    schedule: generateSchedule(tempCity),
-    standings: initialStandingsWithPermanentRosters, // All teams keep their rosters in the standings
-    playoffs: null,
-    playoffBracket: null
+    const newSave: GameSave = {
+      id: Date.now().toString(),
+      name: `My GM Career - ${tempCity}`,
+      slotId: activeSlot,
+      city: tempCity,
+      wins: 0,
+      losses: 0,
+      gamesPlayed: 0,
+      totalGames: 82,
+      rank: 15,
+      conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West') as 'East' | 'West',
+      roster: userTeamData?.roster || [], 
+      schedule: generateSchedule(tempCity),
+      standings: initialStandingsWithPermanentRosters, 
+      playoffs: null,
+      playoffBracket: null,
+      startYear: selectedYear,
+      currentYear: selectedYear,
+      seasonCount: 1
+    };
+
+    const newSaves = [...saves];
+    newSaves[activeSlot - 1] = newSave;
+    setSaves(newSaves);
+    persistSaves(newSaves);
+    setView('home');
   };
-
-  const newSaves = [...saves];
-  newSaves[activeSlot - 1] = newSave;
-  setSaves(newSaves);
-  persistSaves(newSaves);
-  setView('home');
-};
 
   const handleGameFinish = (result: GameResult) => {
     if (activeSlot === null) return;
@@ -191,30 +206,25 @@ function MainApp() {
         currentSave.wins += isWin ? 1 : 0;
         currentSave.losses += isWin ? 0 : 1;
 
-        // 1. Get all AI teams not involved in the user's game today
         const aiTeams = currentSave.standings.filter(
           (t: any) => t.city !== currentSave.city && t.city !== opponentCity
         );
 
-        // 2. Shuffle them to randomize matchups
         for (let i = aiTeams.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [aiTeams[i], aiTeams[j]] = [aiTeams[j], aiTeams[i]];
         }
 
-        // 3. Create a dictionary to hold the results of today's games
         const todayResults: Record<string, 'W' | 'L'> = {};
         
-        // Record the User's game results
         todayResults[currentSave.city] = isWin ? 'W' : 'L';
         todayResults[opponentCity] = isWin ? 'L' : 'W';
 
-        // 4. Pair up the remaining teams 1v1 and simulate
         for (let i = 0; i < aiTeams.length; i += 2) {
           const teamA = aiTeams[i];
           const teamB = aiTeams[i + 1];
 
-          if (teamB) { // Ensure there is a pair
+          if (teamB) { 
             if (Math.random() > 0.5) {
               todayResults[teamA.city] = 'W';
               todayResults[teamB.city] = 'L';
@@ -225,7 +235,6 @@ function MainApp() {
           }
         }
 
-        // 5. Apply all mapped results mathematically to the standings
         currentSave.standings = currentSave.standings.map((team: any) => {
           const gameResult = todayResults[team.city];
           return {
@@ -234,7 +243,6 @@ function MainApp() {
             losses: team.losses + (gameResult === 'L' ? 1 : 0)
           };
         });
-        // -----------------------------------------
 
         currentSave.gamesPlayed += 1;
 
@@ -261,122 +269,138 @@ function MainApp() {
   };
 
   const handleSimulateLeagueDay = () => {
-  if (activeSlot === null) return;
-  const updatedSaves = [...saves];
-  const currentSave = updatedSaves[activeSlot - 1];
-  if (!currentSave || !currentSave.playoffBracket) return;
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave || !currentSave.playoffBracket) return;
 
-  const currentRound = currentSave.playoffs?.round || 1;
+    const currentRound = currentSave.playoffs?.round || 1;
 
-  const getTeamStrength = (city: string) => {
-  const teamData = currentSave.standings.find(t => t.city === city);
-  
-  // If the roster is missing or empty, return a default strength to prevent NaN
-  if (!teamData || !teamData.roster || teamData.roster.length === 0) {
-    return 75; 
-  }
-
-  // Filter for starters, or use the whole roster if no starters are marked
-  const starters = teamData.roster.filter((p: any) => p.isStarter);
-  const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
-
-  const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
-  const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
-  
-  return (off + def) / 2;
-};
-
-  currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
-    if (series.round !== currentRound || series.isCompleted) return series;
-
-    // 1. Get Strengths
-    const highSeedPower = getTeamStrength(series.highSeed);
-    const lowSeedPower = getTeamStrength(series.lowSeed);
-
-    // 2. Calculate Win Probability (Base 50% + difference)
-    // Example: If High Seed is 88 and Low Seed is 82, High Seed has 56% chance to win.
-    const highSeedWinProb = 0.5 + (highSeedPower - lowSeedPower) / 100;
-
-    // 3. Simulate the game outcome
-    if (Math.random() < highSeedWinProb) {
-      series.highSeedWins += 1;
-    } else {
-      series.lowSeedWins += 1;
-    }
-
-    if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
-    return series;
-  });
-
-  const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
-  const allFinished = roundSeries.every(s => s.isCompleted);
-
-  if (allFinished) {
-    if (currentRound < 4) {
-      const nextRound = currentRound + 1;
-      const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
-      const nextMatches: SeriesMatchup[] = [];
+    const getTeamStrength = (city: string) => {
+      const teamData = currentSave.standings.find(t => t.city === city);
       
-      // Keep track of conference to ensure we don't mix East/West until Finals
-      for (let i = 0; i < winners.length; i += 2) {
-        nextMatches.push({
-          id: `R${nextRound}-${i}`,
-          round: nextRound,
-          highSeed: winners[i],
-          lowSeed: winners[i + 1],
-          highSeedWins: 0,
-          lowSeedWins: 0,
-          isCompleted: false,
-          conference: roundSeries[i].conference,
-        });
+      if (!teamData || !teamData.roster || teamData.roster.length === 0) {
+        return 75; 
       }
-      currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
-      if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
-    } else {
-      const champion =
-        roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
-      if (currentSave.playoffs) {
-        currentSave.playoffs.isChampion = champion === currentSave.city;
-        alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+
+      const starters = teamData.roster.filter((p: any) => p.isStarter);
+      const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
+
+      const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
+      const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
+      
+      return (off + def) / 2;
+    };
+
+    currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
+      if (series.round !== currentRound || series.isCompleted) return series;
+
+      const highSeedPower = getTeamStrength(series.highSeed);
+      const lowSeedPower = getTeamStrength(series.lowSeed);
+
+      const highSeedWinProb = 0.5 + (highSeedPower - lowSeedPower) / 100;
+
+      if (Math.random() < highSeedWinProb) {
+        series.highSeedWins += 1;
+      } else {
+        series.lowSeedWins += 1;
+      }
+
+      if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
+      return series;
+    });
+
+    const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
+    const allFinished = roundSeries.every(s => s.isCompleted);
+
+    if (allFinished) {
+      if (currentRound < 4) {
+        const nextRound = currentRound + 1;
+        const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
+        const nextMatches: SeriesMatchup[] = [];
+        
+        for (let i = 0; i < winners.length; i += 2) {
+          nextMatches.push({
+            id: `R${nextRound}-${i}`,
+            round: nextRound,
+            highSeed: winners[i],
+            lowSeed: winners[i + 1],
+            highSeedWins: 0,
+            lowSeedWins: 0,
+            isCompleted: false,
+            conference: roundSeries[i].conference,
+          });
+        }
+        currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
+        if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
+      } else {
+        const champion =
+          roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
+        if (currentSave.playoffs) {
+          currentSave.playoffs.isChampion = champion === currentSave.city;
+          alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+        }
       }
     }
-  }
-
-  setSaves(updatedSaves);
-  persistSaves(updatedSaves);
-};
-
-  const handleStartNewSeason = () => {
-  if (activeSlot === null) return;
-  const updatedSaves = [...saves];
-  const currentSave = updatedSaves[activeSlot - 1];
-
-  if (currentSave) {
-    currentSave.wins = 0;
-    currentSave.losses = 0;
-    currentSave.gamesPlayed = 0;
-    
-    // RESET standings records but KEEP the rosters
-    currentSave.standings = currentSave.standings.map(team => ({
-      ...team,
-      wins: 0,
-      losses: 0,
-      // roster: team.roster <--- We don't change this! It's permanent.
-    }));
-
-    currentSave.schedule = generateSchedule(currentSave.city);
-    currentSave.playoffs = null;
-    currentSave.playoffBracket = null;
 
     setSaves(updatedSaves);
     persistSaves(updatedSaves);
-    setView('home');
-  }
-};
+  };
+
+  const handleStartNewSeason = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+
+    if (currentSave) {
+      currentSave.wins = 0;
+      currentSave.losses = 0;
+      currentSave.gamesPlayed = 0;
+      
+      // Increment season and year
+      currentSave.currentYear += 1;
+      currentSave.seasonCount += 1;
+      
+      currentSave.standings = currentSave.standings.map(team => ({
+        ...team,
+        wins: 0,
+        losses: 0,
+      }));
+
+      currentSave.schedule = generateSchedule(currentSave.city);
+      currentSave.playoffs = null;
+      currentSave.playoffBracket = null;
+
+      setSaves(updatedSaves);
+      persistSaves(updatedSaves);
+      setView('home');
+    }
+  };
 
   // --- RENDERING LOGIC ---
   if (view === 'loading') return <LoadingScreen />;
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
+  
+  if (view === 'yearSelection') {
+    const years = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 1950 + i).reverse();
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>SELECT STARTING YEAR</Text>
+        <ScrollView style={styles.scrollList}>
+          {years.map(year => (
+            <TouchableOpacity 
+              key={year} 
+              style={styles.yearButton}
+              onPress={() => handleYearSelect(year)}
+            >
+              <Text style={styles.yearText}>{year}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  }
+
   if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
   if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} />;
 
@@ -447,6 +471,40 @@ function MainApp() {
 
   return null;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 20,
+    paddingTop: 60,
+  },
+  title: {
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '900',
+    marginBottom: 20,
+    textAlign: 'center',
+    letterSpacing: 2,
+  },
+  scrollList: {
+    flex: 1,
+  },
+  yearButton: {
+    padding: 16,
+    backgroundColor: '#1A1A1A',
+    marginBottom: 10,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#C41E3A',
+  },
+  yearText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }
+});
 
 // --- APP ENTRY POINT ---
 export default function App() {

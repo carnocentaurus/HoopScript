@@ -28,17 +28,17 @@ const HomeScreen = ({
   opponent, 
   onQuickSim, 
   onViewStandings,
-  onViewBracket // NEW PROP
+  onViewBracket 
 }: { 
   save: GameSave, 
   userTeam: any, 
   opponent: any, 
   onQuickSim: () => void,
   onViewStandings: () => void,
-  onViewBracket: () => void // NEW PROP
+  onViewBracket: () => void 
 }) => {
 
-  const isEndOfSeason = save.gamesPlayed === 82;
+  const isEndOfSeason = save.gamesPlayed === 82; // Adjust field name to match your state if needed
   const isEliminated = save.playoffs?.isEliminated;
   const isChampion = save.playoffs?.isChampion;
   
@@ -57,8 +57,14 @@ const HomeScreen = ({
 
   return (
     <Screen>
+      {/* --- SEASON & YEAR HEADER --- */}
+      <View style={styles.seasonHeader}>
+        <View style={styles.yearBadge}>
+          <Text style={styles.yearText}>S{save.seasonCount} Y{save.currentYear}</Text>
+        </View>
+      </View>
+
       <View style={styles.topNav}>
-        {/* Playoff Bracket button appears as soon as playoffs start or if season is over */}
         {(save.playoffs || isEndOfSeason) && (
           <TouchableOpacity style={[styles.standingsBtn, { marginRight: 8 }]} onPress={onViewBracket}>
             <Text style={styles.standingsBtnText}>PLAYOFF BRACKET</Text>
@@ -87,7 +93,6 @@ const HomeScreen = ({
                   : "Tough loss. The journey ends here."}
             </Text>
             
-            {/* View Bracket Button for when the matchup UI is gone */}
             <TouchableOpacity style={styles.viewBracketInline} onPress={onViewBracket}>
                 <Text style={styles.viewBracketInlineText}>VIEW FULL BRACKET</Text>
             </TouchableOpacity>
@@ -142,26 +147,45 @@ const HomeScreen = ({
         )}
       </View>
 
-      {/* FOOTER BUTTONS */}
-      {(isEliminated || isChampion || missedPlayoffs) ? (
-        <TouchableOpacity 
-          style={[styles.simButton, { backgroundColor: '#4A90E2' }]} 
-          onPress={() => alert("Offseason feature coming soon!")}
-        >
-          <Text style={styles.simButtonText}>BEGIN OFFSEASON</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={styles.simButton} onPress={onQuickSim}>
-          <Text style={styles.simButtonText}>
-            {save.playoffs ? "SIMULATE PLAYOFF GAME" : "SIMULATE GAME"}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity 
+        style={[
+          styles.simButton, 
+          (isEliminated || isChampion || missedPlayoffs) && { backgroundColor: '#4A90E2' }
+        ]} 
+        onPress={ (isEliminated || isChampion || missedPlayoffs) ? onViewBracket : onQuickSim}
+      >
+        <Text style={styles.simButtonText}>
+          {isEliminated || isChampion || missedPlayoffs 
+            ? "VIEW PLAYOFF FINISH" 
+            : save.playoffs ? "SIMULATE PLAYOFF GAME" : "SIMULATE NEXT GAME"}
+        </Text>
+      </TouchableOpacity>
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
+  // --- NEW STYLES ---
+  seasonHeader: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+    flexDirection: 'row',
+  },
+  yearBadge: {
+    backgroundColor: '#2D3748',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#C41E3A', // Historical red accent
+  },
+  yearText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
+  // --- EXISTING STYLES ---
   topNav: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 10 },
   standingsBtn: { paddingVertical: 8, paddingHorizontal: 15, backgroundColor: '#FFF', borderRadius: 20, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
   standingsBtnText: { fontSize: 10, fontWeight: '800', color: '#66788A', letterSpacing: 1 },

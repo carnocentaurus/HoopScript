@@ -42,6 +42,8 @@ export interface SeriesMatchup {
 }
 
 export interface GameSave {
+  id: string;
+  name: string;
   slotId: number;
   city: string;
   wins: number;
@@ -54,5 +56,8 @@ export interface GameSave {
   schedule: string[];
   standings: TeamStanding[];
   playoffs: PlayoffSeries | null;
-  playoffBracket: SeriesMatchup[] | null; // Added this property
+  playoffBracket: SeriesMatchup[] | null;
+  startYear: number;   // The year the user chose
+  currentYear: number; // The year they are currently in
+  seasonCount: number; // Starts at 1
 }
