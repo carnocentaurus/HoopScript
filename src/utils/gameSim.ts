@@ -3,7 +3,7 @@ import { Player, GameSave } from '../types/save';
 export interface GameResult {
   myScore: number;
   oppScore: number;
-  otCount: number; // New field
+  otCount: number;
   myBestPlayer: PlayerStat;
   oppBestPlayer: PlayerStat;
   myTeamStats: PlayerStat[];
@@ -11,6 +11,7 @@ export interface GameResult {
 }
 
 export interface PlayerStat {
+  playerId: string;
   lastName: string;
   number: number;
   position: string;
@@ -25,7 +26,7 @@ export interface PlayerStat {
   overall: number;
 }
 
-const randomNormal = (mean: number, stdDev: number): number => {
+export const randomNormal = (mean: number, stdDev: number): number => {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
@@ -49,38 +50,28 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   let myScore = Math.round(randomNormal(myBase, 10));
   let oppScore = Math.round(randomNormal(oppBase, 10));
 
-  // --- REFINED OVERTIME LOGIC ---
   let otCount = 0;
   while (myScore === oppScore) {
     otCount++;
-    
-    // We use a much smaller standard deviation (2.5) for OT.
-    // This keeps the game tight and prevents 20-point blowouts in a 5-min period.
     const myOT = Math.round(randomNormal(9 + (myOvr - oppOvr) / 5, 2.5));
     const oppOT = Math.round(randomNormal(9 + (oppOvr - myOvr) / 5, 2.5));
-    
     myScore += myOT;
     oppScore += oppOT;
-
-    // Safety: If still tied after 4 OTs, force a 1-point win to avoid infinite loops
     if (otCount > 4 && myScore === oppScore) {
       Math.random() > 0.5 ? myScore++ : oppScore++;
     }
   }
 
-  // 1. Simulate Full Team Stats
-  // Passes the exact otCount so generateBestPlayer can scale Minutes (MIN) correctly
-  const myTeamStats = mySorted.map(p => generateBestPlayer(p, myScore > oppScore, otCount, myScore));
-  const oppTeamStats = oppSorted.map(p => generateBestPlayer(p, oppScore > myScore, otCount, oppScore));
+  const myTeamStats = mySorted.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore));
+  const oppTeamStats = oppSorted.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore));
 
-  // 2. Sort by points for the box score view
   myTeamStats.sort((a, b) => b.pts - a.pts);
   oppTeamStats.sort((a, b) => b.pts - a.pts);
 
   return {
     myScore,
     oppScore,
-    otCount, // Now returning the specific count (1, 2, 3...)
+    otCount,
     myBestPlayer: myTeamStats[0],
     oppBestPlayer: oppTeamStats[0],
     myTeamStats,
@@ -88,7 +79,7 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   };
 };
 
-export const generateBestPlayer = (
+export const generatePlayerStats = (
   player: Player, 
   isWinner: boolean, 
   otCount: number, 
@@ -106,34 +97,26 @@ export const generateBestPlayer = (
   const min = Math.max(2, Math.min(minutesBudget, 48 + (otCount * 5)));
   const timeScale = min / 36;
 
-  // 1. IMPROVED SCORING & FG% (Adding Variance)
-  // Determine base FG% by position: Bigs shoot higher %, Guards shoot lower %
   let baseFG = 0.42; 
   if (player.position === 'C') baseFG = 0.54;
   if (player.position === 'PF') baseFG = 0.48;
   
-  // Add variance so it's not always the same (e.g., +/- 10%)
   const fgVariance = (Math.random() * 0.2) - 0.1; 
   const actualFG = baseFG + (offRating / 2000) + fgVariance;
 
   const scoreShare = (player.overall / 85) * timeScale * (isStarter ? 1.1 : 0.9);
   let pts = Math.floor(teamScore * (scoreShare / 5)) + Math.floor(Math.random() * 3);
   
-  // 2. TIE PTS TO FGM/FGA LOGICALLY
   const ftm = Math.floor(Math.random() * (pts * 0.2));
   const remainingPts = pts - ftm;
   
-  // Logic: 2PT vs 3PT based on position
   const threePointFreq = player.position.includes('G') ? 0.4 : 0.05;
   const estThreePM = Math.floor((remainingPts / 2.5) * threePointFreq);
   const estTwoPM = Math.floor((remainingPts - (estThreePM * 3)) / 2);
   
   const fgm = estTwoPM + estThreePM;
-  // Use our actualFG to find attempts (FGA), adding a floor to prevent 0 attempts
   const fga = Math.max(fgm + 1, Math.round(fgm / actualFG) + Math.floor(Math.random() * 3));
 
-  // 3. TONING DOWN REB/AST (Introducing a "Harder" ceiling)
-  // Instead of high linear multipliers, use a square root or lower base
   const rebRate = (Math.sqrt(hFactor) / 35) + (player.position === 'C' ? 0.1 : 0.02);
   const reb = Math.floor(min * rebRate + (Math.random() * 2));
 
@@ -141,12 +124,13 @@ export const generateBestPlayer = (
   const ast = Math.floor(min * astRate + (Math.random() * 2));
 
   return {
+    playerId: player.id,
     lastName: player.lastName,
     number: player.number ?? 0,
     position: player.position,
     overall: player.overall ?? 75,
     min,
-    pts: (estTwoPM * 2) + (estThreePM * 3) + ftm, // Summing back for absolute accuracy
+    pts: (estTwoPM * 2) + (estThreePM * 3) + ftm,
     reb,
     ast,
     stl: Math.floor((min * 0.03) * (sFactor / 100) + (Math.random() * 1.5)),

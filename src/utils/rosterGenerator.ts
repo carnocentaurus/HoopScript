@@ -1,3 +1,5 @@
+import { Player, SeasonStats } from '../types/save';
+
 const LAST_NAMES = [
   // --- NORTH AMERICA / CLASSIC BASKETBALL ---
   "James", "Curry", "Durant", "Tatum", "Butler", "George", "Leonard", "Lillard", "Irving", "Davis",
@@ -61,13 +63,13 @@ const LAST_NAMES = [
   "Jäger", "Otto", "Sommer", "Gross", "Seidel", "Heinrich", "Brandt", "Haas", "Schreiber", "Graf",
   "Schulte", "Dietrich", "Ziegler", "Kuhn", "Kühn", "Pohl", "Engel", "Horn", "Busch", "Bergmann",
   "Thomas", "Voigt", "Sauer", "Arnold", "Wolff", "Pfeiffer", "Suzuki", "Sato", "Takahashi", "Tanaka",
-  "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "山口",
-  "Matsumoto", "Inoue", "Kimura", "林", "Saito", "Shimizu", "山崎", "Mori", "Abe", "Ikeda",
+  "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki",
+  "Matsumoto", "Inoue", "Kimura", "Saito", "Shimizu", "Mori", "Abe", "Ikeda",
   "Hashimoto", "Yamashita", "Ishikawa", "Nakajima", "Maeda", "Fujita", "Ogawa", "Okada", "Goto", "Hasegawa",
   "Murakami", "Kondo", "Ishii", "Saito", "Sakamoto", "Endo", "Aoki", "Fujii", "Nishimura", "Fukuda",
-  "太田", "Miura", "Fujiwara", "Okamoto", "Matsui", "Nakagawa", "Nakano", "Harada", "Ono", "Tamura",
+  "Miura", "Fujiwara", "Okamoto", "Matsui", "Nakagawa", "Nakano", "Harada", "Ono", "Tamura",
   "Takeuchi", "Kaneko", "Wada", "Nakayama", "Ishida", "Ueda", "Morita", "Hara", "Shibata", "Sakai",
-  "K工藤", "Yokoyama", "Miyazaki", "宮崎", "Miyamoto", "Uchida", "Takagi", "Ando", "谷口", "Ohno",
+  "Yokoyama", "Miyazaki", "Miyamoto", "Uchida", "Takagi", "Ando", "Ohno",
   "Maruyama", "Imai", "Takada", "Fujimoto", "Murata", "Takeda", "Ueno", "Sugiyama", "Masuda", "Sugawara",
   "Hirano", "Kojima", "Otsuka", "Chiba", "Kubo", "Matsumura", "Iwasaki", "Sakurai", "Nishida", "Noguchi",
   "Rodriguez", "Gonzalez", "Hernandez", "Lopez", "Garcia", "Martinez", "Perez", "Sanchez", "Ramirez", "Torres",
@@ -105,21 +107,6 @@ const LAST_NAMES = [
 ];
 
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
-
-export interface Player {
-  id: string;
-  lastName: string;
-  number: number;
-  position: string;
-  isStarter: boolean;
-  // Visual Ratings
-  offense: number;
-  defense: number;
-  overall: number;
-  // Logic Driving Stats (Hidden or for Sim logic)
-  heightFactor: number; // 0-100: Influences Rebounds/Blocks
-  speedFactor: number;  // 0-100: Influences Steals/Assists
-}
 
 export const generateRoster = (): Player[] => {
   const roster: Player[] = [];
@@ -174,6 +161,19 @@ export const generateRoster = (): Player[] => {
     const finalOffense = Math.min(99, baseOff + offBonus);
     const finalDefense = Math.min(99, baseDef + defBonus);
 
+    const stats: SeasonStats = {
+      gamesPlayed: 0,
+      gamesStarted: 0,
+      pts: 0,
+      reb: 0,
+      ast: 0,
+      stl: 0,
+      blk: 0,
+      fgm: 0,
+      fga: 0,
+      min: 0
+    };
+
     roster.push({
       id: Math.random().toString(36).substr(2, 9),
       lastName: LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)],
@@ -185,6 +185,8 @@ export const generateRoster = (): Player[] => {
       overall: Math.round((finalOffense + finalDefense) / 2),
       heightFactor: heightBase,
       speedFactor: speedBase,
+      isRookie: Math.random() < 0.1, // ~10% chance to be a rookie
+      stats
     });
   }
   

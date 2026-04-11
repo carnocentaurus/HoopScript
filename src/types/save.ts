@@ -1,14 +1,29 @@
+export interface SeasonStats {
+  gamesPlayed: number;
+  gamesStarted: number;
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  fgm: number;
+  fga: number;
+  min: number;
+}
+
 export interface Player {
-  id: string;        // Added
+  id: string;
   lastName: string;
-  number: number;    // Added
+  number: number;
   position: string;
-  isStarter: boolean; // Added
+  isStarter: boolean;
   offense: number;
   defense: number;
   overall: number;
-  heightFactor: number; // Added
-  speedFactor: number;  // Added
+  heightFactor: number;
+  speedFactor: number;
+  isRookie?: boolean;
+  stats: SeasonStats;
 }
 
 export interface TeamStanding {
@@ -16,10 +31,9 @@ export interface TeamStanding {
   wins: number;
   losses: number;
   conf: 'East' | 'West';
-  roster?: Player[];
+  roster: Player[];
 }
 
-// Fixed PlayoffSeries definition
 export interface PlayoffSeries {
   round: number;
   opponentCity: string;
@@ -29,7 +43,6 @@ export interface PlayoffSeries {
   isChampion: boolean;
 }
 
-// Added the missing SeriesMatchup interface
 export interface SeriesMatchup {
   id: string;
   round: number;
@@ -39,6 +52,25 @@ export interface SeriesMatchup {
   lowSeedWins: number;
   isCompleted: boolean;
   conference: 'East' | 'West' | 'Finals';
+}
+
+export interface AwardWinner {
+  playerId: string;
+  playerName: string;
+  teamCity: string;
+  value: number; // The stat or score that won it
+}
+
+export interface SeasonAwards {
+  mvp: AwardWinner;
+  dpoy: AwardWinner;
+  roty: AwardWinner;
+  sixMan: AwardWinner;
+  ptsLeader: AwardWinner;
+  rebLeader: AwardWinner;
+  astLeader: AwardWinner;
+  stlLeader: AwardWinner;
+  blkLeader: AwardWinner;
 }
 
 export interface GameSave {
@@ -57,7 +89,8 @@ export interface GameSave {
   standings: TeamStanding[];
   playoffs: PlayoffSeries | null;
   playoffBracket: SeriesMatchup[] | null;
-  startYear: number;   // The year the user chose
-  currentYear: number; // The year they are currently in
-  seasonCount: number; // Starts at 1
+  awards: SeasonAwards | null;
+  startYear: number;
+  currentYear: number;
+  seasonCount: number;
 }

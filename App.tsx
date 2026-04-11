@@ -12,14 +12,15 @@ import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
+import AwardsScreen from './src/screens/AwardsScreen';
 
 // Logic & Types
 import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
-import { GameResult } from './src/utils/gameSim';
-import { ALL_CITIES, generateSchedule, generateInitialStandings } from './src/utils/leagueEngine';
+import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
+import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -151,6 +152,7 @@ function MainApp() {
       standings: initialStandingsWithPermanentRosters, 
       playoffs: null,
       playoffBracket: null,
+      awards: null,
       startYear: selectedYear,
       currentYear: selectedYear,
       seasonCount: 1
@@ -206,6 +208,12 @@ function MainApp() {
         currentSave.wins += isWin ? 1 : 0;
         currentSave.losses += isWin ? 0 : 1;
 
+        // 1. Update User Roster Stats
+        currentSave.roster = currentSave.roster.map(p => {
+          const pStat = result.myTeamStats.find(s => s.playerId === p.id);
+          return pStat ? updatePlayerStats(p, pStat) : p;
+        });
+
         const aiTeams = currentSave.standings.filter(
           (t: any) => t.city !== currentSave.city && t.city !== opponentCity
         );
@@ -225,14 +233,31 @@ function MainApp() {
           const teamB = aiTeams[i + 1];
 
           if (teamB) { 
-            if (Math.random() > 0.5) {
-              todayResults[teamA.city] = 'W';
-              todayResults[teamB.city] = 'L';
-            } else {
-              todayResults[teamA.city] = 'L';
-              todayResults[teamB.city] = 'W';
-            }
+            const teamAOvr = teamA.roster.slice(0, 8).reduce((sum: number, p: any) => sum + p.overall, 0) / 8;
+            const teamBOvr = teamB.roster.slice(0, 8).reduce((sum: number, p: any) => sum + p.overall, 0) / 8;
+            
+            const aWinProb = 0.5 + (teamAOvr - teamBOvr) / 100;
+            const aWon = Math.random() < aWinProb;
+            
+            todayResults[teamA.city] = aWon ? 'W' : 'L';
+            todayResults[teamB.city] = aWon ? 'L' : 'W';
+
+            const aScore = Math.round(randomNormal(110 + (teamAOvr - teamBOvr), 10));
+            const bScore = Math.round(randomNormal(110 + (teamBOvr - teamAOvr), 10));
+
+            // Generate and update AI stats
+            teamA.roster = teamA.roster.map((p: any) => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore)));
+            teamB.roster = teamB.roster.map((p: any) => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore)));
           }
+        }
+
+        // 2. Update Opponent Roster Stats (for the game user played)
+        const oppTeam = currentSave.standings.find((t: any) => t.city === opponentCity);
+        if (oppTeam) {
+          oppTeam.roster = oppTeam.roster.map((p: any) => {
+            const pStat = result.oppTeamStats.find(s => s.playerId === p.id);
+            return pStat ? updatePlayerStats(p, pStat) : p;
+          });
         }
 
         currentSave.standings = currentSave.standings.map((team: any) => {
@@ -247,6 +272,9 @@ function MainApp() {
         currentSave.gamesPlayed += 1;
 
         if (currentSave.gamesPlayed === 82) {
+          // Calculate Awards
+          currentSave.awards = calculateAwards(currentSave);
+
           const bracket = generateFullBracket(currentSave);
           currentSave.playoffBracket = bracket;
           const userSeries = bracket.find((s: SeriesMatchup) => s.highSeed === currentSave.city || s.lowSeed === currentSave.city);
@@ -365,11 +393,43 @@ function MainApp() {
         ...team,
         wins: 0,
         losses: 0,
+        roster: team.roster.map(p => ({
+          ...p,
+          stats: {
+            gamesPlayed: 0,
+            gamesStarted: 0,
+            pts: 0,
+            reb: 0,
+            ast: 0,
+            stl: 0,
+            blk: 0,
+            fgm: 0,
+            fga: 0,
+            min: 0
+          }
+        }))
+      }));
+
+      currentSave.roster = currentSave.roster.map(p => ({
+        ...p,
+        stats: {
+          gamesPlayed: 0,
+          gamesStarted: 0,
+          pts: 0,
+          reb: 0,
+          ast: 0,
+          stl: 0,
+          blk: 0,
+          fgm: 0,
+          fga: 0,
+          min: 0
+        }
       }));
 
       currentSave.schedule = generateSchedule(currentSave.city);
       currentSave.playoffs = null;
       currentSave.playoffBracket = null;
+      currentSave.awards = null;
 
       setSaves(updatedSaves);
       persistSaves(updatedSaves);
@@ -464,9 +524,15 @@ function MainApp() {
         save={activeSave!} 
         onSimDay={handleSimulateLeagueDay} 
         onBack={() => setView('home')} 
-        onStartNewSeason={handleStartNewSeason} 
+        onStartNewSeason={handleStartNewSeason}
+        onViewAwards={() => setView('awards')}
       />
     );
+  }
+
+  if (view === 'awards' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    return activeSave ? <AwardsScreen save={activeSave} onBack={() => setView('bracket')} /> : null;
   }
 
   return null;
