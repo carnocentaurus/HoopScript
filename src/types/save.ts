@@ -73,6 +73,15 @@ export interface SeasonAwards {
   blkLeader: AwardWinner;
 }
 
+export interface SeasonHistory {
+  seasonIndex: number; // e.g., 1, 2, 3...
+  year: number;
+  champion: string;
+  awards: SeasonAwards;
+  userRecord: string; // e.g., "50-32"
+  userRank: string;   // e.g., "3rd in West"
+}
+
 export interface GameSave {
   id: string;
   name: string;
@@ -90,6 +99,7 @@ export interface GameSave {
   playoffs: PlayoffSeries | null;
   playoffBracket: SeriesMatchup[] | null;
   awards: SeasonAwards | null;
+  history: SeasonHistory[];
   startYear: number;
   currentYear: number;
   seasonCount: number;

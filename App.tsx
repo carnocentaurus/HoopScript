@@ -13,6 +13,7 @@ import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
 import AwardsScreen from './src/screens/AwardsScreen';
+import HistoryScreen from './src/screens/HistoryScreen';
 
 // Logic & Types
 import { GameSave, SeriesMatchup } from './src/types/save';
@@ -20,7 +21,7 @@ import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards' | 'history';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -64,6 +65,32 @@ const calculateRank = (city: string, standings: any[]) => {
     
   const index = confTeams.findIndex(t => t.city === city);
   return (index + 1).toString();
+};
+
+const getTeamStrength = (city: string, standings: any[]) => {
+  const teamData = standings.find(t => t.city === city);
+  if (!teamData || !teamData.roster || teamData.roster.length === 0) return 75;
+
+  const starters = teamData.roster.filter((p: any) => p.isStarter);
+  const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
+
+  const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
+  const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
+  
+  return (off + def) / 2;
+};
+
+const getHighSeedWinProb = (highSeed: string, lowSeed: string, standings: any[]) => {
+  const highPower = getTeamStrength(highSeed, standings);
+  const lowPower = getTeamStrength(lowSeed, standings);
+  const highRank = parseInt(calculateRank(highSeed, standings));
+  const lowRank = parseInt(calculateRank(lowSeed, standings));
+
+  // Base 55% for higher seed (Home court + Closeness to top)
+  // + 1% for each rank difference
+  // + 1% for each OVR difference
+  let prob = 0.55 + (highPower - lowPower) / 100 + (lowRank - highRank) * 0.01;
+  return Math.max(0.2, Math.min(0.85, prob)); // Cap it between 20% and 85%
 };
 
 // --- MAIN CONTENT (State & Routing) ---
@@ -146,13 +173,14 @@ function MainApp() {
       gamesPlayed: 0,
       totalGames: 82,
       rank: 15,
-      conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West') as 'East' | 'West',
+      conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West'),
       roster: userTeamData?.roster || [], 
       schedule: generateSchedule(tempCity),
       standings: initialStandingsWithPermanentRosters, 
       playoffs: null,
       playoffBracket: null,
       awards: null,
+      history: [],
       startYear: selectedYear,
       currentYear: selectedYear,
       seasonCount: 1
@@ -178,7 +206,10 @@ function MainApp() {
 
         currentSave.playoffBracket = currentSave.playoffBracket?.map((series: SeriesMatchup) => {
           if (series.isCompleted) return series;
-          let highWon = Math.random() > 0.5;
+          
+          const highSeedWinProb = getHighSeedWinProb(series.highSeed, series.lowSeed, currentSave.standings);
+          let highWon = Math.random() < highSeedWinProb;
+
           if (series.id === userSeriesId) {
             const isUserHighSeed = series.highSeed === currentSave.city;
             const userWon = result.myScore > result.oppScore;
@@ -323,10 +354,7 @@ function MainApp() {
     currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
       if (series.round !== currentRound || series.isCompleted) return series;
 
-      const highSeedPower = getTeamStrength(series.highSeed);
-      const lowSeedPower = getTeamStrength(series.lowSeed);
-
-      const highSeedWinProb = 0.5 + (highSeedPower - lowSeedPower) / 100;
+      const highSeedWinProb = getHighSeedWinProb(series.highSeed, series.lowSeed, currentSave.standings);
 
       if (Math.random() < highSeedWinProb) {
         series.highSeedWins += 1;
@@ -348,11 +376,18 @@ function MainApp() {
         const nextMatches: SeriesMatchup[] = [];
         
         for (let i = 0; i < winners.length; i += 2) {
+          const teamA = winners[i];
+          const teamB = winners[i + 1];
+          const rankA = parseInt(calculateRank(teamA, currentSave.standings));
+          const rankB = parseInt(calculateRank(teamB, currentSave.standings));
+          
+          const isAFinishedHigh = rankA < rankB;
+
           nextMatches.push({
             id: `R${nextRound}-${i}`,
             round: nextRound,
-            highSeed: winners[i],
-            lowSeed: winners[i + 1],
+            highSeed: isAFinishedHigh ? teamA : teamB,
+            lowSeed: isAFinishedHigh ? teamB : teamA,
             highSeedWins: 0,
             lowSeedWins: 0,
             isCompleted: false,
@@ -381,6 +416,25 @@ function MainApp() {
     const currentSave = updatedSaves[activeSlot - 1];
 
     if (currentSave) {
+      // 1. Record History
+      const finalRound = currentSave.playoffBracket?.filter(s => s.round === 4)[0];
+      const champ = finalRound 
+        ? (finalRound.highSeedWins === 4 ? finalRound.highSeed : finalRound.lowSeed)
+        : "N/A";
+
+      if (currentSave.awards) {
+        if (!currentSave.history) currentSave.history = [];
+        currentSave.history.push({
+          seasonIndex: currentSave.seasonCount,
+          year: currentSave.currentYear,
+          champion: champ,
+          awards: currentSave.awards,
+          userRecord: `${currentSave.wins}-${currentSave.losses}`,
+          userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
+        });
+      }
+
+      // 2. Reset for Next Season
       currentSave.wins = 0;
       currentSave.losses = 0;
       currentSave.gamesPlayed = 0;
@@ -506,6 +560,7 @@ function MainApp() {
           onQuickSim={() => setView('quickSim')} 
           onViewStandings={() => setView('standings')}
           onViewBracket={() => setView('bracket')}
+          onViewHistory={() => setView('history')}
         />
       );
     }
@@ -533,6 +588,11 @@ function MainApp() {
   if (view === 'awards' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
     return activeSave ? <AwardsScreen save={activeSave} onBack={() => setView('bracket')} /> : null;
+  }
+
+  if (view === 'history' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    return activeSave ? <HistoryScreen save={activeSave} onBack={() => setView('home')} /> : null;
   }
 
   return null;

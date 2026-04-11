@@ -28,14 +28,16 @@ const HomeScreen = ({
   opponent, 
   onQuickSim, 
   onViewStandings,
-  onViewBracket 
+  onViewBracket,
+  onViewHistory
 }: { 
   save: GameSave, 
   userTeam: any, 
   opponent: any, 
   onQuickSim: () => void,
   onViewStandings: () => void,
-  onViewBracket: () => void 
+  onViewBracket: () => void,
+  onViewHistory: () => void
 }) => {
 
   const isEndOfSeason = save.gamesPlayed === 82; // Adjust field name to match your state if needed
@@ -62,6 +64,10 @@ const HomeScreen = ({
         <View style={styles.yearBadge}>
           <Text style={styles.yearText}>S{save.seasonCount} Y{save.currentYear}</Text>
         </View>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity style={styles.historyBtn} onPress={onViewHistory}>
+           <Text style={styles.historyBtnText}>HISTORY</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.topNav}>
@@ -184,6 +190,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 1.5,
+  },
+  historyBtn: {
+    backgroundColor: '#1A202C',
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#2D3748',
+  },
+  historyBtnText: {
+    color: '#A0AEC0',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
   // --- EXISTING STYLES ---
   topNav: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 10 },

@@ -31,16 +31,16 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
     return (index + 1).toString();
   };
 
-  return (
-    <Screen>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
-        <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
-        <TouchableOpacity onPress={onViewAwards}><Text style={styles.awardsText}>AWARDS</Text></TouchableOpacity>
-      </View>
+  const renderConferenceSection = (conf: 'East' | 'West' | 'Finals') => {
+    const matchups = roundMatchups.filter(m => m.conference === conf);
+    if (matchups.length === 0) return null;
 
-      <ScrollView style={styles.content}>
-        {roundMatchups.map((series) => (
+    return (
+      <View key={conf} style={styles.conferenceSection}>
+        <Text style={styles.conferenceHeader}>
+          {conf === 'Finals' ? 'LEAGUE FINALS' : `${conf.toUpperCase()}ERN CONFERENCE`}
+        </Text>
+        {matchups.map((series) => (
           <View key={series.id} style={styles.seriesCard}>
             <View style={styles.teamRow}>
               <View style={styles.teamInfo}>
@@ -63,6 +63,22 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
             </View>
           </View>
         ))}
+      </View>
+    );
+  };
+
+  return (
+    <Screen>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
+        <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
+        <TouchableOpacity onPress={onViewAwards}><Text style={styles.awardsText}>AWARDS</Text></TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.content}>
+        {renderConferenceSection('East')}
+        {renderConferenceSection('West')}
+        {renderConferenceSection('Finals')}
         
         {isFinalsOver && (
           <View style={styles.champContainer}>
@@ -95,6 +111,8 @@ const styles = StyleSheet.create({
   awardsText: { fontWeight: 'bold', color: '#C41E3A' },
   title: { fontSize: 18, fontWeight: '900', color: '#2D3748' },
   content: { padding: 16 },
+  conferenceSection: { marginBottom: 20 },
+  conferenceHeader: { fontSize: 12, fontWeight: '900', color: '#A0AEC0', letterSpacing: 1.5, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E2E8F0', paddingBottom: 4 },
   seriesCard: { backgroundColor: '#FFF', borderRadius: 12, padding: 15, marginBottom: 12, elevation: 2 },
   teamRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 6, alignItems: 'center' },
   teamInfo: { flexDirection: 'row', alignItems: 'center' },
