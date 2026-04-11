@@ -3,10 +3,11 @@ import { Player, GameSave } from '../types/save';
 export interface GameResult {
   myScore: number;
   oppScore: number;
+  otCount: number; // New field
   myBestPlayer: PlayerStat;
   oppBestPlayer: PlayerStat;
-  myTeamStats: PlayerStat[]; // Now required for the full box score
-  oppTeamStats: PlayerStat[]; // Now required for the full box score
+  myTeamStats: PlayerStat[];
+  oppTeamStats: PlayerStat[];
 }
 
 export interface PlayerStat {
@@ -48,18 +49,27 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   let myScore = Math.round(randomNormal(myBase, 10));
   let oppScore = Math.round(randomNormal(oppBase, 10));
 
+  // --- REFINED OVERTIME LOGIC ---
   let otCount = 0;
   while (myScore === oppScore) {
     otCount++;
-    myScore += Math.round(randomNormal(10 + (myOvr - oppOvr), 4));
-    oppScore += Math.round(randomNormal(10 + (oppOvr - myOvr), 4));
-    if (otCount > 5) {
-        myScore > oppScore ? myScore++ : oppScore++;
+    
+    // We use a much smaller standard deviation (2.5) for OT.
+    // This keeps the game tight and prevents 20-point blowouts in a 5-min period.
+    const myOT = Math.round(randomNormal(9 + (myOvr - oppOvr) / 5, 2.5));
+    const oppOT = Math.round(randomNormal(9 + (oppOvr - myOvr) / 5, 2.5));
+    
+    myScore += myOT;
+    oppScore += oppOT;
+
+    // Safety: If still tied after 4 OTs, force a 1-point win to avoid infinite loops
+    if (otCount > 4 && myScore === oppScore) {
+      Math.random() > 0.5 ? myScore++ : oppScore++;
     }
   }
 
   // 1. Simulate Full Team Stats
-  // We pass the target team score so generateBestPlayer can scale contributions
+  // Passes the exact otCount so generateBestPlayer can scale Minutes (MIN) correctly
   const myTeamStats = mySorted.map(p => generateBestPlayer(p, myScore > oppScore, otCount, myScore));
   const oppTeamStats = oppSorted.map(p => generateBestPlayer(p, oppScore > myScore, otCount, oppScore));
 
@@ -70,6 +80,7 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   return {
     myScore,
     oppScore,
+    otCount, // Now returning the specific count (1, 2, 3...)
     myBestPlayer: myTeamStats[0],
     oppBestPlayer: oppTeamStats[0],
     myTeamStats,

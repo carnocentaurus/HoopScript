@@ -100,11 +100,14 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {isFinished && (result?.myScore! > 125 || result?.oppScore! > 125) && (
-          <View style={styles.otBadge}>
-             <Text style={styles.otText}>OVERTIME</Text>
-          </View>
-        )}
+        {/* Replace your old OT Badge logic with this */}
+{isFinished && result && result.otCount > 0 && (
+  <View style={styles.otBadge}>
+    <Text style={styles.otText}>
+      {result.otCount === 1 ? 'OVERTIME' : `${result.otCount}OT`}
+    </Text>
+  </View>
+)}
 
         <View style={styles.scoreBoard}>
           {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
