@@ -49,22 +49,21 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
     ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.overall, 0) / 8
     : 80;
 
-  const myBase = 110 + (myOvr - oppOvr);
-  const oppBase = 110 + (oppOvr - myOvr);
+  const ratingDiff = (myOvr - oppOvr) * 0.3;
+  const myBase = 102 + ratingDiff;
+  const oppBase = 102 - ratingDiff;
 
-  let myScore = Math.round(randomNormal(myBase, 10));
-  let oppScore = Math.round(randomNormal(oppBase, 10));
+  let myScore = Math.round(randomNormal(myBase, 7));
+  let oppScore = Math.round(randomNormal(oppBase, 7));
+
+  myScore = Math.max(80, Math.min(125, myScore));
+  oppScore = Math.max(80, Math.min(125, oppScore));
 
   let otCount = 0;
   while (myScore === oppScore) {
     otCount++;
-    const myOT = Math.round(randomNormal(9 + (myOvr - oppOvr) / 5, 2.5));
-    const oppOT = Math.round(randomNormal(9 + (oppOvr - myOvr) / 5, 2.5));
-    myScore += myOT;
-    oppScore += oppOT;
-    if (otCount > 4 && myScore === oppScore) {
-      Math.random() > 0.5 ? myScore++ : oppScore++;
-    }
+    myScore += Math.round(randomNormal(7, 2));
+    oppScore += Math.round(randomNormal(7, 2));
   }
 
   const teamMargin = myScore - oppScore;
