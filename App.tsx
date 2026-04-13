@@ -14,6 +14,7 @@ import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
 import AwardsScreen from './src/screens/AwardsScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
+import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 
 // Logic & Types
 import { GameSave, SeriesMatchup } from './src/types/save';
@@ -21,7 +22,7 @@ import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards' | 'history';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards' | 'history' | 'myTeamOverview';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -597,11 +598,17 @@ function MainApp() {
           onViewStandings={() => setView('standings')}
           onViewBracket={() => setView('bracket')}
           onViewHistory={() => setView('history')}
+          onViewTeam={() => setView('myTeamOverview')}
           onBackToSaves={() => setView('saveSelection')}
         />
       );
     }
     return <QuickSimScreen save={activeSave} opponent={dynamicOpponent} onFinish={handleGameFinish} onBack={() => setView('home')} />;
+  }
+
+  if (view === 'myTeamOverview' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    return activeSave ? <TeamOverviewScreen save={activeSave} onBack={() => setView('home')} /> : null;
   }
 
   if (view === 'standings' && activeSlot !== null) {

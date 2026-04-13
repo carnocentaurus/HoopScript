@@ -31,6 +31,7 @@ const HomeScreen = ({
   onViewStandings,
   onViewBracket,
   onViewHistory,
+  onViewTeam,
   onBackToSaves
 }: { 
   save: GameSave, 
@@ -41,6 +42,7 @@ const HomeScreen = ({
   onViewStandings: () => void,
   onViewBracket: () => void,
   onViewHistory: () => void,
+  onViewTeam: () => void,
   onBackToSaves: () => void
 }) => {
 
@@ -80,6 +82,10 @@ const HomeScreen = ({
       </View>
 
       <View style={styles.topNav}>
+        <TouchableOpacity style={[styles.standingsBtn, { marginRight: 8 }]} onPress={onViewTeam}>
+          <Text style={styles.standingsBtnText}>TEAM OVERVIEW</Text>
+        </TouchableOpacity>
+
         {(save.playoffs || isEndOfSeason) && (
           <TouchableOpacity style={[styles.standingsBtn, { marginRight: 8 }]} onPress={onViewBracket}>
             <Text style={styles.standingsBtnText}>PLAYOFF BRACKET</Text>
