@@ -146,10 +146,17 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
                 </View>
               </>
             ) : (
-              <BoxScoreTable 
-                teamName={save.city} 
-                stats={result.myTeamStats || []} 
-              />
+              <>
+                <BoxScoreTable 
+                  teamName={save.city} 
+                  stats={result.myTeamStats || []} 
+                />
+                <View style={{ height: 20 }} />
+                <BoxScoreTable 
+                  teamName={opponent.city} 
+                  stats={result.oppTeamStats || []} 
+                />
+              </>
             )}
 
             <View style={styles.buttonRow}>
