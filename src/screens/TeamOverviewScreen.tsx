@@ -25,6 +25,7 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
         </View>
         
         <View style={styles.ratingsRow}>
+          <View style={styles.ratingItem}><Text style={styles.ratingVal}>{player.age}</Text><Text style={styles.ratingLabel}>AGE</Text></View>
           <View style={styles.ratingItem}><Text style={styles.ratingVal}>{player.offense}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
           <View style={styles.ratingItem}><Text style={styles.ratingVal}>{player.defense}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
           <View style={styles.ratingItem}><Text style={[styles.ratingVal, styles.ovrVal]}>{player.overall}</Text><Text style={styles.ratingLabel}>OVR</Text></View>

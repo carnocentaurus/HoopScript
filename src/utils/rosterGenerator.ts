@@ -15,6 +15,34 @@ const seededRandom = (seed: string) => {
 
 const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 
+export const generateRookie = (lastName?: string): Player => {
+  const pos = POSITIONS[Math.floor(Math.random() * 5)];
+  const age = 19;
+  const name = lastName || LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+  
+  const baseOff = Math.floor(Math.random() * 20) + 65;
+  const baseDef = Math.floor(Math.random() * 20) + 65;
+
+  return {
+    id: Math.random().toString(36).substr(2, 9),
+    lastName: name,
+    age,
+    number: Math.floor(Math.random() * 100),
+    position: pos,
+    isStarter: false,
+    offense: baseOff,
+    defense: baseDef,
+    overall: Math.round((baseOff + baseDef) / 2),
+    heightFactor: Math.floor(Math.random() * 100),
+    speedFactor: Math.floor(Math.random() * 100),
+    isRookie: true,
+    stats: {
+      gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, 
+      threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0
+    }
+  };
+};
+
 export const generateRoster = (city: string): Player[] => {
   const roster: Player[] = [];
   const rng = seededRandom(city);
@@ -22,6 +50,7 @@ export const generateRoster = (city: string): Player[] => {
   for (let i = 0; i < 15; i++) {
     const isStarter = i < 5;
     const pos = isStarter ? POSITIONS[i] : POSITIONS[Math.floor(rng() * 5)];
+    const age = Math.floor(rng() * 17) + 19; // 19 to 35
     
     // 1. Determine Archetype Factors based on Position
     let heightBase = 50;
@@ -90,8 +119,9 @@ export const generateRoster = (city: string): Player[] => {
     const nameIndex = Math.floor(rng() * LAST_NAMES.length);
 
     roster.push({
-      id: `${city}-${i}`, // Deterministic ID
+      id: Math.random().toString(36).substr(2, 9),
       lastName: LAST_NAMES[nameIndex],
+      age,
       number: Math.floor(rng() * 100),
       position: pos,
       isStarter,
@@ -100,7 +130,7 @@ export const generateRoster = (city: string): Player[] => {
       overall: Math.round((finalOffense + finalDefense) / 2),
       heightFactor: heightBase,
       speedFactor: speedBase,
-      isRookie: rng() < 0.1,
+      isRookie: age === 19,
       stats
     });
   }

@@ -19,6 +19,7 @@ export interface SeasonStats {
 export interface Player {
   id: string;
   lastName: string;
+  age: number;
   number: number;
   position: string;
   isStarter: boolean;

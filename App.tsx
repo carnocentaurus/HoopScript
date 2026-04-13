@@ -20,7 +20,7 @@ import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
-import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards } from './src/utils/leagueEngine';
+import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards, processAging } from './src/utils/leagueEngine';
 
 type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards' | 'history' | 'myTeamOverview';
 
@@ -473,48 +473,14 @@ function MainApp() {
         ...team,
         wins: 0,
         losses: 0,
-        roster: team.roster.map(p => ({
-          ...p,
-          stats: {
-            gamesPlayed: 0,
-            gamesStarted: 0,
-            pts: 0,
-            reb: 0,
-            ast: 0,
-            stl: 0,
-            blk: 0,
-            tov: 0,
-            threePM: 0,
-            oreb: 0,
-            dreb: 0,
-            plusMinus: 0,
-            fgm: 0,
-            fga: 0,
-            min: 0
-          }
-        }))
+        roster: processAging(team.roster)
       }));
 
-      currentSave.roster = currentSave.roster.map(p => ({
-        ...p,
-        stats: {
-          gamesPlayed: 0,
-          gamesStarted: 0,
-          pts: 0,
-          reb: 0,
-          ast: 0,
-          stl: 0,
-          blk: 0,
-          tov: 0,
-          threePM: 0,
-          oreb: 0,
-          dreb: 0,
-          plusMinus: 0,
-          fgm: 0,
-          fga: 0,
-          min: 0
-        }
-      }));
+      // Update user's roster reference from the new standings
+      const myTeam = currentSave.standings.find(t => t.city === currentSave.city);
+      if (myTeam) {
+        currentSave.roster = myTeam.roster;
+      }
 
       currentSave.schedule = generateSchedule(currentSave.city);
       currentSave.playoffs = null;

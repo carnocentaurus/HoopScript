@@ -1,5 +1,5 @@
 import { Player, SeasonAwards, GameSave, TeamStanding, AwardWinner } from '../types/save';
-import { generateRoster } from './rosterGenerator';
+import { generateRoster, generateRookie } from './rosterGenerator';
 import { PlayerStat } from './gameSim';
 
 export const ALL_CITIES = [
@@ -114,4 +114,52 @@ export const generateSchedule = (userCity: string): string[] => {
   
   // Shuffle the schedule so it's not predictable
   return schedule.sort(() => Math.random() - 0.5);
+};
+
+export const processAging = (roster: Player[]): Player[] => {
+  return roster.map(player => {
+    let newAge = player.age + 1;
+    let newOff = player.offense;
+    let newDef = player.defense;
+
+    // Progression (under 27)
+    if (newAge < 27) {
+      newOff += Math.floor(Math.random() * 4); // 0-3 gain
+      newDef += Math.floor(Math.random() * 4);
+    } 
+    // Prime (27-31) - Small fluctuations
+    else if (newAge >= 27 && newAge <= 31) {
+      newOff += Math.floor(Math.random() * 3) - 1; // -1 to +1
+      newDef += Math.floor(Math.random() * 3) - 1;
+    }
+    // Regression (32+)
+    else {
+      const declineFactor = Math.floor((newAge - 31) / 2) + 1;
+      newOff -= Math.floor(Math.random() * declineFactor) + 1;
+      newDef -= Math.floor(Math.random() * declineFactor) + 1;
+    }
+
+    // Caps
+    newOff = Math.max(40, Math.min(99, newOff));
+    newDef = Math.max(40, Math.min(99, newDef));
+
+    // Retirement (around 40)
+    const retireProb = newAge >= 39 ? 0.4 : (newAge >= 37 ? 0.1 : 0);
+    if (Math.random() < retireProb || newAge > 42) {
+      return generateRookie();
+    }
+
+    return {
+      ...player,
+      age: newAge,
+      offense: newOff,
+      defense: newDef,
+      overall: Math.round((newOff + newDef) / 2),
+      isRookie: false, 
+      stats: { // Reset stats for next season
+        gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, 
+        threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0
+      }
+    };
+  });
 };

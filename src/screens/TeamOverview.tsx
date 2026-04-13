@@ -14,7 +14,10 @@ const TeamOverview = ({ city, onConfirm, onBack }: { city: string, onConfirm: ()
   const renderPlayer = ({ item }: { item: Player }) => (
     <View style={styles.playerRow}>
       <Text style={styles.playerPos}>{item.position}</Text>
-      <Text style={styles.playerName}>{item.lastName}</Text>
+      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={styles.playerName}>{item.lastName}</Text>
+        <Text style={{ fontSize: 11, color: '#888', marginLeft: 8 }}>AGE {item.age}</Text>
+      </View>
       <Text style={styles.playerNum}>#{item.number}</Text>
       <Text style={[styles.playerRate, { color: item.isStarter ? '#2E7D32' : '#757575' }]}>
         {item.overall}
