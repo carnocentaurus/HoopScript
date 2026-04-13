@@ -568,6 +568,7 @@ function MainApp() {
           onViewStandings={() => setView('standings')}
           onViewBracket={() => setView('bracket')}
           onViewHistory={() => setView('history')}
+          onBackToSaves={() => setView('saveSelection')}
         />
       );
     }
