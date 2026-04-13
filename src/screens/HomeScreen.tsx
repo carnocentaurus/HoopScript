@@ -3,24 +3,36 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 
-const TeamMatchupCard = ({ team }: { team: any }) => (
-  <View style={[styles.matchupCard, team.isUser && styles.userCard]}>
-    {team.isUser && (
-      <View style={styles.userBadge}>
-        <Text style={styles.userBadgeText}>YOUR TEAM</Text>
+const TeamMatchupCard = ({ team }: { team: any }) => {
+  const starters = team.roster.filter((p: any) => p.isStarter);
+  const relevant = starters.length > 0 ? starters : team.roster.slice(0, 5);
+  const avg = (key: 'offense' | 'defense' | 'overall') => Math.round(relevant.reduce((sum: number, p: any) => sum + p[key], 0) / relevant.length);
+
+  return (
+    <View style={[styles.matchupCard, team.isUser && styles.userCard]}>
+      {team.isUser && (
+        <View style={styles.userBadge}>
+          <Text style={styles.userBadgeText}>YOUR TEAM</Text>
+        </View>
+      )}
+      <Text style={[styles.matchupLogo, team.isUser ? styles.userLogoText : styles.oppLogoText]}>
+        {team.city.charAt(0)}
+      </Text>
+      <Text style={styles.matchupCity}>{team.city}</Text>
+      <Text style={styles.matchupSub}>{team.rank} | {team.record}</Text>
+      
+      <View style={styles.ratingsContainer}>
+        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('offense')}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
+        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('defense')}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
+        <View style={styles.ratingBox}><Text style={[styles.ratingVal, styles.ovrVal]}>{avg('overall')}</Text><Text style={styles.ratingLabel}>OVR</Text></View>
       </View>
-    )}
-    <Text style={[styles.matchupLogo, team.isUser ? styles.userLogoText : styles.oppLogoText]}>
-      {team.city.charAt(0)}
-    </Text>
-    <Text style={styles.matchupCity}>{team.city}</Text>
-    <Text style={styles.matchupSub}>{team.rank} | {team.record}</Text>
-    
-    <View style={[styles.venueBadge, team.isHome ? styles.homeBadge : styles.awayBadge]}>
-      <Text style={styles.venueText}>{team.isHome ? "HOME" : "AWAY"}</Text>
+
+      <View style={[styles.venueBadge, team.isHome ? styles.homeBadge : styles.awayBadge]}>
+        <Text style={styles.venueText}>{team.isHome ? "HOME" : "AWAY"}</Text>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const HomeScreen = ({ 
   save, 
@@ -238,6 +250,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1,
   },
+  ratingsContainer: { flexDirection: 'row', gap: 15, marginTop: 10 },
+  ratingBox: { alignItems: 'center' },
+  ratingVal: { fontSize: 13, fontWeight: '900', color: '#2D3748' },
+  ovrVal: { color: '#4A90E2' },
+  ratingLabel: { fontSize: 8, color: '#A0AEC0', fontWeight: 'bold' },
+
   // --- EXISTING STYLES ---
   topNav: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 10 },
   standingsBtn: { paddingVertical: 8, paddingHorizontal: 15, backgroundColor: '#FFF', borderRadius: 20, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },

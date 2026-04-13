@@ -101,21 +101,43 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
     </View>
   );
 
-  const UserTeam = () => (
-    <View style={styles.teamSide}>
-      <Text style={styles.logoPlaceholder}>{save.city.charAt(0)}</Text>
-      <Text style={styles.cityName}>{save.city}</Text>
-      <Text style={[styles.score, isFinished && myScore > oppScore && styles.winner]}>{myScore}</Text>
-    </View>
-  );
+  const UserTeam = () => {
+    const starters = save.roster.filter(p => p.isStarter);
+    const relevant = starters.length > 0 ? starters : save.roster.slice(0, 5);
+    const avg = (key: 'offense' | 'defense' | 'overall') => Math.round(relevant.reduce((sum: number, p: any) => sum + p[key], 0) / relevant.length);
 
-  const OpponentTeam = () => (
-    <View style={styles.teamSide}>
-      <Text style={styles.logoPlaceholder}>{opponent.city.charAt(0)}</Text>
-      <Text style={styles.cityName}>{opponent.city}</Text>
-      <Text style={[styles.score, isFinished && oppScore > myScore && styles.winner]}>{oppScore}</Text>
-    </View>
-  );
+    return (
+      <View style={styles.teamSide}>
+        <Text style={styles.logoPlaceholder}>{save.city.charAt(0)}</Text>
+        <Text style={styles.cityName}>{save.city}</Text>
+        <View style={styles.ratingsContainer}>
+          <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('offense')}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
+          <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('defense')}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
+          <View style={styles.ratingBox}><Text style={[styles.ratingVal, styles.ovrVal]}>{avg('overall')}</Text><Text style={styles.ratingLabel}>OVR</Text></View>
+        </View>
+        <Text style={[styles.score, isFinished && myScore > oppScore && styles.winner]}>{myScore}</Text>
+      </View>
+    );
+  };
+
+  const OpponentTeam = () => {
+    const starters = opponent.roster.filter((p: any) => p.isStarter);
+    const relevant = starters.length > 0 ? starters : opponent.roster.slice(0, 5);
+    const avg = (key: 'offense' | 'defense' | 'overall') => Math.round(relevant.reduce((sum: number, p: any) => sum + p[key], 0) / relevant.length);
+
+    return (
+      <View style={styles.teamSide}>
+        <Text style={styles.logoPlaceholder}>{opponent.city.charAt(0)}</Text>
+        <Text style={styles.cityName}>{opponent.city}</Text>
+        <View style={styles.ratingsContainer}>
+          <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('offense')}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
+          <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('defense')}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
+          <View style={styles.ratingBox}><Text style={[styles.ratingVal, styles.ovrVal]}>{avg('overall')}</Text><Text style={styles.ratingLabel}>OVR</Text></View>
+        </View>
+        <Text style={[styles.score, isFinished && oppScore > myScore && styles.winner]}>{oppScore}</Text>
+      </View>
+    );
+  };
 
   return (
     <Screen>
@@ -179,6 +201,12 @@ const styles = StyleSheet.create({
   extraStatsRow: { flexDirection: 'row', gap: 6, marginTop: 2 },
   statValueSmall: { color: '#555', fontSize: 11, fontWeight: '600' },
   
+  ratingsContainer: { flexDirection: 'row', gap: 15, marginTop: 10 },
+  ratingBox: { alignItems: 'center' },
+  ratingVal: { fontSize: 13, fontWeight: '900', color: '#2D3748' },
+  ovrVal: { color: '#4A90E2' },
+  ratingLabel: { fontSize: 8, color: '#A0AEC0', fontWeight: 'bold' },
+
   /* Box Score Styles */
   boxScoreContainer: { backgroundColor: '#111', borderRadius: 12, padding: 15, borderWidth: 1, borderColor: '#222', marginBottom: 10 },
   boxScoreTitle: { color: '#FFF', fontWeight: '900', fontSize: 14, marginBottom: 15, textAlign: 'center', letterSpacing: 1 },
