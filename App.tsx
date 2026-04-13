@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -130,6 +130,30 @@ function MainApp() {
     } catch (e) {
       console.error("Failed to save data", e);
     }
+  };
+
+  const handleDeleteSlot = (slotId: number) => {
+    const updatedSaves = [...saves];
+    const targetSave = updatedSaves[slotId - 1];
+    
+    if (!targetSave) return;
+
+    Alert.alert(
+      "Reset Save",
+      `Are you sure you want to reset SAVE ${slotId} (${targetSave.city})? All progress will be lost.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Reset", 
+          style: "destructive",
+          onPress: () => {
+            updatedSaves[slotId - 1] = null;
+            setSaves(updatedSaves);
+            persistSaves(updatedSaves);
+          }
+        }
+      ]
+    );
   };
 
   const handleSelectSlot = (slotId: number) => {
@@ -499,7 +523,7 @@ function MainApp() {
 
   // --- RENDERING LOGIC ---
   if (view === 'loading') return <LoadingScreen />;
-  if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} />;
+  if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} />;
   
   if (view === 'yearSelection') {
     const years = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 1950 + i).reverse();
