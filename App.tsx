@@ -505,7 +505,12 @@ function MainApp() {
     const years = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 1950 + i).reverse();
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>SELECT STARTING YEAR</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => setView('saveSelection')} style={{ marginRight: 15 }}>
+            <Text style={{ color: '#4A90E2', fontWeight: 'bold' }}>← BACK</Text>
+          </TouchableOpacity>
+          <Text style={[styles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
+        </View>
         <ScrollView style={styles.scrollList}>
           {years.map(year => (
             <TouchableOpacity 
@@ -521,8 +526,8 @@ function MainApp() {
     );
   }
 
-  if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} />;
-  if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} />;
+  if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} onBack={() => setView('yearSelection')} />;
+  if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} onBack={() => setView('teamSelection')} />;
 
   if ((view === 'home' || view === 'quickSim') && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
@@ -572,7 +577,7 @@ function MainApp() {
         />
       );
     }
-    return <QuickSimScreen save={activeSave} opponent={dynamicOpponent} onFinish={handleGameFinish} />;
+    return <QuickSimScreen save={activeSave} opponent={dynamicOpponent} onFinish={handleGameFinish} onBack={() => setView('home')} />;
   }
 
   if (view === 'standings' && activeSlot !== null) {

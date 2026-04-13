@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native
 import { generateRoster, Player } from '../utils/rosterGenerator';
 import Screen from '../components/Screen';
 
-const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void }) => {
+const TeamOverview = ({ city, onConfirm, onBack }: { city: string, onConfirm: () => void, onBack: () => void }) => {
   // Memoize the roster so it doesn't re-randomize on every render
   const roster = useMemo(() => generateRoster(), [city]);
   
@@ -17,7 +17,7 @@ const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void
       <Text style={styles.playerName}>{item.lastName}</Text>
       <Text style={styles.playerNum}>#{item.number}</Text>
       <Text style={[styles.playerRate, { color: item.isStarter ? '#2E7D32' : '#757575' }]}>
-        {item.rating}
+        {item.overall}
       </Text>
     </View>
   );
@@ -25,6 +25,12 @@ const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void
   return (
     <Screen>
       <View style={styles.header}>
+        <View style={styles.topRow}>
+          <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+            <Text style={styles.backBtnText}>← BACK</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1 }} />
+        </View>
         <Text style={styles.cityTitle}>{city.toUpperCase()}</Text>
         <View style={styles.statsRow}>
           <View style={styles.statBox}><Text style={styles.statVal}>{offRating}</Text><Text style={styles.statLabel}>OFF</Text></View>
@@ -49,6 +55,9 @@ const TeamOverview = ({ city, onConfirm }: { city: string, onConfirm: () => void
 
 const styles = StyleSheet.create({
   header: { padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#EEE' },
+  topRow: { flexDirection: 'row', width: '100%', marginBottom: 10 },
+  backBtn: { padding: 5 },
+  backBtnText: { color: '#4A90E2', fontWeight: 'bold', fontSize: 12 },
   cityTitle: { fontSize: 28, fontWeight: '900', letterSpacing: 2 },
   statsRow: { flexDirection: 'row', marginTop: 15, width: '100%', justifyContent: 'space-around' },
   statBox: { alignItems: 'center' },

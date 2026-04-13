@@ -4,7 +4,7 @@ import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 
-const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void }) => {
+const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void, onBack: () => void }) => {
   const [myScore, setMyScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
@@ -109,6 +109,11 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
   return (
     <Screen>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>← BACK</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Replace your old OT Badge logic with this */}
 {isFinished && result && result.otCount > 0 && (
@@ -183,6 +188,9 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
 
 const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 40 },
+  headerRow: { padding: 15, paddingBottom: 0 },
+  backBtn: { padding: 10, width: 60 },
+  backBtnText: { color: '#4A90E2', fontWeight: 'bold', fontSize: 12 },
   scoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   teamSide: { alignItems: 'center', flex: 1 },
   logoPlaceholder: { fontSize: 40, color: '#FFF', fontWeight: '900', backgroundColor: '#222', width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },

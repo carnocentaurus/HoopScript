@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, StyleSheet, Text } from 'react-native';
+import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import TeamCard from '../components/TeamCard';
 import Screen from '../components/Screen';
 
@@ -12,10 +12,16 @@ const TEAMS = [
   "San Diego", "San Francisco", "Toronto", "Utah", "Washington"
 ].sort();
 
-const TeamSelection = ({ onSelectTeam }: { onSelectTeam: (team: string) => void }) => {
+const TeamSelection = ({ onSelectTeam, onBack }: { onSelectTeam: (team: string) => void, onBack: () => void }) => {
   return (
     <Screen>
-      <Text style={styles.header}>Select Your Team</Text>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>← BACK</Text>
+        </TouchableOpacity>
+        <Text style={styles.header}>Select Your Team</Text>
+        <View style={{ width: 60 }} />
+      </View>
       <FlatList
         data={TEAMS}
         numColumns={3}
@@ -39,6 +45,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     marginVertical: 20,
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+  },
+  backBtn: {
+    padding: 10,
+    width: 60,
+  },
+  backBtnText: {
+    color: '#4A90E2',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   listContent: {
     paddingHorizontal: 10,
