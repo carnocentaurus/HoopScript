@@ -60,30 +60,10 @@ export interface SeriesMatchup {
   conference: 'East' | 'West' | 'Finals';
 }
 
-export interface AwardWinner {
-  playerId: string;
-  playerName: string;
-  teamCity: string;
-  value: number; // The stat or score that won it
-}
-
-export interface SeasonAwards {
-  mvp: AwardWinner;
-  dpoy: AwardWinner;
-  roty: AwardWinner;
-  sixMan: AwardWinner;
-  ptsLeader: AwardWinner;
-  rebLeader: AwardWinner;
-  astLeader: AwardWinner;
-  stlLeader: AwardWinner;
-  blkLeader: AwardWinner;
-}
-
 export interface SeasonHistory {
   seasonIndex: number; // e.g., 1, 2, 3...
   year: number;
   champion: string;
-  awards: SeasonAwards;
   userRecord: string; // e.g., "50-32"
   userRank: string;   // e.g., "3rd in West"
 }
@@ -104,7 +84,6 @@ export interface GameSave {
   standings: TeamStanding[];
   playoffs: PlayoffSeries | null;
   playoffBracket: SeriesMatchup[] | null;
-  awards: SeasonAwards | null;
   history: SeasonHistory[];
   startYear: number;
   currentYear: number;

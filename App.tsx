@@ -12,7 +12,6 @@ import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
-import AwardsScreen from './src/screens/AwardsScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 
@@ -20,9 +19,9 @@ import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
-import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, calculateAwards, processAging } from './src/utils/leagueEngine';
+import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, processAging } from './src/utils/leagueEngine';
 
-type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'awards' | 'history' | 'myTeamOverview';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -106,7 +105,6 @@ function MainApp() {
 
   useEffect(() => {
     const loadSaves = async () => {
-      //await AsyncStorage.removeItem('@hoopscript_saves');
       try {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedSaves) setSaves(JSON.parse(storedSaves));
@@ -201,7 +199,6 @@ function MainApp() {
       standings: initialStandingsWithPermanentRosters, 
       playoffs: null,
       playoffBracket: null,
-      awards: null,
       history: [],
       startYear: selectedYear,
       currentYear: selectedYear,
@@ -257,8 +254,6 @@ function MainApp() {
           currentSave.playoffs.myWins = 0;
           currentSave.playoffs.oppWins = 0;
         } else {
-          // If user was not in this round's winners, they should already be isEliminated
-          // but we sync the round just in case
           currentSave.playoffs.round = nextRound;
         }
       } else {
@@ -305,15 +300,11 @@ function MainApp() {
            const won = (mySeries.highSeed === currentSave.city && mySeries.highSeedWins === 4) || (mySeries.lowSeed === currentSave.city && mySeries.lowSeedWins === 4);
            if (!won) {
              currentSave.playoffs.isEliminated = true;
-           } else {
-             // We don't alert here anymore to avoid repeated alerts if round isn't over
-             // The user will see "Series Won" in the UI
            }
         }
         
         checkAndAdvancePlayoffRound(currentSave);
       } else {
-        // --- REALISTIC PAIRED DAILY SIMULATION ---
         const isWin = result.myScore > result.oppScore;
         const opponentCity = currentSave.schedule[currentSave.gamesPlayed];
         currentSave.wins += isWin ? 1 : 0;
@@ -383,9 +374,6 @@ function MainApp() {
         currentSave.gamesPlayed += 1;
 
         if (currentSave.gamesPlayed === 82) {
-          // Calculate Awards
-          currentSave.awards = calculateAwards(currentSave);
-
           const bracket = generateFullBracket(currentSave);
           currentSave.playoffBracket = bracket;
           const userSeries = bracket.find((s: SeriesMatchup) => s.highSeed === currentSave.city || s.lowSeed === currentSave.city);
@@ -448,17 +436,14 @@ function MainApp() {
         ? (finalRound.highSeedWins === 4 ? finalRound.highSeed : finalRound.lowSeed)
         : "N/A";
 
-      if (currentSave.awards) {
-        if (!currentSave.history) currentSave.history = [];
-        currentSave.history.push({
-          seasonIndex: currentSave.seasonCount,
-          year: currentSave.currentYear,
-          champion: champ,
-          awards: currentSave.awards,
-          userRecord: `${currentSave.wins}-${currentSave.losses}`,
-          userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
-        });
-      }
+      if (!currentSave.history) currentSave.history = [];
+      currentSave.history.push({
+        seasonIndex: currentSave.seasonCount,
+        year: currentSave.currentYear,
+        champion: champ,
+        userRecord: `${currentSave.wins}-${currentSave.losses}`,
+        userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
+      });
 
       // 2. Reset for Next Season
       currentSave.wins = 0;
@@ -485,7 +470,6 @@ function MainApp() {
       currentSave.schedule = generateSchedule(currentSave.city);
       currentSave.playoffs = null;
       currentSave.playoffBracket = null;
-      currentSave.awards = null;
 
       setSaves(updatedSaves);
       persistSaves(updatedSaves);
@@ -595,14 +579,8 @@ function MainApp() {
         onSimDay={handleSimulateLeagueDay} 
         onBack={() => setView('home')} 
         onStartNewSeason={handleStartNewSeason}
-        onViewAwards={() => setView('awards')}
       />
     );
-  }
-
-  if (view === 'awards' && activeSlot !== null) {
-    const activeSave = saves[activeSlot - 1];
-    return activeSave ? <AwardsScreen save={activeSave} onBack={() => setView('bracket')} /> : null;
   }
 
   if (view === 'history' && activeSlot !== null) {

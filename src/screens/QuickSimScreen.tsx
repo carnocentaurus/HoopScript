@@ -125,14 +125,13 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Replace your old OT Badge logic with this */}
-{isFinished && result && result.otCount > 0 && (
-  <View style={styles.otBadge}>
-    <Text style={styles.otText}>
-      {result.otCount === 1 ? 'OVERTIME' : `${result.otCount}OT`}
-    </Text>
-  </View>
-)}
+        {isFinished && result && result.otCount > 0 && (
+          <View style={styles.otBadge}>
+            <Text style={styles.otText}>
+              {result.otCount === 1 ? 'OVERTIME' : `${result.otCount}OT`}
+            </Text>
+          </View>
+        )}
 
         <View style={styles.scoreBoard}>
           {opponent.isHome ? <UserTeam /> : <OpponentTeam />}
@@ -142,53 +141,9 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
         {isFinished && result && (
           <View style={styles.postGame}>
-            
-            {!showBoxScore ? (
-              <>
-                <Text style={styles.sectionTitle}>PLAYERS OF THE GAME</Text>
-                <View style={styles.bestPlayersRow}>
-                  {opponent.isHome ? (
-                      <>
-                        <PlayerStats player={result.myBestPlayer} />
-                        <PlayerStats player={result.oppBestPlayer} />
-                      </>
-                  ) : (
-                      <>
-                        <PlayerStats player={result.oppBestPlayer} />
-                        <PlayerStats player={result.myBestPlayer} />
-                      </>
-                  )}
-                </View>
-              </>
-            ) : (
-              <>
-                <BoxScoreTable 
-                  teamName={save.city} 
-                  stats={result.myTeamStats || []} 
-                />
-                <View style={{ height: 20 }} />
-                <BoxScoreTable 
-                  teamName={opponent.city} 
-                  stats={result.oppTeamStats || []} 
-                />
-              </>
-            )}
-
-            <View style={styles.buttonRow}>
-              <TouchableOpacity 
-                style={styles.secondaryButton} 
-                onPress={() => setShowBoxScore(!showBoxScore)}
-              >
-                <Text style={styles.secondaryText}>
-                  {showBoxScore ? "HIDE BOX SCORE" : "FULL BOX SCORE"}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.continueButton} onPress={() => onFinish(result)}>
-                <Text style={styles.continueText}>CONTINUE</Text>
-              </TouchableOpacity>
-            </View>
-
+            <TouchableOpacity style={styles.continueButton} onPress={() => onFinish(result)}>
+              <Text style={styles.continueText}>CONTINUE</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>

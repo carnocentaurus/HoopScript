@@ -9,10 +9,9 @@ interface PlayoffProps {
   onSimDay: () => void;
   onBack: () => void;
   onStartNewSeason: () => void;
-  onViewAwards: () => void;
 }
 
-const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onViewAwards }: PlayoffProps) => {
+const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: PlayoffProps) => {
   const currentRound = save.playoffs?.round || 1;
   const roundMatchups = save.playoffBracket?.filter(s => s.round === currentRound) || [];
   
@@ -74,7 +73,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
         <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
-        <TouchableOpacity onPress={onViewAwards}><Text style={styles.awardsText}>AWARDS</Text></TouchableOpacity>
+        <View style={{ width: 60 }} />
       </View>
 
       <ScrollView style={styles.content}>
@@ -110,7 +109,6 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
   backText: { fontWeight: 'bold', color: '#4A90E2' },
-  awardsText: { fontWeight: 'bold', color: '#C41E3A' },
   title: { fontSize: 18, fontWeight: '900', color: '#2D3748' },
   content: { padding: 16 },
   conferenceSection: { marginBottom: 20 },

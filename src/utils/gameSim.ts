@@ -119,24 +119,24 @@ export const generatePlayerStats = (
   const ftm = Math.floor(Math.random() * (pts * 0.2));
   const remainingPts = pts - ftm;
   
-  const threePointFreq = player.position.includes('G') ? 0.4 : 0.05;
+  const threePointFreq = (player.position && player.position.includes('G')) ? 0.4 : 0.05;
   const threePM = Math.floor((remainingPts / 2.5) * threePointFreq);
   const estTwoPM = Math.floor((remainingPts - (threePM * 3)) / 2);
   
   const fgm = estTwoPM + threePM;
   const fga = Math.max(fgm + 1, Math.round(fgm / actualFG) + Math.floor(Math.random() * 3));
 
-  const rebRate = (Math.sqrt(hFactor) / 35) + (player.position === 'C' ? 0.1 : 0.02);
+  const rebRate = (Math.sqrt(hFactor) / 35) + ((player.position === 'C') ? 0.1 : 0.02);
   const reb = Math.floor(min * rebRate + (Math.random() * 2));
   const oreb = Math.floor(reb * (0.2 + (Math.random() * 0.1)));
   const dreb = reb - oreb;
 
-  const astRate = (Math.sqrt(sFactor) / 45) + (player.position === 'PG' ? 0.12 : 0.01);
+  const astRate = (Math.sqrt(sFactor) / 45) + ((player.position === 'PG') ? 0.12 : 0.01);
   const ast = Math.floor(min * astRate + (Math.random() * 2));
 
   // --- NEW STATS: STL, BLK, TOV ---
   // Steals: Speed and Defense driven. Guards get more.
-  const posStlMod = (player.position.includes('G')) ? 0.045 : 0.025;
+  const posStlMod = (player.position && player.position.includes('G')) ? 0.045 : 0.025;
   const stlRate = posStlMod * (sFactor / 100) * (defRating / 75);
   const stl = Math.floor(min * stlRate + (Math.random() * 1.5));
 
