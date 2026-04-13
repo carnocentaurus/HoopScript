@@ -487,6 +487,10 @@ function MainApp() {
             stl: 0,
             blk: 0,
             tov: 0,
+            threePM: 0,
+            oreb: 0,
+            dreb: 0,
+            plusMinus: 0,
             fgm: 0,
             fga: 0,
             min: 0
@@ -505,6 +509,10 @@ function MainApp() {
           stl: 0,
           blk: 0,
           tov: 0,
+          threePM: 0,
+          oreb: 0,
+          dreb: 0,
+          plusMinus: 0,
           fgm: 0,
           fga: 0,
           min: 0

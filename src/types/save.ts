@@ -7,6 +7,10 @@ export interface SeasonStats {
   stl: number;
   blk: number;
   tov: number;
+  threePM: number;
+  oreb: number;
+  dreb: number;
+  plusMinus: number;
   fgm: number;
   fga: number;
   min: number;

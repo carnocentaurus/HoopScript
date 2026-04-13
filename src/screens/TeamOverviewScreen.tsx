@@ -15,7 +15,7 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
   const championships = save.history?.filter(h => h.champion === save.city).length || 0;
 
   const renderPlayerRow = (player: Player) => {
-    const avg = (val: number) => (val / Math.max(1, player.stats.gamesPlayed)).toFixed(1);
+    const avg = (val: number) => ((val || 0) / Math.max(1, player.stats.gamesPlayed)).toFixed(1);
 
     return (
       <View style={styles.playerCard}>
@@ -34,11 +34,20 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsScroll}>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.pts)}</Text><Text style={styles.statLabel}>PTS</Text></View>
+          <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.threePM)}</Text><Text style={styles.statLabel}>3PM</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.reb)}</Text><Text style={styles.statLabel}>REB</Text></View>
+          <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.oreb)}</Text><Text style={styles.statLabel}>OREB</Text></View>
+          <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.dreb)}</Text><Text style={styles.statLabel}>DREB</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.ast)}</Text><Text style={styles.statLabel}>AST</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.stl)}</Text><Text style={styles.statLabel}>STL</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.blk)}</Text><Text style={styles.statLabel}>BLK</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.tov)}</Text><Text style={styles.statLabel}>TOV</Text></View>
+          <View style={styles.statItem}>
+            <Text style={[styles.statVal, player.stats.plusMinus > 0 ? {color: '#4CAF50'} : player.stats.plusMinus < 0 ? {color: '#E53E3E'} : {}]}>
+              {player.stats.plusMinus > 0 ? `+${avg(player.stats.plusMinus)}` : avg(player.stats.plusMinus)}
+            </Text>
+            <Text style={styles.statLabel}>+/-</Text>
+          </View>
           <View style={styles.statItem}><Text style={styles.statVal}>{avg(player.stats.min)}</Text><Text style={styles.statLabel}>MIN</Text></View>
           <View style={styles.statItem}><Text style={styles.statVal}>{player.stats.gamesPlayed}</Text><Text style={styles.statLabel}>GP</Text></View>
         </ScrollView>

@@ -15,17 +15,21 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
   return {
     ...player,
     stats: {
-      gamesPlayed: player.stats.gamesPlayed + 1,
-      gamesStarted: player.stats.gamesStarted + (player.isStarter ? 1 : 0),
-      pts: player.stats.pts + stats.pts,
-      reb: player.stats.reb + stats.reb,
-      ast: player.stats.ast + stats.ast,
-      stl: player.stats.stl + stats.stl,
-      blk: player.stats.blk + stats.blk,
-      tov: player.stats.tov + stats.tov,
-      fgm: player.stats.fgm + stats.fgm,
-      fga: player.stats.fga + stats.fga,
-      min: player.stats.min + stats.min,
+      gamesPlayed: (player.stats.gamesPlayed || 0) + 1,
+      gamesStarted: (player.stats.gamesStarted || 0) + (player.isStarter ? 1 : 0),
+      pts: (player.stats.pts || 0) + stats.pts,
+      reb: (player.stats.reb || 0) + stats.reb,
+      ast: (player.stats.ast || 0) + stats.ast,
+      stl: (player.stats.stl || 0) + stats.stl,
+      blk: (player.stats.blk || 0) + stats.blk,
+      tov: (player.stats.tov || 0) + stats.tov,
+      threePM: (player.stats.threePM || 0) + stats.threePM,
+      oreb: (player.stats.oreb || 0) + stats.oreb,
+      dreb: (player.stats.dreb || 0) + stats.dreb,
+      plusMinus: (player.stats.plusMinus || 0) + stats.plusMinus,
+      fgm: (player.stats.fgm || 0) + stats.fgm,
+      fga: (player.stats.fga || 0) + stats.fga,
+      min: (player.stats.min || 0) + stats.min,
     }
   };
 };
@@ -39,7 +43,7 @@ export const calculateAwards = (save: GameSave): SeasonAwards => {
     });
   });
 
-  const getAvg = (p: Player, key: keyof typeof p.stats) => p.stats.gamesPlayed > 0 ? (p.stats[key] as number) / p.stats.gamesPlayed : 0;
+  const getAvg = (p: Player, key: keyof typeof p.stats) => p.stats.gamesPlayed > 0 ? ((p.stats[key] || 0) as number) / p.stats.gamesPlayed : 0;
 
   // MVP Logic: Combined score (PTS+REB+AST+STL+BLK - TOV) weighted by team wins
   const mvp = allPlayers.sort((a, b) => {

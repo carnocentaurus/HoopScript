@@ -69,6 +69,10 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
             <Text style={styles.cellSmall}>STL</Text>
             <Text style={styles.cellSmall}>BLK</Text>
             <Text style={styles.cellSmall}>TOV</Text>
+            <Text style={styles.cellSmall}>3PM</Text>
+            <Text style={styles.cellSmall}>OR</Text>
+            <Text style={styles.cellSmall}>DR</Text>
+            <Text style={styles.cellSmall}>+/-</Text>
             <Text style={styles.cell}>FG</Text>
           </View>
           {stats.map((p, i) => (
@@ -83,6 +87,12 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
               <Text style={styles.cellSmall}>{p.stl}</Text>
               <Text style={styles.cellSmall}>{p.blk}</Text>
               <Text style={styles.cellSmall}>{p.tov}</Text>
+              <Text style={styles.cellSmall}>{p.threePM}</Text>
+              <Text style={styles.cellSmall}>{p.oreb}</Text>
+              <Text style={styles.cellSmall}>{p.dreb}</Text>
+              <Text style={[styles.cellSmall, p.plusMinus > 0 ? {color: '#4CAF50'} : p.plusMinus < 0 ? {color: '#E53E3E'} : {}]}>
+                {p.plusMinus > 0 ? `+${p.plusMinus}` : p.plusMinus}
+              </Text>
               <Text style={styles.cell}>{p.fgm}/{p.fga}</Text>
             </View>
           ))}

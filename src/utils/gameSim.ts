@@ -22,6 +22,10 @@ export interface PlayerStat {
   stl: number;
   blk: number;
   tov: number;
+  threePM: number;
+  oreb: number;
+  dreb: number;
+  plusMinus: number;
   fgm: number;
   fga: number;
   overall: number;
@@ -63,8 +67,10 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
     }
   }
 
-  const myTeamStats = mySorted.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore));
-  const oppTeamStats = oppSorted.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore));
+  const teamMargin = myScore - oppScore;
+
+  const myTeamStats = mySorted.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
+  const oppTeamStats = oppSorted.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
 
   myTeamStats.sort((a, b) => b.pts - a.pts);
   oppTeamStats.sort((a, b) => b.pts - a.pts);
@@ -84,7 +90,8 @@ export const generatePlayerStats = (
   player: Player, 
   isWinner: boolean, 
   otCount: number, 
-  teamScore: number = 100
+  teamScore: number = 100,
+  teamMargin: number = 0
 ): PlayerStat => {
   const hFactor = player.heightFactor ?? 50;
   const sFactor = player.speedFactor ?? 50;
@@ -113,14 +120,16 @@ export const generatePlayerStats = (
   const remainingPts = pts - ftm;
   
   const threePointFreq = player.position.includes('G') ? 0.4 : 0.05;
-  const estThreePM = Math.floor((remainingPts / 2.5) * threePointFreq);
-  const estTwoPM = Math.floor((remainingPts - (estThreePM * 3)) / 2);
+  const threePM = Math.floor((remainingPts / 2.5) * threePointFreq);
+  const estTwoPM = Math.floor((remainingPts - (threePM * 3)) / 2);
   
-  const fgm = estTwoPM + estThreePM;
+  const fgm = estTwoPM + threePM;
   const fga = Math.max(fgm + 1, Math.round(fgm / actualFG) + Math.floor(Math.random() * 3));
 
   const rebRate = (Math.sqrt(hFactor) / 35) + (player.position === 'C' ? 0.1 : 0.02);
   const reb = Math.floor(min * rebRate + (Math.random() * 2));
+  const oreb = Math.floor(reb * (0.2 + (Math.random() * 0.1)));
+  const dreb = reb - oreb;
 
   const astRate = (Math.sqrt(sFactor) / 45) + (player.position === 'PG' ? 0.12 : 0.01);
   const ast = Math.floor(min * astRate + (Math.random() * 2));
@@ -143,6 +152,9 @@ export const generatePlayerStats = (
   const tovRate = posTovMod * (1.5 - (offRating / 100)); // Better players have slightly lower TO rate per usage
   const tov = Math.max(0, Math.floor(min * tovRate * (1 + usageMod) + (Math.random() * 1.2)));
 
+  // Plus Minus: Simplified based on team margin and player minutes
+  const plusMinus = Math.round(teamMargin * (min / (48 + otCount * 5)) + (Math.random() * 4 - 2));
+
   return {
     playerId: player.id,
     lastName: player.lastName,
@@ -150,12 +162,16 @@ export const generatePlayerStats = (
     position: player.position,
     overall: player.overall ?? 75,
     min,
-    pts: (estTwoPM * 2) + (estThreePM * 3) + ftm,
+    pts: (estTwoPM * 2) + (threePM * 3) + ftm,
     reb,
     ast,
     stl,
     blk,
     tov,
+    threePM,
+    oreb,
+    dreb,
+    plusMinus,
     fgm,
     fga,
   };
