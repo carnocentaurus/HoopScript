@@ -22,6 +22,7 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
       ast: player.stats.ast + stats.ast,
       stl: player.stats.stl + stats.stl,
       blk: player.stats.blk + stats.blk,
+      tov: player.stats.tov + stats.tov,
       fgm: player.stats.fgm + stats.fgm,
       fga: player.stats.fga + stats.fga,
       min: player.stats.min + stats.min,
@@ -40,10 +41,10 @@ export const calculateAwards = (save: GameSave): SeasonAwards => {
 
   const getAvg = (p: Player, key: keyof typeof p.stats) => p.stats.gamesPlayed > 0 ? (p.stats[key] as number) / p.stats.gamesPlayed : 0;
 
-  // MVP Logic: Combined score (PTS+REB+AST+STL+BLK) weighted by team wins
+  // MVP Logic: Combined score (PTS+REB+AST+STL+BLK - TOV) weighted by team wins
   const mvp = allPlayers.sort((a, b) => {
-    const scoreA = (getAvg(a.player, 'pts') + getAvg(a.player, 'reb') + getAvg(a.player, 'ast') + getAvg(a.player, 'stl') + getAvg(a.player, 'blk')) * (1 + a.teamWins / 82);
-    const scoreB = (getAvg(b.player, 'pts') + getAvg(b.player, 'reb') + getAvg(b.player, 'ast') + getAvg(b.player, 'stl') + getAvg(b.player, 'blk')) * (1 + b.teamWins / 82);
+    const scoreA = (getAvg(a.player, 'pts') + getAvg(a.player, 'reb') + getAvg(a.player, 'ast') + getAvg(a.player, 'stl') + getAvg(a.player, 'blk') - getAvg(a.player, 'tov')) * (1 + a.teamWins / 82);
+    const scoreB = (getAvg(b.player, 'pts') + getAvg(b.player, 'reb') + getAvg(b.player, 'ast') + getAvg(b.player, 'stl') + getAvg(b.player, 'blk') - getAvg(b.player, 'tov')) * (1 + b.teamWins / 82);
     return scoreB - scoreA;
   })[0];
 

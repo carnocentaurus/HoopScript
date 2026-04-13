@@ -461,6 +461,7 @@ function MainApp() {
             ast: 0,
             stl: 0,
             blk: 0,
+            tov: 0,
             fgm: 0,
             fga: 0,
             min: 0
@@ -478,6 +479,7 @@ function MainApp() {
           ast: 0,
           stl: 0,
           blk: 0,
+          tov: 0,
           fgm: 0,
           fga: 0,
           min: 0

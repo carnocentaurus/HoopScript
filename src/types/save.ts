@@ -6,6 +6,7 @@ export interface SeasonStats {
   ast: number;
   stl: number;
   blk: number;
+  tov: number;
   fgm: number;
   fga: number;
   min: number;

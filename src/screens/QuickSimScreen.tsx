@@ -58,26 +58,36 @@ const QuickSimScreen = ({ save, opponent, onFinish }: { save: GameSave, opponent
   const BoxScoreTable = ({ teamName, stats }: { teamName: string, stats: any[] }) => (
     <View style={styles.boxScoreContainer}>
       <Text style={styles.boxScoreTitle}>{teamName} BOX SCORE</Text>
-      <View style={styles.tableHeader}>
-        <Text style={[styles.cell, styles.cellName]}>PLAYER</Text>
-        <Text style={styles.cell}>MIN</Text>
-        <Text style={styles.cell}>PTS</Text>
-        <Text style={styles.cell}>REB</Text>
-        <Text style={styles.cell}>AST</Text>
-        <Text style={styles.cell}>FG</Text>
-      </View>
-      {stats.map((p, i) => (
-        <View key={i} style={styles.tableRow}>
-          <Text style={[styles.cell, styles.cellName]} numberOfLines={1}>
-            {p.position} {p.lastName}
-          </Text>
-          <Text style={styles.cell}>{p.min}</Text>
-          <Text style={[styles.cell, styles.cellHighlight]}>{p.pts}</Text>
-          <Text style={styles.cell}>{p.reb}</Text>
-          <Text style={styles.cell}>{p.ast}</Text>
-          <Text style={styles.cell}>{p.fgm}/{p.fga}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.cell, styles.cellName]}>PLAYER</Text>
+            <Text style={styles.cellSmall}>MIN</Text>
+            <Text style={styles.cellSmall}>PTS</Text>
+            <Text style={styles.cellSmall}>REB</Text>
+            <Text style={styles.cellSmall}>AST</Text>
+            <Text style={styles.cellSmall}>STL</Text>
+            <Text style={styles.cellSmall}>BLK</Text>
+            <Text style={styles.cellSmall}>TOV</Text>
+            <Text style={styles.cell}>FG</Text>
+          </View>
+          {stats.map((p, i) => (
+            <View key={i} style={styles.tableRow}>
+              <Text style={[styles.cell, styles.cellName]} numberOfLines={1}>
+                {p.position} {p.lastName}
+              </Text>
+              <Text style={styles.cellSmall}>{p.min}</Text>
+              <Text style={[styles.cellSmall, styles.cellHighlight]}>{p.pts}</Text>
+              <Text style={styles.cellSmall}>{p.reb}</Text>
+              <Text style={styles.cellSmall}>{p.ast}</Text>
+              <Text style={styles.cellSmall}>{p.stl}</Text>
+              <Text style={styles.cellSmall}>{p.blk}</Text>
+              <Text style={styles.cellSmall}>{p.tov}</Text>
+              <Text style={styles.cell}>{p.fgm}/{p.fga}</Text>
+            </View>
+          ))}
         </View>
-      ))}
+      </ScrollView>
     </View>
   );
 
@@ -186,14 +196,17 @@ const styles = StyleSheet.create({
   verticalStats: { gap: 2 },
   statValue: { color: '#777', fontSize: 13, fontWeight: '600' },
   statValueMain: { color: '#FFF', fontSize: 15, fontWeight: '900', marginVertical: 2 },
+  extraStatsRow: { flexDirection: 'row', gap: 6, marginTop: 2 },
+  statValueSmall: { color: '#555', fontSize: 11, fontWeight: '600' },
   
   /* Box Score Styles */
   boxScoreContainer: { backgroundColor: '#111', borderRadius: 12, padding: 15, borderWidth: 1, borderColor: '#222', marginBottom: 10 },
   boxScoreTitle: { color: '#FFF', fontWeight: '900', fontSize: 14, marginBottom: 15, textAlign: 'center', letterSpacing: 1 },
   tableHeader: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#333', paddingBottom: 8, marginBottom: 8 },
   tableRow: { flexDirection: 'row', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#222' },
-  cell: { flex: 1, color: '#888', fontSize: 11, textAlign: 'center', fontWeight: '600' },
-  cellName: { flex: 2.5, textAlign: 'left', color: '#CCC' },
+  cell: { width: 60, color: '#888', fontSize: 11, textAlign: 'center', fontWeight: '600' },
+  cellSmall: { width: 45, color: '#888', fontSize: 11, textAlign: 'center', fontWeight: '600' },
+  cellName: { width: 120, textAlign: 'left', color: '#CCC' },
   cellHighlight: { color: '#FFF', fontWeight: '900' },
 
   buttonRow: { flexDirection: 'column', gap: 10, marginTop: 20 },

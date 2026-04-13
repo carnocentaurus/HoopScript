@@ -21,6 +21,7 @@ export interface PlayerStat {
   ast: number;
   stl: number;
   blk: number;
+  tov: number;
   fgm: number;
   fga: number;
   overall: number;
@@ -88,6 +89,7 @@ export const generatePlayerStats = (
   const hFactor = player.heightFactor ?? 50;
   const sFactor = player.speedFactor ?? 50;
   const offRating = player.offense ?? 75;
+  const defRating = player.defense ?? 75;
 
   const isStarter = player.isStarter;
   const minutesBudget = isStarter 
@@ -123,6 +125,24 @@ export const generatePlayerStats = (
   const astRate = (Math.sqrt(sFactor) / 45) + (player.position === 'PG' ? 0.12 : 0.01);
   const ast = Math.floor(min * astRate + (Math.random() * 2));
 
+  // --- NEW STATS: STL, BLK, TOV ---
+  // Steals: Speed and Defense driven. Guards get more.
+  const posStlMod = (player.position.includes('G')) ? 0.045 : 0.025;
+  const stlRate = posStlMod * (sFactor / 100) * (defRating / 75);
+  const stl = Math.floor(min * stlRate + (Math.random() * 1.5));
+
+  // Blocks: Height and Defense driven. Bigs get more.
+  const posBlkMod = (player.position === 'C' || player.position === 'PF') ? 0.06 : 0.015;
+  const blkRate = posBlkMod * (hFactor / 100) * (defRating / 75);
+  const blk = Math.floor(min * blkRate + (Math.random() * 1.5));
+
+  // Turnovers: Speed and Offense driven (high usage = more TOs). 
+  // Ball handlers (PG) have higher base TO rate.
+  const posTovMod = (player.position === 'PG') ? 0.08 : 0.05;
+  const usageMod = (offRating / 75) * (pts / 20); // More points/usage usually means more TOs
+  const tovRate = posTovMod * (1.5 - (offRating / 100)); // Better players have slightly lower TO rate per usage
+  const tov = Math.max(0, Math.floor(min * tovRate * (1 + usageMod) + (Math.random() * 1.2)));
+
   return {
     playerId: player.id,
     lastName: player.lastName,
@@ -133,8 +153,9 @@ export const generatePlayerStats = (
     pts: (estTwoPM * 2) + (estThreePM * 3) + ftm,
     reb,
     ast,
-    stl: Math.floor((min * 0.03) * (sFactor / 100) + (Math.random() * 1.5)),
-    blk: Math.floor((min * 0.03) * (hFactor / 100) + (Math.random() * 1.5)),
+    stl,
+    blk,
+    tov,
     fgm,
     fga,
   };
