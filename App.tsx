@@ -180,10 +180,7 @@ function MainApp() {
     if (!tempCity || activeSlot === null) return;
 
     // Generate rosters for ALL teams once. These are permanent to this save.
-    const initialStandingsWithPermanentRosters = generateInitialStandings().map(team => ({
-      ...team,
-      roster: generateRoster() 
-    }));
+    const initialStandingsWithPermanentRosters = generateInitialStandings();
 
     // Find the roster for the user's team
     const userTeamData = initialStandingsWithPermanentRosters.find(t => t.city === tempCity);

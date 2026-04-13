@@ -5,7 +5,7 @@ import Screen from '../components/Screen';
 
 const TeamOverview = ({ city, onConfirm, onBack }: { city: string, onConfirm: () => void, onBack: () => void }) => {
   // Memoize the roster so it doesn't re-randomize on every render
-  const roster = useMemo(() => generateRoster(), [city]);
+  const roster = useMemo(() => generateRoster(city), [city]);
   
   const offRating = Math.floor(Math.random() * 20) + 75;
   const defRating = Math.floor(Math.random() * 20) + 75;

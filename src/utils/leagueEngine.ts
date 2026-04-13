@@ -99,7 +99,7 @@ export const generateInitialStandings = (): TeamStanding[] => {
     conf: (index < 15 ? 'East' : 'West') as 'East' | 'West', // <--- CAST THIS HERE
     wins: 0,
     losses: 0,
-    roster: generateRoster(),
+    roster: generateRoster(city),
   }));
 };
 
