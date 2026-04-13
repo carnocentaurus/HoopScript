@@ -27,6 +27,7 @@ const HomeScreen = ({
   userTeam, 
   opponent, 
   onQuickSim, 
+  onSimDay,
   onViewStandings,
   onViewBracket,
   onViewHistory
@@ -35,6 +36,7 @@ const HomeScreen = ({
   userTeam: any, 
   opponent: any, 
   onQuickSim: () => void,
+  onSimDay: () => void,
   onViewStandings: () => void,
   onViewBracket: () => void,
   onViewHistory: () => void
@@ -43,6 +45,7 @@ const HomeScreen = ({
   const isEndOfSeason = save.gamesPlayed === 82; // Adjust field name to match your state if needed
   const isEliminated = save.playoffs?.isEliminated;
   const isChampion = save.playoffs?.isChampion;
+  const isSeriesCompleted = save.playoffs && (save.playoffs.myWins === 4 || save.playoffs.oppWins === 4);
   
   const missedPlayoffs = isEndOfSeason && !save.playoffs;
 
@@ -124,12 +127,14 @@ const HomeScreen = ({
             <View style={styles.progressSection}>
               {save.playoffs ? (
                 <View style={styles.seriesScoreContainer}>
-                  <Text style={styles.seriesLabel}>BEST OF SEVEN SERIES</Text>
+                  <Text style={styles.seriesLabel}>
+                    {isSeriesCompleted ? "SERIES WON - WAITING FOR NEXT ROUND" : "BEST OF SEVEN SERIES"}
+                  </Text>
                   <Text style={styles.seriesScoreText}>
                     {save.playoffs.myWins} — {save.playoffs.oppWins}
                   </Text>
                   <Text style={styles.seriesSubText}>
-                    FIRST TO 4 WINS ADVANCES
+                    {isSeriesCompleted ? "OTHER MATCHUPS IN PROGRESS" : "FIRST TO 4 WINS ADVANCES"}
                   </Text>
                 </View>
               ) : (
@@ -158,12 +163,14 @@ const HomeScreen = ({
           styles.simButton, 
           (isEliminated || isChampion || missedPlayoffs) && { backgroundColor: '#4A90E2' }
         ]} 
-        onPress={ (isEliminated || isChampion || missedPlayoffs) ? onViewBracket : onQuickSim}
+        onPress={ (isEliminated || isChampion || missedPlayoffs) ? onViewBracket : (isSeriesCompleted ? onSimDay : onQuickSim)}
       >
         <Text style={styles.simButtonText}>
           {isEliminated || isChampion || missedPlayoffs 
             ? "VIEW PLAYOFF FINISH" 
-            : save.playoffs ? "SIMULATE PLAYOFF GAME" : "SIMULATE NEXT GAME"}
+            : save.playoffs 
+              ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
+              : "SIMULATE NEXT GAME"}
         </Text>
       </TouchableOpacity>
     </Screen>

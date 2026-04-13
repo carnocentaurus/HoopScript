@@ -67,6 +67,8 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
     );
   };
 
+  const isSeriesCompleted = save.playoffs && (save.playoffs.myWins === 4 || save.playoffs.oppWins === 4);
+
   return (
     <Screen>
       <View style={styles.header}>
@@ -95,7 +97,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
           <Text style={styles.simDayBtnText}>START NEW SEASON</Text>
         </TouchableOpacity>
       ) : (
-        save.playoffs?.isEliminated && (
+        (save.playoffs?.isEliminated || isSeriesCompleted) && (
           <TouchableOpacity style={styles.simDayBtn} onPress={onSimDay}>
             <Text style={styles.simDayBtnText}>SIMULATE DAY</Text>
           </TouchableOpacity>

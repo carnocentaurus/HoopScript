@@ -193,6 +193,61 @@ function MainApp() {
     setView('home');
   };
 
+  const checkAndAdvancePlayoffRound = (currentSave: GameSave) => {
+    if (!currentSave.playoffs || !currentSave.playoffBracket) return;
+    
+    const currentRound = currentSave.playoffs.round;
+    const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
+    const allFinished = roundSeries.every(s => s.isCompleted);
+
+    if (allFinished) {
+      if (currentRound < 4) {
+        const nextRound = currentRound + 1;
+        const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
+        const nextMatches: SeriesMatchup[] = [];
+        
+        for (let i = 0; i < winners.length; i += 2) {
+          const teamA = winners[i];
+          const teamB = winners[i + 1];
+          const rankA = parseInt(calculateRank(teamA, currentSave.standings));
+          const rankB = parseInt(calculateRank(teamB, currentSave.standings));
+          
+          const isAFinishedHigh = rankA < rankB;
+
+          nextMatches.push({
+            id: `R${nextRound}-${i}`,
+            round: nextRound,
+            highSeed: isAFinishedHigh ? teamA : teamB,
+            lowSeed: isAFinishedHigh ? teamB : teamA,
+            highSeedWins: 0,
+            lowSeedWins: 0,
+            isCompleted: false,
+            conference: currentRound === 3 ? 'Finals' : roundSeries[i].conference,
+          });
+        }
+        currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
+        
+        // Update User Playoff State for next round
+        const userSeries = nextMatches.find(s => s.highSeed === currentSave.city || s.lowSeed === currentSave.city);
+        if (userSeries) {
+          currentSave.playoffs.round = nextRound;
+          currentSave.playoffs.opponentCity = userSeries.highSeed === currentSave.city ? userSeries.lowSeed : userSeries.highSeed;
+          currentSave.playoffs.myWins = 0;
+          currentSave.playoffs.oppWins = 0;
+        } else {
+          // If user was not in this round's winners, they should already be isEliminated
+          // but we sync the round just in case
+          currentSave.playoffs.round = nextRound;
+        }
+      } else {
+        const lastSeries = roundSeries[0];
+        const champion = lastSeries.highSeedWins === 4 ? lastSeries.highSeed : lastSeries.lowSeed;
+        currentSave.playoffs.isChampion = (champion === currentSave.city);
+        alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+      }
+    }
+  };
+
   const handleGameFinish = (result: GameResult) => {
     if (activeSlot === null) return;
     const updatedSaves = [...saves];
@@ -201,11 +256,11 @@ function MainApp() {
     if (currentSave) {
       if (currentSave.playoffs) {
         const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
-          s.highSeed === currentSave.city || s.lowSeed === currentSave.city
+          (s.highSeed === currentSave.city || s.lowSeed === currentSave.city) && s.round === currentSave.playoffs!.round
         )?.id;
 
         currentSave.playoffBracket = currentSave.playoffBracket?.map((series: SeriesMatchup) => {
-          if (series.isCompleted) return series;
+          if (series.isCompleted || series.round !== currentSave.playoffs!.round) return series;
           
           const highSeedWinProb = getHighSeedWinProb(series.highSeed, series.lowSeed, currentSave.standings);
           let highWon = Math.random() < highSeedWinProb;
@@ -229,9 +284,12 @@ function MainApp() {
            if (!won) {
              currentSave.playoffs.isEliminated = true;
            } else {
-             alert("Series Won!");
+             // We don't alert here anymore to avoid repeated alerts if round isn't over
+             // The user will see "Series Won" in the UI
            }
         }
+        
+        checkAndAdvancePlayoffRound(currentSave);
       } else {
         // --- REALISTIC PAIRED DAILY SIMULATION ---
         const isWin = result.myScore > result.oppScore;
@@ -335,22 +393,6 @@ function MainApp() {
 
     const currentRound = currentSave.playoffs?.round || 1;
 
-    const getTeamStrength = (city: string) => {
-      const teamData = currentSave.standings.find(t => t.city === city);
-      
-      if (!teamData || !teamData.roster || teamData.roster.length === 0) {
-        return 75; 
-      }
-
-      const starters = teamData.roster.filter((p: any) => p.isStarter);
-      const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
-
-      const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
-      const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
-      
-      return (off + def) / 2;
-    };
-
     currentSave.playoffBracket = currentSave.playoffBracket.map((series: SeriesMatchup) => {
       if (series.round !== currentRound || series.isCompleted) return series;
 
@@ -366,45 +408,7 @@ function MainApp() {
       return series;
     });
 
-    const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
-    const allFinished = roundSeries.every(s => s.isCompleted);
-
-    if (allFinished) {
-      if (currentRound < 4) {
-        const nextRound = currentRound + 1;
-        const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
-        const nextMatches: SeriesMatchup[] = [];
-        
-        for (let i = 0; i < winners.length; i += 2) {
-          const teamA = winners[i];
-          const teamB = winners[i + 1];
-          const rankA = parseInt(calculateRank(teamA, currentSave.standings));
-          const rankB = parseInt(calculateRank(teamB, currentSave.standings));
-          
-          const isAFinishedHigh = rankA < rankB;
-
-          nextMatches.push({
-            id: `R${nextRound}-${i}`,
-            round: nextRound,
-            highSeed: isAFinishedHigh ? teamA : teamB,
-            lowSeed: isAFinishedHigh ? teamB : teamA,
-            highSeedWins: 0,
-            lowSeedWins: 0,
-            isCompleted: false,
-            conference: roundSeries[i].conference,
-          });
-        }
-        currentSave.playoffBracket = [...currentSave.playoffBracket, ...nextMatches];
-        if (currentSave.playoffs) currentSave.playoffs.round = nextRound;
-      } else {
-        const champion =
-          roundSeries[0].highSeedWins === 4 ? roundSeries[0].highSeed : roundSeries[0].lowSeed;
-        if (currentSave.playoffs) {
-          currentSave.playoffs.isChampion = champion === currentSave.city;
-          alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
-        }
-      }
-    }
+    checkAndAdvancePlayoffRound(currentSave);
 
     setSaves(updatedSaves);
     persistSaves(updatedSaves);
@@ -558,6 +562,7 @@ function MainApp() {
           userTeam={dynamicUserTeam} 
           opponent={dynamicOpponent} 
           onQuickSim={() => setView('quickSim')} 
+          onSimDay={handleSimulateLeagueDay}
           onViewStandings={() => setView('standings')}
           onViewBracket={() => setView('bracket')}
           onViewHistory={() => setView('history')}
