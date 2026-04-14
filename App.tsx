@@ -540,7 +540,20 @@ function MainApp() {
       : (activeSave.schedule[activeSave.gamesPlayed] || "Free Agent");
 
     const oppData = activeSave.standings?.find((t: any) => t.city === nextOpponentCity);
-    const isHomeGame = activeSave.playoffs ? (activeSave.playoffs.myWins + activeSave.playoffs.oppWins) % 2 === 0 : activeSave.gamesPlayed % 2 === 0;
+    
+    let isHomeGame = activeSave.gamesPlayed % 2 === 0;
+    
+    if (activeSave.playoffs) {
+      const gameIndex = activeSave.playoffs.myWins + activeSave.playoffs.oppWins;
+      const isHighSeedHome = [true, true, false, false, true, false, true][gameIndex];
+      
+      const currentSeries = activeSave.playoffBracket?.find((s: SeriesMatchup) => 
+        (s.highSeed === activeSave.city || s.lowSeed === activeSave.city) && s.round === activeSave.playoffs!.round
+      );
+      const isUserHighSeed = currentSeries?.highSeed === activeSave.city;
+      
+      isHomeGame = isUserHighSeed ? isHighSeedHome : !isHighSeedHome;
+    }
 
     const dynamicOpponent = {
       city: nextOpponentCity,
