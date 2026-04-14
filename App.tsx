@@ -100,6 +100,7 @@ function MainApp() {
   const [saves, setSaves] = useState<(GameSave | null)[]>([null, null, null]);
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [tempCity, setTempCity] = useState<string | null>(null);
+  const [selectedTeamCity, setSelectedTeamCity] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(2024);
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
@@ -574,7 +575,10 @@ function MainApp() {
           onViewStandings={() => setView('standings')}
           onViewBracket={() => setView('bracket')}
           onViewHistory={() => setView('history')}
-          onViewTeam={() => setView('myTeamOverview')}
+          onViewTeam={() => {
+            setSelectedTeamCity(activeSave.city);
+            setView('myTeamOverview');
+          }}
           onBackToSaves={() => setView('saveSelection')}
         />
       );
@@ -584,12 +588,32 @@ function MainApp() {
 
   if (view === 'myTeamOverview' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
-    return activeSave ? <TeamOverviewScreen save={activeSave} onBack={() => setView('home')} /> : null;
+    if (!activeSave || !selectedTeamCity) return null;
+
+    const teamData = activeSave.standings.find(t => t.city === selectedTeamCity) || { city: activeSave.city, roster: activeSave.roster };
+
+    return (
+      <TeamOverviewScreen 
+        city={teamData.city} 
+        roster={teamData.roster} 
+        history={activeSave.history}
+        onBack={() => setView(selectedTeamCity === activeSave.city ? 'home' : 'standings')} 
+      />
+    );
   }
 
   if (view === 'standings' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
-    return activeSave ? <StandingsScreen save={activeSave} onBack={() => setView('home')} /> : null;
+    return activeSave ? (
+      <StandingsScreen 
+        save={activeSave} 
+        onBack={() => setView('home')} 
+        onViewTeam={(city) => {
+          setSelectedTeamCity(city);
+          setView('myTeamOverview');
+        }}
+      />
+    ) : null;
   }
 
   if (view === 'bracket' && activeSlot !== null) {

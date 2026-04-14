@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { GameSave, LeagueTeam } from '../types/save';
+import { GameSave, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
 
-const StandingsScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
+interface StandingsProps {
+  save: GameSave;
+  onBack: () => void;
+  onViewTeam: (city: string) => void;
+}
+
+const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
   const [activeConf, setActiveConf] = useState<'East' | 'West'>(save.conference);
 
   const filteredTeams = save.standings
     .filter(t => t.conf === activeConf)
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
 
-  const renderTeam = ({ item, index }: { item: LeagueTeam, index: number }) => (
-    <View style={[styles.teamRow, item.city === save.city && styles.userRow]}>
+  const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => (
+    <TouchableOpacity 
+      style={[styles.teamRow, item.city === save.city && styles.userRow]}
+      onPress={() => onViewTeam(item.city)}
+    >
       <Text style={styles.rankText}>{index + 1}</Text>
       <Text style={styles.cityName}>{item.city}</Text>
       <View style={styles.recordCols}>
         <Text style={styles.recordText}>{item.wins}</Text>
         <Text style={styles.recordText}>{item.losses}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

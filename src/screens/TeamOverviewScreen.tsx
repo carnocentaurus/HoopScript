@@ -1,23 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { GameSave, Player } from '../types/save';
+import { Player, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 
 interface TeamOverviewScreenProps {
-  save: GameSave;
+  city: string;
+  roster: Player[];
+  history?: SeasonHistory[];
   onBack: () => void;
 }
 
-const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
-  const starters = save.roster.filter(p => p.isStarter);
-  const bench = save.roster.filter(p => !p.isStarter);
-  const ratings = calculateTeamRatings(save.roster);
+const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
+  const starters = roster.filter(p => p.isStarter);
+  const ratings = calculateTeamRatings(roster);
 
-  const championships = save.history?.filter(h => h.champion === save.city).length || 0;
+  const championships = history?.filter(h => h.champion === city).length || 0;
 
   const renderPlayerRow = (player: Player) => (
-    <View style={styles.playerCard}>
+    <View style={styles.playerCard} key={player.id}>
       <View style={styles.playerHeader}>
         <Text style={styles.playerMain}>{player.lastName} <Text style={styles.playerNum}>#{player.number}</Text></Text>
         <Text style={styles.playerPos}>{player.position}</Text>
@@ -38,7 +39,7 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
           <Text style={styles.backBtnText}>← BACK</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>TEAM OVERVIEW</Text>
+        <Text style={styles.title}>{city.toUpperCase()}</Text>
         <View style={{ width: 60 }} />
       </View>
 
@@ -56,7 +57,7 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
         </View>
 
         <Text style={styles.sectionHeader}>STARTERS</Text>
-        {starters.map(p => <View key={p.id}>{renderPlayerRow(p)}</View>)}
+        {starters.map(p => renderPlayerRow(p))}
         
         <View style={{ height: 40 }} />
       </ScrollView>
