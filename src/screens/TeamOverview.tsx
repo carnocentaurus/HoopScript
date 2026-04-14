@@ -42,7 +42,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
       </View>
 
       <FlatList
-        data={roster}
+        data={roster.filter(p => p.isStarter)}
         keyExtractor={(item, index) => item.id || index.toString()}
         renderItem={({ item }) => (
           <View style={styles.playerCard}>

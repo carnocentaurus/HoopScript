@@ -57,9 +57,6 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
 
         <Text style={styles.sectionHeader}>STARTERS</Text>
         {starters.map(p => <View key={p.id}>{renderPlayerRow(p)}</View>)}
-
-        <Text style={[styles.sectionHeader, { marginTop: 20 }]}>BENCH</Text>
-        {bench.map(p => <View key={p.id}>{renderPlayerRow(p)}</View>)}
         
         <View style={{ height: 40 }} />
       </ScrollView>
