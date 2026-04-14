@@ -34,6 +34,20 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
   };
 };
 
+export const calculateTeamRatings = (roster: Player[]) => {
+  const starters = roster.filter(p => p.isStarter);
+  const relevant = starters.length > 0 ? starters : roster.slice(0, 5);
+  
+  const avg = (key: 'offense' | 'defense' | 'overall') => 
+    Math.round(relevant.reduce((sum, p) => sum + p[key], 0) / relevant.length);
+
+  return {
+    offense: avg('offense'),
+    defense: avg('defense'),
+    overall: avg('overall')
+  };
+};
+
 export const generateInitialStandings = (): TeamStanding[] => {
   return ALL_CITIES.map((city, index) => ({
     city,

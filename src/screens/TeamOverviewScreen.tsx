@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { GameSave, Player } from '../types/save';
 import Screen from '../components/Screen';
+import { calculateTeamRatings } from '../utils/leagueEngine';
 
 interface TeamOverviewScreenProps {
   save: GameSave;
@@ -11,6 +12,7 @@ interface TeamOverviewScreenProps {
 const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
   const starters = save.roster.filter(p => p.isStarter);
   const bench = save.roster.filter(p => !p.isStarter);
+  const ratings = calculateTeamRatings(save.roster);
 
   const championships = save.history?.filter(h => h.champion === save.city).length || 0;
 
@@ -47,6 +49,12 @@ const TeamOverviewScreen = ({ save, onBack }: TeamOverviewScreenProps) => {
           <Text style={styles.trophyLabel}>CHAMPIONSHIPS</Text>
         </View>
 
+        <View style={styles.teamRatingsRow}>
+          <View style={styles.teamRatingBox}><Text style={styles.teamRatingVal}>{ratings.offense}</Text><Text style={styles.teamRatingLabel}>OFF</Text></View>
+          <View style={styles.teamRatingBox}><Text style={styles.teamRatingVal}>{ratings.defense}</Text><Text style={styles.teamRatingLabel}>DEF</Text></View>
+          <View style={styles.teamRatingBox}><Text style={[styles.teamRatingVal, styles.teamOvrVal]}>{ratings.overall}</Text><Text style={styles.teamRatingLabel}>OVR</Text></View>
+        </View>
+
         <Text style={styles.sectionHeader}>STARTERS</Text>
         {starters.map(p => <View key={p.id}>{renderPlayerRow(p)}</View>)}
 
@@ -70,6 +78,12 @@ const styles = StyleSheet.create({
   trophyIcon: { fontSize: 32 },
   trophyCount: { color: '#FFF', fontSize: 24, fontWeight: '900', marginTop: 5 },
   trophyLabel: { color: '#A0AEC0', fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+
+  teamRatingsRow: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginBottom: 25, backgroundColor: '#F7FAFC', padding: 15, borderRadius: 12 },
+  teamRatingBox: { alignItems: 'center' },
+  teamRatingVal: { fontSize: 22, fontWeight: '900', color: '#2D3748' },
+  teamOvrVal: { color: '#4A90E2' },
+  teamRatingLabel: { fontSize: 9, color: '#718096', fontWeight: '800', marginTop: 2 },
 
   sectionHeader: { color: '#2D3748', fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 10, marginLeft: 5 },
   

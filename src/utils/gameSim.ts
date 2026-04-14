@@ -40,13 +40,15 @@ export const randomNormal = (mean: number, stdDev: number): number => {
 };
 
 export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
-  const mySorted = [...myTeam.roster].sort((a, b) => b.overall - a.overall);
-  const oppRoster = opponent.roster || [];
-  const oppSorted = [...oppRoster].sort((a: any, b: any) => b.overall - a.overall);
+  const myStarters = myTeam.roster.filter(p => p.isStarter);
+  const myRelevant = myStarters.length > 0 ? myStarters : myTeam.roster.slice(0, 5);
+  const myOvr = myRelevant.reduce((sum, p) => sum + p.overall, 0) / myRelevant.length;
 
-  const myOvr = mySorted.slice(0, 8).reduce((sum, p) => sum + p.overall, 0) / 8;
-  const oppOvr = oppSorted.length > 0
-    ? oppSorted.slice(0, 8).reduce((sum: number, p: any) => sum + p.overall, 0) / 8
+  const oppRoster = opponent.roster || [];
+  const oppStarters = oppRoster.filter((p: any) => p.isStarter);
+  const oppRelevant = oppStarters.length > 0 ? oppStarters : (oppRoster.length > 0 ? oppRoster.slice(0, 5) : []);
+  const oppOvr = oppRelevant.length > 0
+    ? oppRelevant.reduce((sum: number, p: any) => sum + p.overall, 0) / oppRelevant.length
     : 80;
 
   const ratingDiff = (myOvr - oppOvr) * 0.3;
@@ -68,20 +70,33 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
 
   const teamMargin = myScore - oppScore;
 
-  const myTeamStats = mySorted.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
-  const oppTeamStats = oppSorted.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
+  const myTeamStats = myRelevant.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
+  const oppTeamStats = oppRelevant.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
 
-  myTeamStats.sort((a, b) => b.pts - a.pts);
-  oppTeamStats.sort((a, b) => b.pts - a.pts);
+  // Also include bench players in stats generation for a full box score
+  const myBench = myTeam.roster.filter(p => !myRelevant.includes(p));
+  const oppBench = oppRoster.filter((p: any) => !oppRelevant.includes(p));
+
+  const myFullStats = [
+    ...myTeamStats,
+    ...myBench.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin))
+  ];
+  const oppFullStats = [
+    ...oppTeamStats,
+    ...oppBench.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin))
+  ];
+
+  myFullStats.sort((a, b) => b.pts - a.pts);
+  oppFullStats.sort((a, b) => b.pts - a.pts);
 
   return {
     myScore,
     oppScore,
     otCount,
-    myBestPlayer: myTeamStats[0],
-    oppBestPlayer: oppTeamStats[0],
-    myTeamStats,
-    oppTeamStats
+    myBestPlayer: myFullStats[0],
+    oppBestPlayer: oppFullStats[0],
+    myTeamStats: myFullStats,
+    oppTeamStats: oppFullStats
   };
 };
 

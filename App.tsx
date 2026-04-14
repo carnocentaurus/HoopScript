@@ -20,6 +20,7 @@ import { GameSave, SeriesMatchup } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, processAging } from './src/utils/leagueEngine';
+import { TEAM_ROSTERS } from './src/data/rosters';
 
 type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview';
 
@@ -507,7 +508,27 @@ function MainApp() {
   }
 
   if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} onBack={() => setView('yearSelection')} />;
-  if (view === 'teamOverview' && tempCity) return <TeamOverview city={tempCity} onConfirm={handleConfirmTeam} onBack={() => setView('teamSelection')} />;
+  if (view === 'teamOverview' && tempCity) {
+    const rawRoster = TEAM_ROSTERS[tempCity] || [];
+    const mappedRoster = rawRoster.map((p, index) => ({
+      id: `initial-${index}`,
+      lastName: p.name,
+      offense: p.off,
+      defense: p.def,
+      overall: Math.round((p.off + p.def) / 2),
+      isStarter: index < 5,
+      position: ["PG", "SG", "SF", "PF", "C"][index] || "BN"
+    }));
+
+    return (
+      <TeamOverview 
+        city={tempCity} 
+        roster={mappedRoster} 
+        onConfirm={handleConfirmTeam} 
+        onBack={() => setView('teamSelection')} 
+      />
+    );
+  }
 
   if ((view === 'home' || view === 'quickSim') && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];

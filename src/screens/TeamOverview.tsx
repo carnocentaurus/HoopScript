@@ -1,79 +1,140 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { generateRoster, Player } from '../utils/rosterGenerator';
 import Screen from '../components/Screen';
+import { calculateTeamRatings } from '../utils/leagueEngine';
 
-const TeamOverview = ({ city, onConfirm, onBack }: { city: string, onConfirm: () => void, onBack: () => void }) => {
-  // Memoize the roster so it doesn't re-randomize on every render
-  const roster = useMemo(() => generateRoster(city), [city]);
-  
-  const offRating = Math.floor(Math.random() * 20) + 75;
-  const defRating = Math.floor(Math.random() * 20) + 75;
-  const overall = Math.floor((offRating + defRating) / 2);
+interface SimplePlayer {
+  id?: string;
+  lastName: string;
+  position?: string;
+  offense: number;
+  defense: number;
+  overall: number;
+}
 
-  const renderPlayer = ({ item }: { item: Player }) => (
-    <View style={styles.playerRow}>
-      <Text style={styles.playerPos}>{item.position}</Text>
-      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={styles.playerName}>{item.lastName}</Text>
-        <Text style={{ fontSize: 11, color: '#888', marginLeft: 8 }}>AGE {item.age}</Text>
-      </View>
-      <Text style={styles.playerNum}>#{item.number}</Text>
-      <Text style={[styles.playerRate, { color: item.isStarter ? '#2E7D32' : '#757575' }]}>
-        {item.overall}
-      </Text>
-    </View>
-  );
+interface TeamOverviewProps {
+  city: string;
+  roster: SimplePlayer[];
+  onBack: () => void;
+  onConfirm?: () => void;
+}
+
+const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) => {
+  // Map simple roster to what calculateTeamRatings expects if needed, 
+  // though calculateTeamRatings currently expects Player[] from types/save.
+  // We'll cast for now as the fields we need are there.
+  const ratings = calculateTeamRatings(roster as any);
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View style={styles.topRow}>
-          <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-            <Text style={styles.backBtnText}>← BACK</Text>
-          </TouchableOpacity>
-          <View style={{ flex: 1 }} />
-        </View>
-        <Text style={styles.cityTitle}>{city.toUpperCase()}</Text>
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}><Text style={styles.statVal}>{offRating}</Text><Text style={styles.statLabel}>OFF</Text></View>
-          <View style={styles.statBox}><Text style={styles.statVal}>{defRating}</Text><Text style={styles.statLabel}>DEF</Text></View>
-          <View style={styles.statBox}><Text style={styles.statVal}>{overall}</Text><Text style={styles.statLabel}>OVR</Text></View>
-        </View>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>← BACK</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerText}>{city} Roster</Text>
+        <View style={{ width: 60 }} />
+      </View>
+
+      <View style={styles.teamStatsRow}>
+          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.offense}</Text><Text style={styles.statLabel}>OFF</Text></View>
+          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.defense}</Text><Text style={styles.statLabel}>DEF</Text></View>
+          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.overall}</Text><Text style={styles.statLabel}>OVR</Text></View>
       </View>
 
       <FlatList
         data={roster}
-        keyExtractor={(item) => item.id}
-        renderItem={renderPlayer}
-        ListHeaderComponent={<Text style={styles.sectionHeader}>TEAM ROSTER</Text>}
+        keyExtractor={(item, index) => item.id || index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.playerCard}>
+            <Text style={styles.playerPos}>{item.position || '?'}</Text>
+            <Text style={styles.playerName}>{item.lastName}</Text>
+            <Text style={styles.playerOvr}>
+              {item.overall}
+            </Text>
+          </View>
+        )}
       />
 
-      <TouchableOpacity style={styles.confirmButton} onPress={onConfirm}>
-        <Text style={styles.confirmText}>CONFIRM TEAM</Text>
-      </TouchableOpacity>
+      {onConfirm && (
+        <TouchableOpacity style={styles.confirmBtn} onPress={onConfirm}>
+          <Text style={styles.confirmBtnText}>CHOOSE THIS TEAM</Text>
+        </TouchableOpacity>
+      )}
     </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  header: { padding: 20, alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#EEE' },
-  topRow: { flexDirection: 'row', width: '100%', marginBottom: 10 },
-  backBtn: { padding: 5 },
-  backBtnText: { color: '#4A90E2', fontWeight: 'bold', fontSize: 12 },
-  cityTitle: { fontSize: 28, fontWeight: '900', letterSpacing: 2 },
-  statsRow: { flexDirection: 'row', marginTop: 15, width: '100%', justifyContent: 'space-around' },
-  statBox: { alignItems: 'center' },
-  statVal: { fontSize: 22, fontWeight: 'bold' },
-  statLabel: { fontSize: 10, color: '#666' },
-  sectionHeader: { padding: 15, backgroundColor: '#F8F8F8', fontWeight: 'bold', fontSize: 12, color: '#888' },
-  playerRow: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, borderBottomColor: '#F0F0F0', alignItems: 'center' },
-  playerPos: { width: 30, fontWeight: 'bold', color: '#444' },
-  playerName: { flex: 1, fontSize: 16 },
-  playerNum: { width: 40, color: '#999' },
-  playerRate: { width: 30, fontWeight: 'bold', textAlign: 'right' },
-  confirmButton: { backgroundColor: '#000', margin: 20, padding: 18, borderRadius: 8, alignItems: 'center' },
-  confirmText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    marginVertical: 15,
+  },
+  backBtn: {
+    padding: 10,
+    width: 60,
+  },
+  backBtnText: {
+    color: '#4A90E2',
+    fontWeight: 'bold',
+    fontSize: 12,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+  },
+  teamStatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 30,
+    marginBottom: 20,
+  },
+  statBox: {
+    alignItems: 'center',
+  },
+  statVal: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 10,
+    color: '#666',
+  },
+  playerCard: {
+    flexDirection: 'row',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+    alignItems: 'center',
+  },
+  playerPos: {
+    width: 40,
+    fontWeight: 'bold',
+    color: '#666',
+  },
+  playerName: {
+    flex: 1,
+    fontSize: 16,
+  },
+  playerOvr: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  confirmBtn: {
+    backgroundColor: '#4A90E2',
+    margin: 20,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  confirmBtnText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
 
 export default TeamOverview;

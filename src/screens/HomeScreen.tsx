@@ -2,11 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
+import { calculateTeamRatings } from '../utils/leagueEngine';
 
 const TeamMatchupCard = ({ team }: { team: any }) => {
-  const starters = team.roster.filter((p: any) => p.isStarter);
-  const relevant = starters.length > 0 ? starters : team.roster.slice(0, 5);
-  const avg = (key: 'offense' | 'defense' | 'overall') => Math.round(relevant.reduce((sum: number, p: any) => sum + p[key], 0) / relevant.length);
+  const ratings = calculateTeamRatings(team.roster);
 
   return (
     <View style={[styles.matchupCard, team.isUser && styles.userCard]}>
@@ -22,9 +21,9 @@ const TeamMatchupCard = ({ team }: { team: any }) => {
       <Text style={styles.matchupSub}>{team.rank} | {team.record}</Text>
       
       <View style={styles.ratingsContainer}>
-        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('offense')}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
-        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{avg('defense')}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
-        <View style={styles.ratingBox}><Text style={[styles.ratingVal, styles.ovrVal]}>{avg('overall')}</Text><Text style={styles.ratingLabel}>OVR</Text></View>
+        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{ratings.offense}</Text><Text style={styles.ratingLabel}>OFF</Text></View>
+        <View style={styles.ratingBox}><Text style={styles.ratingVal}>{ratings.defense}</Text><Text style={styles.ratingLabel}>DEF</Text></View>
+        <View style={styles.ratingBox}><Text style={[styles.ratingVal, styles.ovrVal]}>{ratings.overall}</Text><Text style={styles.ratingLabel}>OVR</Text></View>
       </View>
 
       <View style={[styles.venueBadge, team.isHome ? styles.homeBadge : styles.awayBadge]}>
