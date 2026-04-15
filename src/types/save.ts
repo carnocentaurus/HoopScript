@@ -64,6 +64,8 @@ export interface SeasonHistory {
   seasonIndex: number; // e.g., 1, 2, 3...
   year: number;
   champion: string;
+  championRecord: string;
+  championRank: string;
   userRecord: string; // e.g., "50-32"
   userRank: string;   // e.g., "3rd in West"
 }

@@ -7,10 +7,17 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
   <View style={styles.historyCard}>
     <View style={styles.cardHeader}>
       <Text style={styles.yearText}>S{item.seasonIndex} - {item.year}</Text>
-      <Text style={styles.champText}>🏆 {item.champion.toUpperCase()}</Text>
+      <View style={styles.champRow}>
+        <Text style={styles.champText}>🏆 {item.champion.toUpperCase()}</Text>
+        <View style={styles.champStats}>
+          <Text style={styles.champStatText}>{item.championRecord}</Text>
+          <Text style={styles.champStatText}>{item.championRank}</Text>
+        </View>
+      </View>
     </View>
 
     <View style={styles.userSummary}>
+      <Text style={styles.userLabel}>YOUR TEAM:</Text>
       <Text style={styles.userStat}>{item.userRecord}</Text>
       <Text style={styles.userStat}>{item.userRank}</Text>
     </View>
@@ -53,9 +60,13 @@ const styles = StyleSheet.create({
   historyCard: { backgroundColor: '#111', borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: '#222' },
   cardHeader: { flexDirection: 'column' },
   yearText: { color: '#C41E3A', fontSize: 12, fontWeight: '900', letterSpacing: 1 },
-  champText: { color: '#FFF', fontSize: 20, fontWeight: '900', marginTop: 4 },
+  champRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  champText: { color: '#FFF', fontSize: 20, fontWeight: '900', flex: 1 },
+  champStats: { alignItems: 'flex-end' },
+  champStatText: { color: '#4A90E2', fontSize: 10, fontWeight: '900' },
   
-  userSummary: { flexDirection: 'row', gap: 15, marginTop: 12, borderTopWidth: 1, borderTopColor: '#222', paddingTop: 12 },
+  userSummary: { flexDirection: 'row', gap: 10, marginTop: 12, borderTopWidth: 1, borderTopColor: '#222', paddingTop: 12, alignItems: 'center' },
+  userLabel: { color: '#444', fontSize: 10, fontWeight: '900', letterSpacing: 1 },
   userStat: { color: '#888', fontSize: 13, fontWeight: 'bold' },
 
   emptyContainer: { padding: 40, alignItems: 'center' },

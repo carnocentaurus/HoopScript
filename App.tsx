@@ -439,11 +439,15 @@ function MainApp() {
         ? (finalRound.highSeedWins === 4 ? finalRound.highSeed : finalRound.lowSeed)
         : "N/A";
 
+      const champData = currentSave.standings.find(t => t.city === champ);
+
       if (!currentSave.history) currentSave.history = [];
       currentSave.history.push({
         seasonIndex: currentSave.seasonCount,
         year: currentSave.currentYear,
         champion: champ,
+        championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
+        championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
         userRecord: `${currentSave.wins}-${currentSave.losses}`,
         userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
       });
