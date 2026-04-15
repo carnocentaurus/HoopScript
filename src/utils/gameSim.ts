@@ -48,7 +48,7 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   const oppRatings = calculateTeamRatings(oppRoster);
   const oppOvr = oppRatings.overall;
 
-  const ratingDiff = (myOvr - oppOvr) * 0.3;
+  const ratingDiff = (myOvr - oppOvr) * 0.6;
   const myBase = 102 + ratingDiff;
   const oppBase = 102 - ratingDiff;
 
