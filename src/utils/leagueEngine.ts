@@ -64,13 +64,20 @@ export const calculateTeamRatings = (roster: Player[]) => {
 };
 
 export const generateInitialStandings = (): TeamStanding[] => {
-  return ALL_CITIES.map((city, index) => ({
-    city,
-    conf: (index < 15 ? 'East' : 'West') as 'East' | 'West', 
-    wins: 0,
-    losses: 0,
-    roster: generateRoster(city),
-  }));
+  return ALL_CITIES.map((city, index) => {
+    const roster = generateRoster(city).map(player => ({
+      ...player,
+      isRookie: false
+    }));
+
+    return {
+      city,
+      conf: (index < 15 ? 'East' : 'West') as 'East' | 'West', 
+      wins: 0,
+      losses: 0,
+      roster,
+    };
+  });
 };
 
 export const generateSchedule = (userCity: string): { opponents: string[], homeStatuses: boolean[] } => {
