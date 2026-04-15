@@ -185,6 +185,7 @@ function MainApp() {
 
     // Find the roster for the user's team
     const userTeamData = initialStandingsWithPermanentRosters.find(t => t.city === tempCity);
+    const { opponents, homeStatuses } = generateSchedule(tempCity);
 
     const newSave: GameSave = {
       id: Date.now().toString(),
@@ -198,7 +199,8 @@ function MainApp() {
       rank: 15,
       conference: (ALL_CITIES.indexOf(tempCity) < 15 ? 'East' : 'West'),
       roster: userTeamData?.roster || [], 
-      schedule: generateSchedule(tempCity),
+      schedule: opponents,
+      scheduleHomeStatus: homeStatuses,
       standings: initialStandingsWithPermanentRosters, 
       playoffs: null,
       playoffBracket: null,
@@ -536,7 +538,9 @@ function MainApp() {
         currentSave.roster = myTeam.roster;
       }
 
-      currentSave.schedule = generateSchedule(currentSave.city);
+      const { opponents, homeStatuses } = generateSchedule(currentSave.city);
+      currentSave.schedule = opponents;
+      currentSave.scheduleHomeStatus = homeStatuses;
       currentSave.playoffs = null;
       currentSave.playoffBracket = null;
       currentSave.draftState = null;
@@ -619,7 +623,7 @@ function MainApp() {
 
     const oppData = activeSave.standings?.find((t: any) => t.city === nextOpponentCity);
     
-    let isHomeGame = activeSave.gamesPlayed % 2 === 0;
+    let isHomeGame = activeSave.scheduleHomeStatus[activeSave.gamesPlayed];
     
     if (activeSave.playoffs) {
       const gameIndex = activeSave.playoffs.myWins + activeSave.playoffs.oppWins;

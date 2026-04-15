@@ -73,15 +73,62 @@ export const generateInitialStandings = (): TeamStanding[] => {
   }));
 };
 
-export const generateSchedule = (userCity: string): string[] => {
-  const opponents = ALL_CITIES.filter(city => city !== userCity);
-  let schedule: string[] = [];
+export const generateSchedule = (userCity: string): { opponents: string[], homeStatuses: boolean[] } => {
+  const userIndex = ALL_CITIES.indexOf(userCity);
+  const isEast = userIndex < 15;
   
-  for (let i = 0; i < 82; i++) {
-    schedule.push(opponents[i % opponents.length]);
+  const conferenceOpponents = ALL_CITIES.filter((city, idx) => {
+    const cityIsEast = idx < 15;
+    return city !== userCity && cityIsEast === isEast;
+  });
+
+  const nonConferenceOpponents = ALL_CITIES.filter((city, idx) => {
+    const cityIsEast = idx < 15;
+    return cityIsEast !== isEast;
+  });
+
+  let opponents: string[] = [];
+
+  // NBA-ish distribution: 
+  // ~52 games against conference (approx 3-4 times each)
+  // ~30 games against non-conference (2 times each)
+  
+  // 1. Add Conference Games (4 times vs each)
+  conferenceOpponents.forEach(opp => {
+    for (let i = 0; i < 4; i++) opponents.push(opp);
+  });
+
+  // 2. Add Non-Conference Games (2 times vs each)
+  nonConferenceOpponents.forEach(opp => {
+    for (let i = 0; i < 2; i++) opponents.push(opp);
+  });
+
+  // 3. Truncate/Pad to exactly 82 games
+  if (opponents.length > 82) {
+    opponents = opponents.slice(0, 82);
+  } else {
+    while (opponents.length < 82) {
+      const extra = ALL_CITIES[Math.floor(Math.random() * ALL_CITIES.length)];
+      if (extra !== userCity) opponents.push(extra);
+    }
   }
-  
-  return schedule.sort(() => Math.random() - 0.5);
+
+  // 4. Create 41 Home and 41 Away statuses
+  let homeStatuses: boolean[] = [
+    ...Array(41).fill(true),
+    ...Array(41).fill(false)
+  ];
+
+  // 5. Shuffle both together (Fisher-Yates)
+  for (let i = 81; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    // Swap opponents
+    [opponents[i], opponents[j]] = [opponents[j], opponents[i]];
+    // Swap statuses
+    [homeStatuses[i], homeStatuses[j]] = [homeStatuses[j], homeStatuses[i]];
+  }
+
+  return { opponents, homeStatuses };
 };
 
 export const processAging = (roster: Player[]): Player[] => {

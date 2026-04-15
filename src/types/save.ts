@@ -97,6 +97,7 @@ export interface GameSave {
   conference: 'East' | 'West';
   roster: Player[];
   schedule: string[];
+  scheduleHomeStatus: boolean[]; // true if home, false if away
   standings: TeamStanding[];
   playoffs: PlayoffSeries | null;
   playoffBracket: SeriesMatchup[] | null;
