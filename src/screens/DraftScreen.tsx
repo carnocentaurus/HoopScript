@@ -8,9 +8,10 @@ interface DraftScreenProps {
   draftState: DraftState;
   onPick: (player: Player) => void;
   onComplete: () => void;
+  onViewTeam: () => void;
 }
 
-const DraftScreen = ({ userCity, draftState, onPick, onComplete }: DraftScreenProps) => {
+const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: DraftScreenProps) => {
   const { currentPickIndex, picks, pool, isCompleted } = draftState;
   const currentPick = picks[currentPickIndex];
   const isUserTurn = currentPick?.teamCity === userCity;
@@ -81,7 +82,13 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete }: DraftScreenPr
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={styles.title}>ROOKIE DRAFT</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.title}>ROOKIE DRAFT</Text>
+          <TouchableOpacity style={styles.teamViewBtn} onPress={onViewTeam}>
+            <Text style={styles.teamViewBtnText}>TEAM OVERVIEW</Text>
+          </TouchableOpacity>
+        </View>
+
         {currentPick && (
           <View style={styles.onClockCard}>
             <Text style={styles.onClockLabel}>ON THE CLOCK</Text>
@@ -127,7 +134,10 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete }: DraftScreenPr
 
 const styles = StyleSheet.create({
   header: { padding: 20, alignItems: 'center', backgroundColor: '#1A202C' },
-  title: { color: '#FFF', fontSize: 12, fontWeight: '900', letterSpacing: 4, marginBottom: 15 },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 15 },
+  title: { color: '#FFF', fontSize: 12, fontWeight: '900', letterSpacing: 4, marginBottom: 0 },
+  teamViewBtn: { backgroundColor: '#2D3748', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 15, borderWidth: 1, borderColor: '#4A5568' },
+  teamViewBtnText: { color: '#A0AEC0', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   onClockCard: { alignItems: 'center' },
   onClockLabel: { color: '#4A90E2', fontSize: 10, fontWeight: '900', letterSpacing: 1 },
   onClockTeam: { color: '#FFF', fontSize: 24, fontWeight: '900', marginVertical: 4 },

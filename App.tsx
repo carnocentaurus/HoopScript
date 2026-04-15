@@ -684,7 +684,13 @@ function MainApp() {
         city={teamData.city} 
         roster={teamData.roster} 
         history={activeSave.history}
-        onBack={() => setView(selectedTeamCity === activeSave.city ? 'home' : 'standings')} 
+        onBack={() => {
+          if (activeSave.draftState && !activeSave.draftState.isCompleted) {
+            setView('draft');
+          } else {
+            setView(selectedTeamCity === activeSave.city ? 'home' : 'standings');
+          }
+        }} 
       />
     );
   }
@@ -729,6 +735,10 @@ function MainApp() {
         draftState={activeSave.draftState} 
         onPick={handleDraftPick} 
         onComplete={handleDraftComplete} 
+        onViewTeam={() => {
+          setSelectedTeamCity(activeSave.city);
+          setView('myTeamOverview');
+        }}
       />
     );
   }
