@@ -13,6 +13,7 @@ interface TeamOverviewScreenProps {
 
 const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
   const starters = roster.filter(p => p.isStarter);
+  const bench = roster.filter(p => !p.isStarter);
   const ratings = calculateTeamRatings(roster);
 
   const championships = history?.filter(h => h.champion === city).length || 0;
@@ -58,6 +59,10 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
 
         <Text style={styles.sectionHeader}>STARTERS</Text>
         {starters.map(p => renderPlayerRow(p))}
+
+        <View style={{ height: 20 }} />
+        <Text style={styles.sectionHeader}>BENCH</Text>
+        {bench.map(p => renderPlayerRow(p))}
         
         <View style={{ height: 40 }} />
       </ScrollView>

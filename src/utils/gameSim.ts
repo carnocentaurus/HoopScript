@@ -70,8 +70,8 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
 
   const teamMargin = myScore - oppScore;
 
-  const myTeamStats = myRelevant.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
-  const oppTeamStats = oppRelevant.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
+  const myTeamStats = myRelevant.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
+  const oppTeamStats = oppRelevant.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
 
   // Also include bench players in stats generation for a full box score
   const myBench = myTeam.roster.filter(p => !myRelevant.includes(p));
@@ -79,11 +79,11 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
 
   const myFullStats = [
     ...myTeamStats,
-    ...myBench.map(p => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin))
+    ...myBench.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin))
   ];
   const oppFullStats = [
     ...oppTeamStats,
-    ...oppBench.map(p => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin))
+    ...oppBench.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin))
   ];
 
   myFullStats.sort((a, b) => b.pts - a.pts);

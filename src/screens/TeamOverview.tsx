@@ -10,6 +10,7 @@ interface SimplePlayer {
   offense: number;
   defense: number;
   overall: number;
+  isStarter: boolean;
 }
 
 interface TeamOverviewProps {
@@ -42,17 +43,32 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
       </View>
 
       <FlatList
-        data={roster.filter(p => p.isStarter)}
-        keyExtractor={(item, index) => item.id || index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.playerCard}>
-            <Text style={styles.playerPos}>{item.position || '?'}</Text>
-            <Text style={styles.playerName}>{item.lastName}</Text>
-            <Text style={styles.playerOvr}>
-              {item.overall}
-            </Text>
-          </View>
-        )}
+        data={[
+          { type: 'header' as const, title: 'STARTERS' },
+          ...roster.filter(p => p.isStarter).map(p => ({ ...p, type: 'player' as const })),
+          { type: 'header' as const, title: 'BENCH' },
+          ...roster.filter(p => !p.isStarter).map(p => ({ ...p, type: 'player' as const }))
+        ]}
+        keyExtractor={(item, index) => (item.type === 'header' ? `header-${item.title}` : (item.id || index.toString()))}
+        renderItem={({ item }) => {
+          if (item.type === 'header') {
+            return (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionHeaderText}>{item.title}</Text>
+              </View>
+            );
+          }
+          const p = item as SimplePlayer;
+          return (
+            <View style={styles.playerCard}>
+              <Text style={styles.playerPos}>{p.position || '?'}</Text>
+              <Text style={styles.playerName}>{p.lastName}</Text>
+              <Text style={styles.playerOvr}>
+                {p.overall}
+              </Text>
+            </View>
+          );
+        }}
       />
 
       {onConfirm && (
@@ -122,6 +138,17 @@ const styles = StyleSheet.create({
   playerOvr: {
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  sectionHeader: {
+    backgroundColor: '#F5F5F5',
+    padding: 10,
+    paddingHorizontal: 15,
+  },
+  sectionHeaderText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#333',
+    letterSpacing: 1,
   },
   confirmBtn: {
     backgroundColor: '#4A90E2',
