@@ -124,10 +124,6 @@ const HomeScreen = ({
                   ? "You didn't qualify for the playoffs this year." 
                   : "Tough loss. The journey ends here."}
             </Text>
-            
-            <TouchableOpacity style={styles.viewBracketInline} onPress={onViewBracket}>
-                <Text style={styles.viewBracketInlineText}>VIEW FULL BRACKET</Text>
-            </TouchableOpacity>
           </View>
         ) : (
           <>
@@ -181,21 +177,18 @@ const HomeScreen = ({
         )}
       </View>
 
-      <TouchableOpacity 
-        style={[
-          styles.simButton, 
-          (isEliminated || isChampion || missedPlayoffs) && { backgroundColor: '#4A90E2' }
-        ]} 
-        onPress={ (isEliminated || isChampion || missedPlayoffs) ? onViewBracket : (isSeriesCompleted ? onSimDay : onQuickSim)}
-      >
-        <Text style={styles.simButtonText}>
-          {isEliminated || isChampion || missedPlayoffs 
-            ? "VIEW PLAYOFF FINISH" 
-            : save.playoffs 
+      {!(isEliminated || isChampion || missedPlayoffs) && (
+        <TouchableOpacity 
+          style={styles.simButton} 
+          onPress={isSeriesCompleted ? onSimDay : onQuickSim}
+        >
+          <Text style={styles.simButtonText}>
+            {save.playoffs 
               ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
               : "SIMULATE NEXT GAME"}
-        </Text>
-      </TouchableOpacity>
+          </Text>
+        </TouchableOpacity>
+      )}
     </Screen>
   );
 };
@@ -301,8 +294,6 @@ const styles = StyleSheet.create({
   endSeasonIcon: { fontSize: 64, marginBottom: 20 },
   endSeasonTitle: { fontSize: 22, fontWeight: '900', color: '#2D3748', textAlign: 'center' },
   endSeasonSub: { fontSize: 14, color: '#718096', textAlign: 'center', marginTop: 10, lineHeight: 20 },
-  viewBracketInline: { marginTop: 25, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 10, backgroundColor: '#F0F4F8' },
-  viewBracketInlineText: { color: '#4A90E2', fontWeight: '800', fontSize: 12 },
 
   simButton: { backgroundColor: '#2D3748', margin: 20, padding: 20, borderRadius: 16, alignItems: 'center', position: 'absolute', bottom: 40, left: 0, right: 0, elevation: 8 },
   simButtonText: { color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }
