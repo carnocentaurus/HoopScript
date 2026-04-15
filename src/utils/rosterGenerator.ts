@@ -10,7 +10,9 @@ const seededRandom = (seed: string) => {
   }
   return () => {
     h = h * 16807 % 2147483647;
-    return (h - 1) / 2147483646;
+    // Ensure h is positive for the division
+    const posH = h < 0 ? h + 2147483647 : h;
+    return (posH - 1) / 2147483646;
   };
 };
 
