@@ -19,12 +19,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
   const [simulating, setSimulating] = useState(false);
 
   useEffect(() => {
-    if (isCompleted) {
-      onComplete();
-      return;
-    }
-
-    if (!isUserTurn && currentPickIndex < picks.length && !simulating) {
+    if (!isUserTurn && currentPickIndex < picks.length && !simulating && !isCompleted) {
       // Auto-pick for AI with a slight delay
       const timer = setTimeout(() => {
         const bestPlayer = pool.sort((a, b) => b.overall - a.overall)[0];
@@ -78,6 +73,42 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       )}
     </View>
   );
+
+  if (isCompleted) {
+    return (
+      <Screen>
+        <View style={styles.header}>
+          <Text style={styles.title}>DRAFT SUMMARY</Text>
+          <Text style={styles.onClockLabel}>ALL PICKS COMPLETED</Text>
+        </View>
+
+        <FlatList
+          data={picks}
+          keyExtractor={(item) => `final-${item.overall}`}
+          renderItem={({ item }) => (
+            <View style={[styles.summaryRow, item.teamCity === userCity && styles.userSummaryRow]}>
+              <Text style={styles.summaryPick}>#{item.overall}</Text>
+              <View style={styles.summaryInfo}>
+                <Text style={[styles.summaryTeam, item.teamCity === userCity && styles.userSummaryText]}>
+                  {item.teamCity.toUpperCase()}
+                </Text>
+                <Text style={styles.summaryPlayer}>{item.player?.lastName}</Text>
+              </View>
+              <View style={styles.summaryRating}>
+                <Text style={styles.summaryRatingVal}>{item.player?.overall}</Text>
+                <Text style={styles.summaryRatingLabel}>OVR</Text>
+              </View>
+            </View>
+          )}
+          contentContainerStyle={styles.listContainer}
+        />
+
+        <TouchableOpacity style={styles.startSeasonBtn} onPress={onComplete}>
+          <Text style={styles.startSeasonBtnText}>PROCEED TO NEXT SEASON</Text>
+        </TouchableOpacity>
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
@@ -158,6 +189,20 @@ const styles = StyleSheet.create({
   ratingLabel: { fontSize: 8, color: '#A0AEC0', fontWeight: 'bold' },
   pickBtn: { backgroundColor: '#4A90E2', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
   pickBtnText: { color: '#FFF', fontWeight: '900', fontSize: 12 },
+
+  summaryRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', padding: 12, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#EDF2F7' },
+  userSummaryRow: { borderColor: '#4A90E2', backgroundColor: '#EBF4FF' },
+  summaryPick: { width: 40, fontSize: 12, fontWeight: '900', color: '#718096' },
+  summaryInfo: { flex: 1 },
+  summaryTeam: { fontSize: 10, fontWeight: '900', color: '#4A90E2' },
+  userSummaryText: { color: '#2D3748' },
+  summaryPlayer: { fontSize: 14, fontWeight: '800', color: '#1A202C' },
+  summaryRating: { alignItems: 'center' },
+  summaryRatingVal: { fontSize: 14, fontWeight: '900', color: '#2D3748' },
+  summaryRatingLabel: { fontSize: 7, fontWeight: 'bold', color: '#A0AEC0' },
+
+  startSeasonBtn: { backgroundColor: '#2D3748', margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
+  startSeasonBtnText: { color: '#FFF', fontWeight: '900', fontSize: 14, letterSpacing: 1 },
 
   footer: { backgroundColor: '#F7FAFC', padding: 15, borderTopWidth: 1, borderColor: '#EDF2F7' },
   footerText: { fontSize: 10, fontWeight: '900', color: '#718096', marginBottom: 10, letterSpacing: 1 },
