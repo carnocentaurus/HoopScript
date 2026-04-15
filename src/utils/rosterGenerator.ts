@@ -44,6 +44,36 @@ export const generateRookie = (lastName?: string): Player => {
   };
 };
 
+export const validateAndFixRoster = (roster: Player[]): Player[] => {
+  // 1. Sort by overall to identify the best players
+  const sorted = [...roster].sort((a, b) => b.overall - a.overall);
+  
+  // 2. Set top 5 as starters and ensure they are at least 75 OVR
+  return roster.map(p => {
+    const rank = sorted.findIndex(s => s.id === p.id);
+    const isStarter = rank < 5;
+    
+    let finalOff = p.offense;
+    let finalDef = p.defense;
+    let finalOvr = p.overall;
+
+    if (isStarter && finalOvr < 75) {
+      const diff = 75 - finalOvr;
+      finalOff += diff;
+      finalDef += diff;
+      finalOvr = Math.round((finalOff + finalDef) / 2);
+    }
+
+    return {
+      ...p,
+      isStarter,
+      offense: finalOff,
+      defense: finalDef,
+      overall: finalOvr
+    };
+  });
+};
+
 export const generateRoster = (city: string): Player[] => {
   const roster: Player[] = [];
   const rng = seededRandom(city);
@@ -149,6 +179,6 @@ export const generateRoster = (city: string): Player[] => {
       stats
     });
   }
-  
-  return roster;
+
+  return validateAndFixRoster(roster);
 };

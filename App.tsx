@@ -18,7 +18,7 @@ import DraftScreen from './src/screens/DraftScreen';
 
 // Logic & Types
 import { GameSave, SeriesMatchup, Player, DraftPick } from './src/types/save';
-import { generateRoster } from './src/utils/rosterGenerator';
+import { generateRoster, validateAndFixRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
 import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, processAging, generateDraftOrder, generateDraftPool } from './src/utils/leagueEngine';
 import { TEAM_ROSTERS } from './src/data/rosters';
@@ -484,9 +484,10 @@ function MainApp() {
       // Update team roster
       currentSave.standings = currentSave.standings.map(team => {
         if (team.city === pick.teamCity) {
+          const updatedRoster = [...team.roster, { ...player, isStarter: false, isRookie: true }];
           return {
             ...team,
-            roster: [...team.roster, { ...player, isStarter: false, isRookie: true }]
+            roster: validateAndFixRoster(updatedRoster)
           };
         }
         return team;
@@ -574,20 +575,30 @@ function MainApp() {
   if (view === 'teamSelection') return <TeamSelection onSelectTeam={handleTeamSelect} onBack={() => setView('yearSelection')} />;
   if (view === 'teamOverview' && tempCity) {
     const rawRoster = TEAM_ROSTERS[tempCity] || [];
-    const mappedRoster = rawRoster.map((p, index) => ({
+    const mappedRoster: Player[] = rawRoster.map((p, index) => ({
       id: `initial-${index}`,
       lastName: p.name,
+      age: 25, // Default age for preview
+      number: index + 1,
+      position: ["PG", "SG", "SF", "PF", "C"][index] || "BN",
       offense: p.off,
       defense: p.def,
       overall: Math.round((p.off + p.def) / 2),
       isStarter: index < 5,
-      position: ["PG", "SG", "SF", "PF", "C"][index] || "BN"
+      heightFactor: 50,
+      speedFactor: 50,
+      stats: {
+        gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, 
+        threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0
+      }
     }));
+
+    const fixedRoster = validateAndFixRoster(mappedRoster);
 
     return (
       <TeamOverview 
         city={tempCity} 
-        roster={mappedRoster} 
+        roster={fixedRoster} 
         onConfirm={handleConfirmTeam} 
         onBack={() => setView('teamSelection')} 
       />

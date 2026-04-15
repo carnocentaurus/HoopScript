@@ -1,5 +1,5 @@
 import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup } from '../types/save';
-import { generateRoster, generateRookie } from './rosterGenerator';
+import { generateRoster, generateRookie, validateAndFixRoster } from './rosterGenerator';
 import { PlayerStat } from './gameSim';
 
 export const ALL_CITIES = [
@@ -85,7 +85,7 @@ export const generateSchedule = (userCity: string): string[] => {
 };
 
 export const processAging = (roster: Player[]): Player[] => {
-  return roster.map(player => {
+  const agedRoster = roster.map(player => {
     let newAge = player.age + 1;
     let newOff = player.offense;
     let newDef = player.defense;
@@ -130,6 +130,8 @@ export const processAging = (roster: Player[]): Player[] => {
       }
     };
   });
+
+  return validateAndFixRoster(agedRoster);
 };
 
 // --- DRAFT LOGIC ---
