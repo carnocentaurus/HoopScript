@@ -21,7 +21,14 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   const renderPlayerRow = (player: Player) => (
     <View style={styles.playerCard} key={player.id}>
       <View style={styles.playerHeader}>
-        <Text style={styles.playerMain}>{player.lastName} <Text style={styles.playerNum}>#{player.number}</Text></Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.playerMain}>{player.lastName} <Text style={styles.playerNum}>#{player.number}</Text></Text>
+          {player.isRookie && (
+            <View style={styles.rookieBadge}>
+              <Text style={styles.rookieBadgeText}>ROOKIE</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.playerPos}>{player.position}</Text>
       </View>
       
@@ -101,6 +108,8 @@ const styles = StyleSheet.create({
   ratingVal: { fontSize: 16, fontWeight: 'bold', color: '#2D3748' },
   ovrVal: { color: '#4A90E2' },
   ratingLabel: { fontSize: 8, color: '#A0AEC0', fontWeight: 'bold' },
+  rookieBadge: { backgroundColor: '#F6AD55', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 },
+  rookieBadgeText: { color: '#FFF', fontSize: 8, fontWeight: '900', letterSpacing: 0.5 },
 });
 
 export default TeamOverviewScreen;

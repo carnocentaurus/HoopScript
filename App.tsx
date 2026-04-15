@@ -486,7 +486,7 @@ function MainApp() {
         if (team.city === pick.teamCity) {
           return {
             ...team,
-            roster: [...team.roster, { ...player, isStarter: false }]
+            roster: [...team.roster, { ...player, isStarter: false, isRookie: true }]
           };
         }
         return team;
