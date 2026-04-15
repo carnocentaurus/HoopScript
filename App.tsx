@@ -14,15 +14,16 @@ import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
 import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
+import DraftScreen from './src/screens/DraftScreen';
 
 // Logic & Types
-import { GameSave, SeriesMatchup } from './src/types/save';
+import { GameSave, SeriesMatchup, Player, DraftPick } from './src/types/save';
 import { generateRoster } from './src/utils/rosterGenerator';
 import { GameResult, generatePlayerStats, randomNormal } from './src/utils/gameSim';
-import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, processAging } from './src/utils/leagueEngine';
+import { ALL_CITIES, generateSchedule, generateInitialStandings, updatePlayerStats, processAging, generateDraftOrder, generateDraftPool } from './src/utils/leagueEngine';
 import { TEAM_ROSTERS } from './src/data/rosters';
 
-type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview';
+type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview' | 'draft';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -447,12 +448,74 @@ function MainApp() {
         userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
       });
 
-      // 2. Reset for Next Season
+      // 2. Initialize Draft
+      const draftOrder = generateDraftOrder(currentSave);
+      const picks: DraftPick[] = draftOrder.map((city, index) => ({
+        round: index < 30 ? 1 : 2,
+        overall: index + 1,
+        teamCity: city
+      }));
+
+      currentSave.draftState = {
+        currentPickIndex: 0,
+        picks,
+        pool: generateDraftPool(75),
+        isCompleted: false
+      };
+
+      setSaves(updatedSaves);
+      persistSaves(updatedSaves);
+      setView('draft');
+    }
+  };
+
+  const handleDraftPick = (player: Player) => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+
+    if (currentSave && currentSave.draftState) {
+      const { currentPickIndex, picks, pool } = currentSave.draftState;
+      const pick = picks[currentPickIndex];
+      
+      // Update pick with player
+      pick.player = player;
+      
+      // Update team roster
+      currentSave.standings = currentSave.standings.map(team => {
+        if (team.city === pick.teamCity) {
+          return {
+            ...team,
+            roster: [...team.roster, { ...player, isStarter: false }]
+          };
+        }
+        return team;
+      });
+
+      // Remove from pool and advance index
+      currentSave.draftState.pool = pool.filter(p => p.id !== player.id);
+      currentSave.draftState.currentPickIndex += 1;
+
+      if (currentSave.draftState.currentPickIndex >= picks.length) {
+        currentSave.draftState.isCompleted = true;
+      }
+
+      setSaves(updatedSaves);
+      persistSaves(updatedSaves);
+    }
+  };
+
+  const handleDraftComplete = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+
+    if (currentSave) {
+      // 3. Reset for Next Season (The actual transition)
       currentSave.wins = 0;
       currentSave.losses = 0;
       currentSave.gamesPlayed = 0;
       
-      // Increment season and year
       currentSave.currentYear += 1;
       currentSave.seasonCount += 1;
       
@@ -463,7 +526,6 @@ function MainApp() {
         roster: processAging(team.roster)
       }));
 
-      // Update user's roster reference from the new standings
       const myTeam = currentSave.standings.find(t => t.city === currentSave.city);
       if (myTeam) {
         currentSave.roster = myTeam.roster;
@@ -472,6 +534,7 @@ function MainApp() {
       currentSave.schedule = generateSchedule(currentSave.city);
       currentSave.playoffs = null;
       currentSave.playoffBracket = null;
+      currentSave.draftState = null;
 
       setSaves(updatedSaves);
       persistSaves(updatedSaves);
@@ -644,6 +707,19 @@ function MainApp() {
   if (view === 'history' && activeSlot !== null) {
     const activeSave = saves[activeSlot - 1];
     return activeSave ? <HistoryScreen save={activeSave} onBack={() => setView('home')} /> : null;
+  }
+
+  if (view === 'draft' && activeSlot !== null) {
+    const activeSave = saves[activeSlot - 1];
+    if (!activeSave || !activeSave.draftState) return null;
+    return (
+      <DraftScreen 
+        userCity={activeSave.city} 
+        draftState={activeSave.draftState} 
+        onPick={handleDraftPick} 
+        onComplete={handleDraftComplete} 
+      />
+    );
   }
 
   return null;

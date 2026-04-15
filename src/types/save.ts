@@ -68,6 +68,20 @@ export interface SeasonHistory {
   userRank: string;   // e.g., "3rd in West"
 }
 
+export interface DraftPick {
+  round: number;
+  overall: number; // 1 to 60
+  teamCity: string;
+  player?: Player;
+}
+
+export interface DraftState {
+  currentPickIndex: number;
+  picks: DraftPick[];
+  pool: Player[];
+  isCompleted: boolean;
+}
+
 export interface GameSave {
   id: string;
   name: string;
@@ -88,4 +102,5 @@ export interface GameSave {
   startYear: number;
   currentYear: number;
   seasonCount: number;
+  draftState?: DraftState | null;
 }
