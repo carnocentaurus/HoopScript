@@ -1,45 +1,37 @@
 export const LAST_NAMES = [
-  "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
-  "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin",
-  "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
-  "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
-  "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez",
-  "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards", "Collins", "Reyes", "Stewart",
-  "Morris", "Morales", "Murphy", "Cook", "Rogers", "Gutierrez", "Morgan", "Ortiz", "Cooper", "Peterson",
-  "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward", "Richardson", "Watson",
-  "Brooks", "Chavez", "Wood", "James", "Bennett", "Gray", "Mendoza", "Ruiz", "Hughes", "Price",
-  "Alvarez", "Castillo", "Sanders", "Patel", "Myers", "Long", "Ross", "Foster", "Jimenez", "Powell",
-  "Jenkins", "Perry", "Russell", "Sullivan", "Bell", "Coleman", "Butler", "Henderson", "Barnes", "Gonzales",
-  "Fisher", "Vasquez", "Simmons", "Romero", "Jordan", "Patterson", "Alexander", "Hamilton", "Graham", "Reynolds",
-  "Griffin", "Wallace", "Moreno", "West", "Cole", "Hayes", "Bryant", "Herrera", "Gibson", "Ellis",
-  "Tran", "Medina", "Aguilar", "Cassidy", "Ford", "Blanco", "Marshall", "Owens", "Harrison", "Schmidt",
-  "Woodson", "Washington", "Kennedy", "Wells", "Henry", "Chen", "Freeman", "Webb", "Tucker", "Guzman",
-  "Burns", "Novak", "Wagner", "Becker", "Schulz", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter",
-  "Klein", "Wolf", "Neumann", "Schwarz", "Zimmermann", "Krüger", "Hofmann", "Hartmann", "Lange", "Schmitt",
-  "Werner", "Schmitz", "Krause", "Meier", "Lehmann", "Schmid", "Schulze", "Maier", "Köhler", "Herrmann",
-  "König", "Walter", "Mayer", "Huber", "Kaiser", "Fuchs", "Peters", "Lang", "Scholz", "Möller",
-  "Weiss", "Jung", "Hahn", "Schubert", "Vogel", "Friedrich", "Günther", "Keller", "Winkler", "Frank",
-  "Berger", "Roth", "Beck", "Lorenz", "Baumann", "Franke", "Albrecht", "Schuster", "Simon", "Ludwig",
-  "Böhm", "Winter", "Kraus", "Sommer", "Gross", "Seidel", "Heinrich", "Brandt", "Haas", "Schreiber",
-  "Graf", "Schulte", "Dietrich", "Ziegler", "Kuhn", "Kühn", "Pohl", "Engel", "Horn", "Busch",
-  "Bergmann", "Voigt", "Sauer", "Arnold", "Wolff", "Pfeiffer", "Suzuki", "Sato", "Takahashi", "Tanaka",
-  "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "Matsumoto",
-  "Inoue", "Kimura", "Saito", "Shimizu", "Mori", "Abe", "Ikeda", "Hashimoto", "Yamashita", "Ishikawa",
-  "Nakajima", "Maeda", "Fujita", "Ogawa", "Okada", "Goto", "Hasegawa", "Murakami", "Kondo", "Ishii",
-  "Sakamoto", "Endo", "Aoki", "Fujii", "Nishimura", "Fukuda", "Miura", "Fujiwara", "Okamoto", "Matsui",
-  "Nakagawa", "Nakano", "Harada", "Ono", "Tamura", "Takeuchi", "Kaneko", "Wada", "Nakayama", "Ishida",
-  "Ueda", "Morita", "Hara", "Shibata", "Sakai", "Yokoyama", "Miyazaki", "Miyamoto", "Uchida", "Takagi",
-  "Ando", "Ohno", "Maruyama", "Imai", "Takada", "Fujimoto", "Murata", "Takeda", "Ueno", "Sugiyama",
-  "Masuda", "Sugawara", "Hirano", "Kojima", "Otsuka", "Chiba", "Kubo", "Matsumura", "Iwasaki", "Sakurai",
-  "Nishida", "Noguchi", "Rossi", "Russo", "Ferrari", "Esposito", "Bianchi", "Romano", "Colombo", "Ricci",
-  "Marino", "Greco", "Bruno", "Gallo", "Conti", "De Luca", "Mancini", "Costa", "Giordano", "Rizzo",
-  "Lombardi", "Moretti", "Barbieri", "Fontana", "Santoro", "Mariani", "Rinaldi", "Caruso", "Ferrara", "Galli",
-  "Martini", "Leone", "Longo", "Gentile", "Martinelli", "Vitale", "Lombardo", "Serra", "Coppola", "De Angelis",
-  "Ferraro", "Parisi", "Villa", "Conte", "Ferri", "Fabbri", "Monti", "Marchetti", "Guerra", "Palumbo",
-  "Abate", "Foti", "D'Amico", "Grasso", "Piras", "Sanna", "Farina", "Riva", "Donati", "Pellegrini",
-  "Biondi", "Palermo", "Kim", "Lee", "Park", "Choi", "Jung", "Kang", "Cho", "Yoon", "Jang",
-  "Lim", "Han", "Shin", "Oh", "Seo", "Kwon", "Hwang", "Song", "Ahn", "Im",
-  "Yoo", "Hong", "Yang", "Go", "Moon", "Baek", "Heo", "Yoo", "Nam", "Sim",
-  "Noh", "Ha", "Gwak", "Seong", "Cha", "Joo", "Woo", "Gu", "Min", "Yu",
-  "Jin", "Pyo", "Ji", "Ban", "Ra", "Chae", "Um", "Eom", "Won", "Cheon", "Gye"
+  // --- AMERICAN (74.0% - 148 names) ---
+  "Miller", "Wilson", "Anderson", "Taylor", "Moore", "Martin", "White", "Harris", "Clark", "Lewis",
+  "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Hill", "Adams", "Nelson",
+  "Baker", "Hall", "Campbell", "Mitchell", "Carter", "Roberts", "Phillips", "Evans", "Turner", "Parker",
+  "Edwards", "Collins", "Stewart", "Morris", "Murphy", "Cook", "Rogers", "Morgan", "Cooper", "Peterson",
+  "Bailey", "Reed", "Kelly", "Howard", "Cox", "Ward", "Richardson", "Watson", "Brooks", "Wood",
+  "Bennett", "Gray", "Hughes", "Price", "Sanders", "Myers", "Long", "Ross", "Foster", "Powell",
+  "Jenkins", "Perry", "Russell", "Sullivan", "Bell", "Coleman", "Butler", "Henderson", "Barnes", "Fisher",
+  "Simmons", "Patterson", "Alexander", "Hamilton", "Graham", "Reynolds", "Griffin", "Wallace", "West", "Cole",
+  "Hayes", "Gibson", "Ellis", "Ford", "Marshall", "Owens", "Harrison", "Kennedy", "Wells", "Henry",
+  "Freeman", "Webb", "Tucker", "Stevens", "Murray", "Graham", "Sullivan", "Curtis", "Fisher", "Stone",
+  "Douglas", "Bishop", "Burke", "Ray", "Pierce", "Arnold", "Black", "Fuller", "Lynch", "Simpson",
+  "Mills", "Rhodes", "Hart", "Wheeler", "Rice", "Mason", "Knight", "Garrett", "Rose", "Banks",
+  "Dixon", "Hunt", "Hicks", "Gardner", "Stephens", "Franklin", "Hoffman", "Carr", "Burton", "Lawrence",
+  "Berry", "Foster", "Watkins", "Day", "Meyer", "Palmer", "Webb", "Lucas", "Grant", "Fisher",
+  "Wagner", "Fowler", "Wells", "Porter", "Glover", "Munoz", "Key", "Bush",
+
+  // --- CANADIAN (4.5% - 9 names) ---
+  "Tremblay", "Gagnon", "Roy", "Cote", "Bouchard", "Gauthier", "Morin", "Lavoie", "Fortin",
+
+  // --- FRENCH (3.7% - 7 names) ---
+  "Bernard", "Durand", "Dubois", "Moreau", "Laurent", "Simon", "Michel",
+
+  // --- AUSTRALIAN (2.7% - 5 names) ---
+  "Simpson", "Davidson", "Watts", "Webb", "Knight",
+
+  // --- SERBIA, GERMANY, SLOVENIA, NIGERIA (15.1% - 31 names) ---
+  // Serbian (8)
+  "Jovanovic", "Petrovic", "Nikolic", "Markovic", "Djordjevic", "Stojanovic", "Ilic", "Stankovic",
+  // German (8)
+  "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Schulz", "Becker", "Hoffmann",
+  // Slovenian (8)
+  "Novak", "Horvat", "Krajnc", "Zupancic", "Potocnik", "Kovacic", "Mlakar", "Kos",
+  // Nigerian (7)
+  "Obi", "Okeke", "Nwosu", "Eze", "Adeyemi", "Balogun", "Bello"
 ];
