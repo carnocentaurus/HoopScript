@@ -135,30 +135,15 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         </TouchableOpacity>
       )}
 
-      <FlatList
-        data={pool.sort((a, b) => b.overall - a.overall)}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProspect}
-        contentContainerStyle={styles.listContainer}
-        ListHeaderComponent={<Text style={styles.listHeader}>AVAILABLE PROSPECTS</Text>}
-      />
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Recent Picks:</Text>
+      {isUserTurn && !simulating && !isCompleted && (
         <FlatList
-          horizontal
-          data={[...picks].slice(0, currentPickIndex).reverse()}
-          keyExtractor={(item) => `recent-${item.overall}`}
-          renderItem={({ item }) => (
-            <View style={styles.recentPick}>
-              <Text style={styles.recentPickNum}>#{item.overall}</Text>
-              <Text style={styles.recentPickName}>{item.player?.lastName}</Text>
-              <Text style={styles.recentPickTeam}>{item.teamCity.substring(0,3).toUpperCase()}</Text>
-            </View>
-          )}
-          showsHorizontalScrollIndicator={false}
+          data={pool.sort((a, b) => b.overall - a.overall)}
+          keyExtractor={(item) => item.id}
+          renderItem={renderProspect}
+          contentContainerStyle={styles.listContainer}
+          ListHeaderComponent={<Text style={styles.listHeader}>AVAILABLE PROSPECTS</Text>}
         />
-      </View>
+      )}
     </Screen>
   );
 };
@@ -203,13 +188,6 @@ const styles = StyleSheet.create({
 
   startSeasonBtn: { backgroundColor: '#2D3748', margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
   startSeasonBtnText: { color: '#FFF', fontWeight: '900', fontSize: 14, letterSpacing: 1 },
-
-  footer: { backgroundColor: '#F7FAFC', padding: 15, borderTopWidth: 1, borderColor: '#EDF2F7' },
-  footerText: { fontSize: 10, fontWeight: '900', color: '#718096', marginBottom: 10, letterSpacing: 1 },
-  recentPick: { backgroundColor: '#FFF', padding: 8, borderRadius: 8, marginRight: 10, borderWidth: 1, borderColor: '#EDF2F7', alignItems: 'center', width: 70 },
-  recentPickNum: { fontSize: 10, fontWeight: 'bold', color: '#4A90E2' },
-  recentPickName: { fontSize: 11, fontWeight: '900', marginVertical: 2 },
-  recentPickTeam: { fontSize: 9, color: '#718096', fontWeight: 'bold' },
 });
 
 export default DraftScreen;
