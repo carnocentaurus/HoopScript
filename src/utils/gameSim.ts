@@ -1,4 +1,5 @@
 import { Player, GameSave } from '../types/save';
+import { calculateTeamRatings } from './leagueEngine';
 
 export interface GameResult {
   myScore: number;
@@ -40,16 +41,12 @@ export const randomNormal = (mean: number, stdDev: number): number => {
 };
 
 export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
-  const myStarters = myTeam.roster.filter(p => p.isStarter);
-  const myRelevant = myStarters.length > 0 ? myStarters : myTeam.roster.slice(0, 5);
-  const myOvr = myRelevant.reduce((sum, p) => sum + p.overall, 0) / myRelevant.length;
+  const myRatings = calculateTeamRatings(myTeam.roster);
+  const myOvr = myRatings.overall;
 
   const oppRoster = opponent.roster || [];
-  const oppStarters = oppRoster.filter((p: any) => p.isStarter);
-  const oppRelevant = oppStarters.length > 0 ? oppStarters : (oppRoster.length > 0 ? oppRoster.slice(0, 5) : []);
-  const oppOvr = oppRelevant.length > 0
-    ? oppRelevant.reduce((sum: number, p: any) => sum + p.overall, 0) / oppRelevant.length
-    : 80;
+  const oppRatings = calculateTeamRatings(oppRoster);
+  const oppOvr = oppRatings.overall;
 
   const ratingDiff = (myOvr - oppOvr) * 0.3;
   const myBase = 102 + ratingDiff;
@@ -69,6 +66,12 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
   }
 
   const teamMargin = myScore - oppScore;
+
+  const myStarters = myTeam.roster.filter(p => p.isStarter);
+  const myRelevant = myStarters.length > 0 ? myStarters : myTeam.roster.slice(0, 5);
+
+  const oppStarters = oppRoster.filter((p: any) => p.isStarter);
+  const oppRelevant = oppStarters.length > 0 ? oppStarters : (oppRoster.length > 0 ? oppRoster.slice(0, 5) : []);
 
   const myTeamStats = myRelevant.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
   const oppTeamStats = oppRelevant.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));

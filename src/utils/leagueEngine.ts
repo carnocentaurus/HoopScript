@@ -35,16 +35,31 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
 };
 
 export const calculateTeamRatings = (roster: Player[]) => {
+  // Sort roster by overall descending to ensure we have the best players at the top 
+  // if isStarter flags aren't perfectly aligned, but we'll prioritize isStarter.
   const starters = roster.filter(p => p.isStarter);
-  const relevant = starters.length > 0 ? starters : roster.slice(0, 5);
+  const others = roster.filter(p => !p.isStarter).sort((a, b) => b.overall - a.overall);
   
-  const avg = (key: 'offense' | 'defense' | 'overall') => 
-    Math.round(relevant.reduce((sum, p) => sum + p[key], 0) / relevant.length);
+  // In case of incomplete rosters, we'll fall back to slicing
+  const teamStarters = starters.length >= 5 ? starters : roster.slice(0, 5);
+  const keyBench = starters.length >= 5 ? others.slice(0, 5) : roster.slice(5, 10);
+
+  const calculateWeightedRating = (key: 'offense' | 'defense' | 'overall') => {
+    const startersAvg = teamStarters.length > 0 
+      ? teamStarters.reduce((sum, p) => sum + p[key], 0) / teamStarters.length 
+      : 0;
+    
+    const keyBenchAvg = keyBench.length > 0 
+      ? keyBench.reduce((sum, p) => sum + p[key], 0) / keyBench.length 
+      : 0;
+
+    return Math.round((startersAvg * 0.75) + (keyBenchAvg * 0.25));
+  };
 
   return {
-    offense: avg('offense'),
-    defense: avg('defense'),
-    overall: avg('overall')
+    offense: calculateWeightedRating('offense'),
+    defense: calculateWeightedRating('defense'),
+    overall: calculateWeightedRating('overall')
   };
 };
 
