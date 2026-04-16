@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
+import { globalStyles } from '../styles/globalStyles';
 
 // Added onStartNewSeason to the props interface
 interface PlayoffProps {
@@ -35,30 +36,30 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
     if (matchups.length === 0) return null;
 
     return (
-      <View key={conf} style={styles.conferenceSection}>
-        <Text style={styles.conferenceHeader}>
+      <View key={conf} style={globalStyles.pbConferenceSection}>
+        <Text style={globalStyles.pbConferenceHeader}>
           {conf === 'Finals' ? 'LEAGUE FINALS' : `${conf.toUpperCase()}ERN CONFERENCE`}
         </Text>
         {matchups.map((series) => (
-          <View key={series.id} style={styles.seriesCard}>
-            <View style={styles.teamRow}>
-              <View style={styles.teamInfo}>
-                <Text style={styles.rankLabel}>{getRank(series.highSeed)}</Text>
-                <Text style={[styles.teamName, series.highSeedWins === 4 && styles.winner]}>
+          <View key={series.id} style={globalStyles.pbSeriesCard}>
+            <View style={globalStyles.pbTeamRow}>
+              <View style={globalStyles.pbTeamInfo}>
+                <Text style={globalStyles.pbRankLabel}>{getRank(series.highSeed)}</Text>
+                <Text style={[globalStyles.pbTeamName, series.highSeedWins === 4 && globalStyles.pbWinner]}>
                   {series.highSeed}
                 </Text>
               </View>
-              <Text style={styles.score}>{series.highSeedWins}</Text>
+              <Text style={globalStyles.pbScore}>{series.highSeedWins}</Text>
             </View>
 
-            <View style={styles.teamRow}>
-              <View style={styles.teamInfo}>
-                <Text style={styles.rankLabel}>{getRank(series.lowSeed)}</Text>
-                <Text style={[styles.teamName, series.lowSeedWins === 4 && styles.winner]}>
+            <View style={globalStyles.pbTeamRow}>
+              <View style={globalStyles.pbTeamInfo}>
+                <Text style={globalStyles.pbRankLabel}>{getRank(series.lowSeed)}</Text>
+                <Text style={[globalStyles.pbTeamName, series.lowSeedWins === 4 && globalStyles.pbWinner]}>
                   {series.lowSeed}
                 </Text>
               </View>
-              <Text style={styles.score}>{series.lowSeedWins}</Text>
+              <Text style={globalStyles.pbScore}>{series.lowSeedWins}</Text>
             </View>
           </View>
         ))}
@@ -70,20 +71,20 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack}><Text style={styles.backText}>← HOME</Text></TouchableOpacity>
-        <Text style={styles.title}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
+      <View style={globalStyles.pbHeader}>
+        <TouchableOpacity onPress={onBack}><Text style={globalStyles.pbBackText}>← HOME</Text></TouchableOpacity>
+        <Text style={globalStyles.pbTitle}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={globalStyles.pbContent}>
         {renderConferenceSection('East')}
         {renderConferenceSection('West')}
         {renderConferenceSection('Finals')}
         
         {isFinalsOver && (
-          <View style={styles.champContainer}>
-            <Text style={styles.champText}>
+          <View style={globalStyles.pbChampContainer}>
+            <Text style={globalStyles.pbChampText}>
               🏆 {roundMatchups[0].highSeedWins === 4 ? roundMatchups[0].highSeed : roundMatchups[0].lowSeed} CHAMPIONS
             </Text>
           </View>
@@ -92,39 +93,18 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
 
       {/* Button Logic: Show "Start New Season" if Finals are over, otherwise "Simulate Day" */}
       {isFinalsOver ? (
-        <TouchableOpacity style={[styles.simDayBtn, styles.nextSeasonBtn]} onPress={onStartNewSeason}>
-          <Text style={styles.simDayBtnText}>START NEW SEASON</Text>
+        <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn]} onPress={onStartNewSeason}>
+          <Text style={globalStyles.pbSimDayBtnText}>START NEW SEASON</Text>
         </TouchableOpacity>
       ) : (
         (save.playoffs?.isEliminated || isSeriesCompleted) && (
-          <TouchableOpacity style={styles.simDayBtn} onPress={onSimDay}>
-            <Text style={styles.simDayBtnText}>SIMULATE DAY</Text>
+          <TouchableOpacity style={globalStyles.pbSimDayBtn} onPress={onSimDay}>
+            <Text style={globalStyles.pbSimDayBtnText}>SIMULATE DAY</Text>
           </TouchableOpacity>
         )
       )}
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
-  backText: { fontWeight: 'bold', color: '#4A90E2' },
-  title: { fontSize: 18, fontWeight: '900', color: '#2D3748' },
-  content: { padding: 16 },
-  conferenceSection: { marginBottom: 20 },
-  conferenceHeader: { fontSize: 12, fontWeight: '900', color: '#A0AEC0', letterSpacing: 1.5, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: '#E2E8F0', paddingBottom: 4 },
-  seriesCard: { backgroundColor: '#FFF', borderRadius: 12, padding: 15, marginBottom: 12, elevation: 2 },
-  teamRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 6, alignItems: 'center' },
-  teamInfo: { flexDirection: 'row', alignItems: 'center' },
-  rankLabel: { fontSize: 12, color: '#A0AEC0', fontWeight: 'bold', width: 22, textAlign: 'left' },
-  teamName: { fontSize: 16, fontWeight: '700', color: '#4A5568' },
-  winner: { color: '#4A90E2' },
-  score: { fontSize: 16, fontWeight: '900', color: '#2D3748' },
-  simDayBtn: { backgroundColor: '#2D3748', margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
-  nextSeasonBtn: { backgroundColor: '#48BB78' }, // Green for the new start
-  simDayBtnText: { color: '#FFF', fontWeight: 'bold' },
-  champContainer: { alignItems: 'center', marginTop: 20, padding: 20 },
-  champText: { fontSize: 20, fontWeight: '900', color: '#2D3748' }
-});
 
 export default PlayoffBracketScreen;

@@ -1,25 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { GameSave, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
+import { globalStyles } from '../styles/globalStyles';
 
 const HistoryItem = ({ item }: { item: SeasonHistory }) => (
-  <View style={styles.historyCard}>
-    <View style={styles.cardHeader}>
-      <Text style={styles.yearText}>S{item.seasonIndex} - {item.year}</Text>
-      <View style={styles.champRow}>
-        <Text style={styles.champText}>🏆 {item.champion.toUpperCase()}</Text>
-        <View style={styles.champStats}>
-          <Text style={styles.champStatText}>{item.championRecord}</Text>
-          <Text style={styles.champStatText}>{item.championRank}</Text>
+  <View style={globalStyles.hiHistoryCard}>
+    <View style={globalStyles.hiCardHeader}>
+      <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
+      <View style={globalStyles.hiChampRow}>
+        <Text style={globalStyles.hiChampText}>🏆 {item.champion.toUpperCase()}</Text>
+        <View style={globalStyles.hiChampStats}>
+          <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
+          <Text style={globalStyles.hiChampStatText}>{item.championRank}</Text>
         </View>
       </View>
     </View>
 
-    <View style={styles.userSummary}>
-      <Text style={styles.userLabel}>YOUR TEAM:</Text>
-      <Text style={styles.userStat}>{item.userRecord}</Text>
-      <Text style={styles.userStat}>{item.userRank}</Text>
+    <View style={globalStyles.hiUserSummary}>
+      <Text style={globalStyles.hiUserLabel}>YOUR TEAM:</Text>
+      <Text style={globalStyles.hiUserStat}>{item.userRecord}</Text>
+      <Text style={globalStyles.hiUserStat}>{item.userRank}</Text>
     </View>
   </View>
 );
@@ -27,18 +28,18 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   return (
     <Screen>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBack} onPress={onBack}>
-          <Text style={styles.headerBackText}>←</Text>
+      <View style={globalStyles.hiHeader}>
+        <TouchableOpacity style={globalStyles.hiHeaderBack} onPress={onBack}>
+          <Text style={globalStyles.hiHeaderBackText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>CAREER HISTORY</Text>
+        <Text style={globalStyles.hiHeaderTitle}>CAREER HISTORY</Text>
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={globalStyles.hiScrollContent}>
         {save.history.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No finished seasons recorded yet.</Text>
+          <View style={globalStyles.hiEmptyContainer}>
+            <Text style={globalStyles.hiEmptyText}>No finished seasons recorded yet.</Text>
           </View>
         ) : (
           [...save.history].reverse().map((item, idx) => (
@@ -49,28 +50,5 @@ const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void })
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: '#222' },
-  headerBack: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  headerBackText: { color: '#FFF', fontSize: 24, fontWeight: 'bold' },
-  headerTitle: { color: '#FFF', fontSize: 18, fontWeight: '900', letterSpacing: 2 },
-  
-  scrollContent: { padding: 15 },
-  historyCard: { backgroundColor: '#111', borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: '#222' },
-  cardHeader: { flexDirection: 'column' },
-  yearText: { color: '#C41E3A', fontSize: 12, fontWeight: '900', letterSpacing: 1 },
-  champRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  champText: { color: '#FFF', fontSize: 20, fontWeight: '900', flex: 1 },
-  champStats: { alignItems: 'flex-end' },
-  champStatText: { color: '#4A90E2', fontSize: 10, fontWeight: '900' },
-  
-  userSummary: { flexDirection: 'row', gap: 10, marginTop: 12, borderTopWidth: 1, borderTopColor: '#222', paddingTop: 12, alignItems: 'center' },
-  userLabel: { color: '#444', fontSize: 10, fontWeight: '900', letterSpacing: 1 },
-  userStat: { color: '#888', fontSize: 13, fontWeight: 'bold' },
-
-  emptyContainer: { padding: 40, alignItems: 'center' },
-  emptyText: { color: '#444', fontSize: 16, fontWeight: 'bold', textAlign: 'center' }
-});
 
 export default HistoryScreen;

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
+import { globalStyles } from '../styles/globalStyles';
 
 interface SimplePlayer {
   id?: string;
@@ -28,18 +29,18 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
 
   return (
     <Screen>
-      <View style={styles.headerRow}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backBtnText}>← BACK</Text>
+      <View style={globalStyles.toHeaderRow}>
+        <TouchableOpacity onPress={onBack} style={globalStyles.toBackBtn}>
+          <Text style={globalStyles.toBackBtnText}>← BACK</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>{city} Roster</Text>
+        <Text style={globalStyles.toHeaderText}>{city} Roster</Text>
         <View style={{ width: 60 }} />
       </View>
 
-      <View style={styles.teamStatsRow}>
-          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.offense}</Text><Text style={styles.statLabel}>OFF</Text></View>
-          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.defense}</Text><Text style={styles.statLabel}>DEF</Text></View>
-          <View style={styles.statBox}><Text style={styles.statVal}>{ratings.overall}</Text><Text style={styles.statLabel}>OVR</Text></View>
+      <View style={globalStyles.toTeamStatsRow}>
+          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.offense}</Text><Text style={globalStyles.toStatLabel}>OFF</Text></View>
+          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.defense}</Text><Text style={globalStyles.toStatLabel}>DEF</Text></View>
+          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.overall}</Text><Text style={globalStyles.toStatLabel}>OVR</Text></View>
       </View>
 
       <FlatList
@@ -53,17 +54,17 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
         renderItem={({ item }) => {
           if (item.type === 'header') {
             return (
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionHeaderText}>{item.title}</Text>
+              <View style={globalStyles.toSectionHeader}>
+                <Text style={globalStyles.toSectionHeaderText}>{item.title}</Text>
               </View>
             );
           }
           const p = item as SimplePlayer;
           return (
-            <View style={styles.playerCard}>
-              <Text style={styles.playerPos}>{p.position || '?'}</Text>
-              <Text style={styles.playerName}>{p.lastName}</Text>
-              <Text style={styles.playerOvr}>
+            <View style={globalStyles.toPlayerCard}>
+              <Text style={globalStyles.toPlayerPos}>{p.position || '?'}</Text>
+              <Text style={globalStyles.toPlayerName}>{p.lastName}</Text>
+              <Text style={globalStyles.toPlayerOvr}>
                 {p.overall}
               </Text>
             </View>
@@ -72,96 +73,12 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
       />
 
       {onConfirm && (
-        <TouchableOpacity style={styles.confirmBtn} onPress={onConfirm}>
-          <Text style={styles.confirmBtnText}>CHOOSE THIS TEAM</Text>
+        <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={onConfirm}>
+          <Text style={globalStyles.toConfirmBtnText}>CHOOSE THIS TEAM</Text>
         </TouchableOpacity>
       )}
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    marginVertical: 15,
-  },
-  backBtn: {
-    padding: 10,
-    width: 60,
-  },
-  backBtnText: {
-    color: '#4A90E2',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-  },
-  teamStatsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 30,
-    marginBottom: 20,
-  },
-  statBox: {
-    alignItems: 'center',
-  },
-  statVal: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 10,
-    color: '#666',
-  },
-  playerCard: {
-    flexDirection: 'row',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-    alignItems: 'center',
-  },
-  playerPos: {
-    width: 40,
-    fontWeight: 'bold',
-    color: '#666',
-  },
-  playerName: {
-    flex: 1,
-    fontSize: 16,
-  },
-  playerOvr: {
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  sectionHeader: {
-    backgroundColor: '#F5F5F5',
-    padding: 10,
-    paddingHorizontal: 15,
-  },
-  sectionHeaderText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-    letterSpacing: 1,
-  },
-  confirmBtn: {
-    backgroundColor: '#4A90E2',
-    margin: 20,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  confirmBtnText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
 
 export default TeamOverview;

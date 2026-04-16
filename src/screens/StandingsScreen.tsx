@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { GameSave, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
+import { globalStyles } from '../styles/globalStyles';
 
 interface StandingsProps {
   save: GameSave;
@@ -18,50 +19,50 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
 
   const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => (
     <TouchableOpacity 
-      style={[styles.teamRow, item.city === save.city && styles.userRow]}
+      style={[globalStyles.stTeamRow, item.city === save.city && globalStyles.stUserRow]}
       onPress={() => onViewTeam(item.city)}
     >
-      <Text style={styles.rankText}>{index + 1}</Text>
-      <Text style={styles.cityName}>{item.city}</Text>
-      <View style={styles.recordCols}>
-        <Text style={styles.recordText}>{item.wins}</Text>
-        <Text style={styles.recordText}>{item.losses}</Text>
+      <Text style={globalStyles.stRankText}>{index + 1}</Text>
+      <Text style={globalStyles.stCityName}>{item.city}</Text>
+      <View style={globalStyles.stRecordCols}>
+        <Text style={globalStyles.stRecordText}>{item.wins}</Text>
+        <Text style={globalStyles.stRecordText}>{item.losses}</Text>
       </View>
     </TouchableOpacity>
   );
 
   return (
     <Screen>
-      <View style={styles.header}>
+      <View style={globalStyles.stHeader}>
         <TouchableOpacity onPress={onBack}>
-          <Text style={styles.backButton}>← BACK</Text>
+          <Text style={globalStyles.stBackButton}>← BACK</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>STANDINGS</Text>
+        <Text style={globalStyles.stTitle}>STANDINGS</Text>
         <View style={{ width: 50 }} /> 
       </View>
 
-      <View style={styles.tabBar}>
+      <View style={globalStyles.stTabBar}>
         <TouchableOpacity 
-          style={[styles.tab, activeConf === 'West' && styles.activeTab]} 
+          style={[globalStyles.stTab, activeConf === 'West' && globalStyles.stActiveTab]} 
           onPress={() => setActiveConf('West')}
         >
-          <Text style={[styles.tabText, activeConf === 'West' && styles.activeTabText]}>WEST</Text>
+          <Text style={[globalStyles.stTabText, activeConf === 'West' && globalStyles.stActiveTabText]}>WEST</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.tab, activeConf === 'East' && styles.activeTab]} 
+          style={[globalStyles.stTab, activeConf === 'East' && globalStyles.stActiveTab]} 
           onPress={() => setActiveConf('East')}
         >
-          <Text style={[styles.tabText, activeConf === 'East' && styles.activeTabText]}>EAST</Text>
+          <Text style={[globalStyles.stTabText, activeConf === 'East' && globalStyles.stActiveTabText]}>EAST</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.tableHeader}>
-        <Text style={styles.headerRank}>#</Text>
-        <Text style={styles.headerTeam}>TEAM</Text>
-        <View style={styles.recordColsHeader}>
-          <Text style={styles.headerStat}>W</Text>
-          <Text style={styles.headerStat}>L</Text>
+      <View style={globalStyles.stTableHeader}>
+        <Text style={globalStyles.stHeaderRank}>#</Text>
+        <Text style={globalStyles.stHeaderTeam}>TEAM</Text>
+        <View style={globalStyles.stRecordColsHeader}>
+          <Text style={globalStyles.stHeaderStat}>W</Text>
+          <Text style={globalStyles.stHeaderStat}>L</Text>
         </View>
       </View>
 
@@ -74,27 +75,5 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
-  backButton: { fontWeight: 'bold', color: '#000' },
-  title: { fontSize: 18, fontWeight: '900', letterSpacing: 1 },
-  tabBar: { flexDirection: 'row', borderBottomWidth: 1, borderColor: '#EEE' },
-  tab: { flex: 1, padding: 15, alignItems: 'center' },
-  activeTab: { borderBottomWidth: 3, borderColor: '#000' },
-  tabText: { color: '#AAA', fontWeight: 'bold' },
-  activeTabText: { color: '#000' },
-  tableHeader: { flexDirection: 'row', padding: 15, backgroundColor: '#F9F9F9', borderBottomWidth: 1, borderColor: '#EEE' },
-  headerRank: { width: 30, fontSize: 10, color: '#999', fontWeight: 'bold' },
-  headerTeam: { flex: 1, fontSize: 10, color: '#999', fontWeight: 'bold' },
-  recordColsHeader: { flexDirection: 'row', width: 60, justifyContent: 'space-between' },
-  headerStat: { fontSize: 10, color: '#999', fontWeight: 'bold', width: 25, textAlign: 'center' },
-  teamRow: { flexDirection: 'row', padding: 15, alignItems: 'center', borderBottomWidth: 1, borderColor: '#F0F0F0' },
-  userRow: { backgroundColor: '#FFFBEB' },
-  rankText: { width: 30, fontWeight: 'bold', color: '#666' },
-  cityName: { flex: 1, fontWeight: '600', fontSize: 16 },
-  recordCols: { flexDirection: 'row', width: 60, justifyContent: 'space-between' },
-  recordText: { width: 25, textAlign: 'center', fontWeight: 'bold' }
-});
 
 export default StandingsScreen;

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { globalStyles } from '../styles/globalStyles';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -13,7 +14,7 @@ export default function Screen({ children, style }: ScreenProps) {
   return (
     <View 
       style={[
-        styles.container, 
+        globalStyles.container, 
         { 
           paddingTop: insets.top, 
           paddingBottom: insets.bottom 
@@ -25,10 +26,3 @@ export default function Screen({ children, style }: ScreenProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F7FA', // Your default app background color
-  },
-});

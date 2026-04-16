@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { Player, DraftState, DraftPick } from '../types/save';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { Player, DraftState } from '../types/save';
 import Screen from '../components/Screen';
+import { globalStyles } from '../styles/globalStyles';
 
 interface DraftScreenProps {
   userCity: string;
@@ -49,18 +50,18 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
   };
 
   const renderProspect = ({ item }: { item: Player }) => (
-    <View style={styles.playerCard}>
-      <View style={styles.playerInfo}>
-        <Text style={styles.playerName}>{item.lastName}</Text>
-        <Text style={styles.playerSub}>{item.position} | AGE {item.age}</Text>
+    <View style={globalStyles.drPlayerCard}>
+      <View style={globalStyles.drPlayerInfo}>
+        <Text style={globalStyles.drPlayerName}>{item.lastName}</Text>
+        <Text style={globalStyles.drPlayerSub}>{item.position} | AGE {item.age}</Text>
       </View>
-      <View style={styles.ratingBox}>
-        <Text style={styles.ratingVal}>{item.overall}</Text>
-        <Text style={styles.ratingLabel}>OVR</Text>
+      <View style={globalStyles.drRatingBox}>
+        <Text style={globalStyles.drRatingVal}>{item.overall}</Text>
+        <Text style={globalStyles.drRatingLabel}>OVR</Text>
       </View>
       {isUserTurn && !simulating && (
         <TouchableOpacity 
-          style={styles.pickBtn} 
+          style={globalStyles.drPickBtn} 
           onPress={() => {
             Alert.alert("Draft Player", `Are you sure you want to draft ${item.lastName}?`, [
               { text: "Cancel", style: "cancel" },
@@ -68,7 +69,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
             ]);
           }}
         >
-          <Text style={styles.pickBtnText}>PICK</Text>
+          <Text style={globalStyles.drPickBtnText}>PICK</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -77,34 +78,34 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
   if (isCompleted) {
     return (
       <Screen>
-        <View style={styles.header}>
-          <Text style={styles.title}>DRAFT SUMMARY</Text>
-          <Text style={styles.onClockLabel}>ALL PICKS COMPLETED</Text>
+        <View style={globalStyles.drHeader}>
+          <Text style={globalStyles.drTitle}>DRAFT SUMMARY</Text>
+          <Text style={globalStyles.drOnClockLabel}>ALL PICKS COMPLETED</Text>
         </View>
 
         <FlatList
           data={picks}
           keyExtractor={(item) => `final-${item.overall}`}
           renderItem={({ item }) => (
-            <View style={[styles.summaryRow, item.teamCity === userCity && styles.userSummaryRow]}>
-              <Text style={styles.summaryPick}>#{item.overall}</Text>
-              <View style={styles.summaryInfo}>
-                <Text style={[styles.summaryTeam, item.teamCity === userCity && styles.userSummaryText]}>
+            <View style={[globalStyles.drSummaryRow, item.teamCity === userCity && globalStyles.drUserSummaryRow]}>
+              <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
+              <View style={globalStyles.drSummaryInfo}>
+                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.drUserSummaryText]}>
                   {item.teamCity.toUpperCase()}
                 </Text>
-                <Text style={styles.summaryPlayer}>{item.player?.lastName}</Text>
+                <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
               </View>
-              <View style={styles.summaryRating}>
-                <Text style={styles.summaryRatingVal}>{item.player?.overall}</Text>
-                <Text style={styles.summaryRatingLabel}>OVR</Text>
+              <View style={globalStyles.drSummaryRating}>
+                <Text style={globalStyles.drSummaryRatingVal}>{item.player?.overall}</Text>
+                <Text style={globalStyles.drSummaryRatingLabel}>OVR</Text>
               </View>
             </View>
           )}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={globalStyles.drListContainer}
         />
 
-        <TouchableOpacity style={styles.startSeasonBtn} onPress={onComplete}>
-          <Text style={styles.startSeasonBtnText}>PROCEED TO NEXT SEASON</Text>
+        <TouchableOpacity style={globalStyles.drStartSeasonBtn} onPress={onComplete}>
+          <Text style={globalStyles.drStartSeasonBtnText}>PROCEED TO NEXT SEASON</Text>
         </TouchableOpacity>
       </Screen>
     );
@@ -112,26 +113,26 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text style={styles.title}>ROOKIE DRAFT</Text>
-          <TouchableOpacity style={styles.teamViewBtn} onPress={onViewTeam}>
-            <Text style={styles.teamViewBtnText}>TEAM OVERVIEW</Text>
+      <View style={globalStyles.drHeader}>
+        <View style={globalStyles.drHeaderTop}>
+          <Text style={globalStyles.drTitle}>ROOKIE DRAFT</Text>
+          <TouchableOpacity style={globalStyles.drTeamViewBtn} onPress={onViewTeam}>
+            <Text style={globalStyles.drTeamViewBtnText}>TEAM OVERVIEW</Text>
           </TouchableOpacity>
         </View>
 
         {currentPick && (
-          <View style={styles.onClockCard}>
-            <Text style={styles.onClockLabel}>ON THE CLOCK</Text>
-            <Text style={styles.onClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
-            <Text style={styles.pickNumber}>Round {currentPick.round} | Pick {currentPick.overall}</Text>
+          <View style={globalStyles.drOnClockCard}>
+            <Text style={globalStyles.drOnClockLabel}>ON THE CLOCK</Text>
+            <Text style={globalStyles.drOnClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
+            <Text style={globalStyles.drPickNumber}>Round {currentPick.round} | Pick {currentPick.overall}</Text>
           </View>
         )}
       </View>
 
       {!isUserTurn && !isCompleted && (
-        <TouchableOpacity style={styles.simBtn} onPress={handleSimToUserPick} disabled={simulating}>
-          <Text style={styles.simBtnText}>{simulating ? "SIMULATING..." : "SIM TO MY PICK"}</Text>
+        <TouchableOpacity style={globalStyles.drSimBtn} onPress={handleSimToUserPick} disabled={simulating}>
+          <Text style={globalStyles.drSimBtnText}>{simulating ? "SIMULATING..." : "SIM TO MY PICK"}</Text>
         </TouchableOpacity>
       )}
 
@@ -140,54 +141,12 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
           data={pool.sort((a, b) => b.overall - a.overall)}
           keyExtractor={(item) => item.id}
           renderItem={renderProspect}
-          contentContainerStyle={styles.listContainer}
-          ListHeaderComponent={<Text style={styles.listHeader}>AVAILABLE PROSPECTS</Text>}
+          contentContainerStyle={globalStyles.drListContainer}
+          ListHeaderComponent={<Text style={globalStyles.drListHeader}>AVAILABLE PROSPECTS</Text>}
         />
       )}
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  header: { padding: 20, alignItems: 'center', backgroundColor: '#1A202C' },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 15 },
-  title: { color: '#FFF', fontSize: 12, fontWeight: '900', letterSpacing: 4, marginBottom: 0 },
-  teamViewBtn: { backgroundColor: '#2D3748', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 15, borderWidth: 1, borderColor: '#4A5568' },
-  teamViewBtnText: { color: '#A0AEC0', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
-  onClockCard: { alignItems: 'center' },
-  onClockLabel: { color: '#4A90E2', fontSize: 10, fontWeight: '900', letterSpacing: 1 },
-  onClockTeam: { color: '#FFF', fontSize: 24, fontWeight: '900', marginVertical: 4 },
-  pickNumber: { color: '#A0AEC0', fontSize: 12, fontWeight: 'bold' },
-  
-  simBtn: { backgroundColor: '#2D3748', margin: 15, padding: 12, borderRadius: 8, alignItems: 'center' },
-  simBtnText: { color: '#FFF', fontWeight: '900', fontSize: 12, letterSpacing: 1 },
-
-  listContainer: { paddingHorizontal: 15, paddingBottom: 20 },
-  listHeader: { fontSize: 12, fontWeight: '900', color: '#718096', marginVertical: 15, letterSpacing: 1 },
-  
-  playerCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 15, borderRadius: 12, marginBottom: 10, alignItems: 'center', elevation: 2 },
-  playerInfo: { flex: 1 },
-  playerName: { fontSize: 18, fontWeight: '900', color: '#1A202C' },
-  playerSub: { color: '#718096', fontWeight: 'bold', fontSize: 12, marginTop: 2 },
-  ratingBox: { alignItems: 'center', marginRight: 15 },
-  ratingVal: { fontSize: 20, fontWeight: '900', color: '#4A90E2' },
-  ratingLabel: { fontSize: 8, color: '#A0AEC0', fontWeight: 'bold' },
-  pickBtn: { backgroundColor: '#4A90E2', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  pickBtnText: { color: '#FFF', fontWeight: '900', fontSize: 12 },
-
-  summaryRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', padding: 12, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: '#EDF2F7' },
-  userSummaryRow: { borderColor: '#4A90E2', backgroundColor: '#EBF4FF' },
-  summaryPick: { width: 40, fontSize: 12, fontWeight: '900', color: '#718096' },
-  summaryInfo: { flex: 1 },
-  summaryTeam: { fontSize: 10, fontWeight: '900', color: '#4A90E2' },
-  userSummaryText: { color: '#2D3748' },
-  summaryPlayer: { fontSize: 14, fontWeight: '800', color: '#1A202C' },
-  summaryRating: { alignItems: 'center' },
-  summaryRatingVal: { fontSize: 14, fontWeight: '900', color: '#2D3748' },
-  summaryRatingLabel: { fontSize: 7, fontWeight: 'bold', color: '#A0AEC0' },
-
-  startSeasonBtn: { backgroundColor: '#2D3748', margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
-  startSeasonBtnText: { color: '#FFF', fontWeight: '900', fontSize: 14, letterSpacing: 1 },
-});
 
 export default DraftScreen;

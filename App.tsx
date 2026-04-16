@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Styles
+import { globalStyles } from './src/styles/globalStyles';
 
 // Screen Imports
 import LoadingScreen from './src/screens/LoadingScreen';
@@ -558,21 +561,21 @@ function MainApp() {
   if (view === 'yearSelection') {
     const years = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 1950 + i).reverse();
     return (
-      <View style={styles.container}>
+      <View style={globalStyles.blackContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <TouchableOpacity onPress={() => setView('saveSelection')} style={{ marginRight: 15 }}>
             <Text style={{ color: '#4A90E2', fontWeight: 'bold' }}>← BACK</Text>
           </TouchableOpacity>
-          <Text style={[styles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
+          <Text style={[globalStyles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
         </View>
-        <ScrollView style={styles.scrollList}>
+        <ScrollView style={globalStyles.appScrollList}>
           {years.map(year => (
             <TouchableOpacity 
               key={year} 
-              style={styles.yearButton}
+              style={globalStyles.appYearButton}
               onPress={() => handleYearSelect(year)}
             >
-              <Text style={styles.yearText}>{year}</Text>
+              <Text style={globalStyles.appYearText}>{year}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -753,40 +756,6 @@ function MainApp() {
 
   return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-    padding: 20,
-    paddingTop: 60,
-  },
-  title: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: '900',
-    marginBottom: 20,
-    textAlign: 'center',
-    letterSpacing: 2,
-  },
-  scrollList: {
-    flex: 1,
-  },
-  yearButton: {
-    padding: 16,
-    backgroundColor: '#1A1A1A',
-    marginBottom: 10,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#C41E3A',
-  },
-  yearText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  }
-});
 
 // --- APP ENTRY POINT ---
 export default function App() {

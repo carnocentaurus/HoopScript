@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
+import { globalStyles } from '../styles/globalStyles';
 
 interface SelectSaveProps {
   saves: (GameSave | null)[];
@@ -12,37 +13,37 @@ interface SelectSaveProps {
 const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
   return (
     <Screen>
-      <Text style={styles.title}>CHOOSE SAVE SLOT</Text>
+      <Text style={globalStyles.selectSaveTitle}>CHOOSE SAVE SLOT</Text>
       {[1, 2, 3].map((slotId) => {
         const saveData = saves[slotId - 1];
         return (
-          <View key={slotId} style={styles.slotWrapper}>
+          <View key={slotId} style={globalStyles.selectSaveSlotWrapper}>
             <TouchableOpacity 
-              style={styles.slotCard} 
+              style={globalStyles.selectSaveSlotCard} 
               onPress={() => onSelectSlot(slotId)}
             >
               <View>
-                <Text style={styles.slotNumber}>SAVE {slotId}</Text>
+                <Text style={globalStyles.selectSaveSlotNumber}>SAVE {slotId}</Text>
                 {saveData ? (
-                  <Text style={styles.saveInfo}>{saveData.city}</Text>
+                  <Text style={globalStyles.selectSaveInfo}>{saveData.city}</Text>
                 ) : (
-                  <Text style={styles.emptyText}>[ EMPTY SLOT ]</Text>
+                  <Text style={globalStyles.selectSaveEmptyText}>[ EMPTY SLOT ]</Text>
                 )}
               </View>
               {saveData && (
                 <View>
-                  <Text style={styles.saveStats}>{saveData.wins}-{saveData.losses}</Text>
-                  <Text style={styles.saveYear}>S{saveData.seasonCount} Y{saveData.currentYear}</Text>
+                  <Text style={globalStyles.selectSaveStats}>{saveData.wins}-{saveData.losses}</Text>
+                  <Text style={globalStyles.selectSaveYear}>S{saveData.seasonCount} Y{saveData.currentYear}</Text>
                 </View>
               )}
             </TouchableOpacity>
             
             {saveData && (
               <TouchableOpacity 
-                style={styles.deleteBtn} 
+                style={globalStyles.selectSaveDeleteBtn} 
                 onPress={() => onDeleteSlot(slotId)}
               >
-                <Text style={styles.deleteText}>RESET</Text>
+                <Text style={globalStyles.selectSaveDeleteText}>RESET</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -51,22 +52,5 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  title: { fontSize: 24, fontWeight: '900', textAlign: 'center', marginBottom: 40, letterSpacing: 2 },
-  slotWrapper: { marginBottom: 20 },
-  slotCard: { 
-    borderWidth: 2, borderColor: '#EEE', padding: 25, borderRadius: 12, 
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#FFF'
-  },
-  slotNumber: { fontWeight: 'bold', color: '#888', fontSize: 10, letterSpacing: 1, marginBottom: 4 },
-  saveInfo: { fontSize: 18, fontWeight: '900', color: '#000' },
-  saveStats: { fontSize: 16, fontWeight: 'bold', color: '#2D3748', textAlign: 'right' },
-  saveYear: { fontSize: 11, color: '#A0AEC0', textAlign: 'right', marginTop: 2 },
-  emptyText: { color: '#CCC', fontStyle: 'italic', fontSize: 16 },
-  deleteBtn: { position: 'absolute', top: -10, right: 10, backgroundColor: '#FFF', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, borderWidth: 1, borderColor: '#FED7D7' },
-  deleteText: { color: '#E53E3E', fontSize: 9, fontWeight: '900' }
-});
 
 export default SelectSave;
