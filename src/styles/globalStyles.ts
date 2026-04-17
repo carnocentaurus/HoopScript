@@ -67,11 +67,6 @@ export const globalStyles = StyleSheet.create({
   },
 
   // --- LOADING SCREEN ---
-  loadingLogoText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    letterSpacing: 4,
-  },
 
   // --- SELECT SAVE SCREEN ---
   selectSaveTitle: { 

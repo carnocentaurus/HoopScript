@@ -1,14 +1,29 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { globalStyles } from '../styles/globalStyles';
+import { View, Image, StyleSheet } from 'react-native';
 
 const LoadingScreen = () => {
   return (
-    <View style={[globalStyles.whiteContainer, { justifyContent: 'center', alignItems: 'center' }]}>
-      {/* Replace Text with <Image source={...} /> when logo is ready */}
-      <Text style={globalStyles.loadingLogoText}>HOOPSCRIPT</Text>
+    <View style={styles.container}>
+      <Image 
+        source={require('../../assets/images/icon/hoopscript_icon_no_bg.png')} 
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#B34726',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 200,
+    height: 200,
+  },
+});
 
 export default LoadingScreen;
