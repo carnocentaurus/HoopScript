@@ -1,8 +1,10 @@
 import React from 'react';
 import { FlatList, Text, View, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import TeamCard from '../components/TeamCard';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 const TEAMS = [
   "Atlanta", "Boston", "Brooklyn", "Charlotte", "Chicago", 
@@ -18,7 +20,7 @@ const TeamSelection = ({ onSelectTeam, onBack }: { onSelectTeam: (team: string) 
     <Screen>
       <View style={globalStyles.tsHeaderRow}>
         <TouchableOpacity onPress={onBack} style={globalStyles.tsBackBtn}>
-          <Text style={globalStyles.tsBackBtnText}>← BACK</Text>
+          <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.tsHeader}>Select Your Team</Text>
         <View style={{ width: 60 }} />

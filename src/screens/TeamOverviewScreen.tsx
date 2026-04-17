@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 interface TeamOverviewScreenProps {
   city: string;
@@ -58,7 +60,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
     <Screen>
       <View style={globalStyles.tosHeader}>
         <TouchableOpacity onPress={onBack} style={globalStyles.tosBackBtn}>
-          <Text style={globalStyles.tosBackBtnText}>← BACK</Text>
+          <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
         <View style={{ width: 60 }} />

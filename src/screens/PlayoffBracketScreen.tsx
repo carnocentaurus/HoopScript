@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 // Added onStartNewSeason to the props interface
 interface PlayoffProps {
@@ -72,7 +74,9 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
   return (
     <Screen>
       <View style={globalStyles.pbHeader}>
-        <TouchableOpacity onPress={onBack}><Text style={globalStyles.pbBackText}>← HOME</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onBack}>
+          <Icon name="chevron-back" size={28} color={COLORS.primary} />
+        </TouchableOpacity>
         <Text style={globalStyles.pbTitle}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
         <View style={{ width: 60 }} />
       </View>

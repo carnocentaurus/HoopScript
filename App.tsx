@@ -20,6 +20,8 @@ import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import DraftScreen from './src/screens/DraftScreen';
 
+import { Ionicons as Icon } from '@expo/vector-icons';
+
 // Logic & Types
 import { GameSave, SeriesMatchup, Player, DraftPick } from './src/types/save';
 import { generateRoster, validateAndFixRoster } from './src/utils/rosterGenerator';
@@ -565,7 +567,7 @@ function MainApp() {
       <View style={globalStyles.blackContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <TouchableOpacity onPress={() => setView('saveSelection')} style={{ marginRight: 15 }}>
-            <Text style={{ color: COLORS.primary, fontWeight: 'bold' }}>← BACK</Text>
+            <Icon name="chevron-back" size={32} color={COLORS.primary} />
           </TouchableOpacity>
           <Text style={[globalStyles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
         </View>

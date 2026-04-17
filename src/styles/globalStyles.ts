@@ -164,12 +164,6 @@ export const globalStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.primary,
   },
-  homeBackBtnText: {
-    color: COLORS.textSub,
-    fontSize: 10,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
   homeHistoryBtn: {
     backgroundColor: COLORS.card,
     paddingHorizontal: 15,
@@ -410,7 +404,6 @@ export const globalStyles = StyleSheet.create({
   qsScrollContent: { paddingBottom: 40 },
   qsHeaderRow: { padding: 15, paddingBottom: 0 },
   qsBackBtn: { padding: 10, width: 60 },
-  qsBackBtnText: { color: COLORS.primary, fontWeight: 'bold', fontSize: 12 },
   qsScoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   qsTeamSide: { alignItems: 'center', flex: 1 },
   qsLogoPlaceholder: { fontSize: 40, color: COLORS.white, fontWeight: '900', backgroundColor: COLORS.grayLight, width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
@@ -426,7 +419,6 @@ export const globalStyles = StyleSheet.create({
 
   // --- STANDINGS SCREEN ---
   stHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
-  stBackButton: { fontWeight: 'bold', color: COLORS.white },
   stTitle: { fontSize: 18, fontWeight: '900', letterSpacing: 1, color: COLORS.white },
   stTabBar: { flexDirection: 'row', borderBottomWidth: 1, borderColor: COLORS.border },
   stTab: { flex: 1, padding: 15, alignItems: 'center' },
@@ -484,7 +476,6 @@ export const globalStyles = StyleSheet.create({
   // --- TEAM OVERVIEW SCREEN ---
   tosHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, paddingVertical: 10 },
   tosBackBtn: { width: 60 },
-  tosBackBtnText: { color: COLORS.primary, fontWeight: 'bold' },
   tosTitle: { color: COLORS.white, fontSize: 18, fontWeight: '900', letterSpacing: 1 },
   tosContainer: { flex: 1, paddingHorizontal: 15 },
   tosTrophySection: { alignItems: 'center', backgroundColor: COLORS.darkBg, padding: 20, borderRadius: 15, marginVertical: 15 },
@@ -513,7 +504,6 @@ export const globalStyles = StyleSheet.create({
   // --- TEAM OVERVIEW (PREVIEW) ---
   toHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginVertical: 15 },
   toBackBtn: { padding: 10, width: 60 },
-  toBackBtnText: { color: COLORS.primary, fontWeight: 'bold', fontSize: 12 },
   toHeaderText: { fontSize: 20, fontWeight: 'bold', flex: 1, textAlign: 'center', color: COLORS.white },
   toTeamStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 30, marginBottom: 20 },
   toStatBox: { alignItems: 'center' },
@@ -531,7 +521,6 @@ export const globalStyles = StyleSheet.create({
   // --- HISTORY SCREEN ---
   hiHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   hiHeaderBack: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  hiHeaderBackText: { color: COLORS.white, fontSize: 24, fontWeight: 'bold' },
   hiHeaderTitle: { color: COLORS.white, fontSize: 18, fontWeight: '900', letterSpacing: 2 },
   hiScrollContent: { padding: 15 },
   hiHistoryCard: { backgroundColor: COLORS.card, borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: COLORS.border },
@@ -549,7 +538,6 @@ export const globalStyles = StyleSheet.create({
 
   // --- PLAYOFF BRACKET SCREEN ---
   pbHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
-  pbBackText: { fontWeight: 'bold', color: COLORS.primary },
   pbTitle: { fontSize: 18, fontWeight: '900', color: COLORS.white },
   pbContent: { padding: 16 },
   pbConferenceSection: { marginBottom: 20 },
@@ -571,7 +559,6 @@ export const globalStyles = StyleSheet.create({
   tsHeader: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginVertical: 20, flex: 1, color: COLORS.white },
   tsHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15 },
   tsBackBtn: { padding: 10, width: 60 },
-  tsBackBtnText: { color: COLORS.primary, fontWeight: 'bold', fontSize: 12 },
   tsListContent: { paddingHorizontal: 10 },
 
   // --- TEAM CARD COMPONENT ---

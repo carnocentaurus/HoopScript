@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 interface SimplePlayer {
   id?: string;
@@ -31,7 +33,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
     <Screen>
       <View style={globalStyles.toHeaderRow}>
         <TouchableOpacity onPress={onBack} style={globalStyles.toBackBtn}>
-          <Text style={globalStyles.toBackBtnText}>← BACK</Text>
+          <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.toHeaderText}>{city} Roster</Text>
         <View style={{ width: 60 }} />

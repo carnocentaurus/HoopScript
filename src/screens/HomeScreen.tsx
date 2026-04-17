@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 const TeamMatchupCard = ({ team }: { team: any }) => {
   const ratings = calculateTeamRatings(team.roster);
@@ -81,7 +83,7 @@ const HomeScreen = ({
       {/* --- SEASON & YEAR HEADER --- */}
       <View style={globalStyles.homeSeasonHeader}>
         <TouchableOpacity style={globalStyles.homeBackBtn} onPress={onBackToSaves}>
-           <Text style={globalStyles.homeBackBtnText}>SWITCH SAVE</Text>
+           <Icon name="chevron-back" size={24} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
         <View style={globalStyles.homeYearBadge}>

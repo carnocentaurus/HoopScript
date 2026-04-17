@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void, onBack: () => void }) => {
   const [myScore, setMyScore] = useState(0);
@@ -74,7 +76,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
     <Screen>
       <View style={globalStyles.qsHeaderRow}>
         <TouchableOpacity onPress={onBack} style={globalStyles.qsBackBtn}>
-          <Text style={globalStyles.qsBackBtnText}>← BACK</Text>
+          <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={globalStyles.qsScrollContent} showsVerticalScrollIndicator={false}>

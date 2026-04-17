@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 interface StandingsProps {
   save: GameSave;
@@ -35,7 +37,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     <Screen>
       <View style={globalStyles.stHeader}>
         <TouchableOpacity onPress={onBack}>
-          <Text style={globalStyles.stBackButton}>← BACK</Text>
+          <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.stTitle}>STANDINGS</Text>
         <View style={{ width: 50 }} /> 

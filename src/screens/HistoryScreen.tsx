@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { COLORS } from '../styles/theme';
 
 const HistoryItem = ({ item }: { item: SeasonHistory }) => (
   <View style={globalStyles.hiHistoryCard}>
@@ -30,7 +32,7 @@ const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void })
     <Screen>
       <View style={globalStyles.hiHeader}>
         <TouchableOpacity style={globalStyles.hiHeaderBack} onPress={onBack}>
-          <Text style={globalStyles.hiHeaderBackText}>←</Text>
+          <Icon name="chevron-back" size={28} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.hiHeaderTitle}>CAREER HISTORY</Text>
         <View style={{ width: 40 }} />
