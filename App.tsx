@@ -564,7 +564,7 @@ function MainApp() {
       <View style={globalStyles.blackContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
           <TouchableOpacity onPress={() => setView('saveSelection')} style={{ marginRight: 15 }}>
-            <Text style={{ color: '#4A90E2', fontWeight: 'bold' }}>← BACK</Text>
+            <Text style={{ color: COLORS.primary, fontWeight: 'bold' }}>← BACK</Text>
           </TouchableOpacity>
           <Text style={[globalStyles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
         </View>
