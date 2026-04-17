@@ -12,8 +12,7 @@ interface SelectSaveProps {
 
 const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
   return (
-    <Screen>
-      <Text style={globalStyles.selectSaveTitle}>CHOOSE SAVE SLOT</Text>
+    <Screen style={{ justifyContent: 'center', paddingHorizontal: 20 }}>
       {[1, 2, 3].map((slotId) => {
         const saveData = saves[slotId - 1];
         return (
@@ -23,11 +22,11 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
               onPress={() => onSelectSlot(slotId)}
             >
               <View>
-                <Text style={globalStyles.selectSaveSlotNumber}>SAVE {slotId}</Text>
-                {saveData ? (
+                {!saveData && (
+                  <Text style={globalStyles.selectSaveSlotNumber}>SAVE {slotId}</Text>
+                )}
+                {saveData && (
                   <Text style={globalStyles.selectSaveInfo}>{saveData.city}</Text>
-                ) : (
-                  <Text style={globalStyles.selectSaveEmptyText}>[ EMPTY SLOT ]</Text>
                 )}
               </View>
               {saveData && (

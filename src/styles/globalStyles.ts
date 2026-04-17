@@ -82,40 +82,40 @@ export const globalStyles = StyleSheet.create({
   },
   selectSaveSlotCard: { 
     borderWidth: 2, 
-    borderColor: COLORS.border, 
+    borderColor: COLORS.black, 
     padding: 25, 
     borderRadius: 12, 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'center',
-    backgroundColor: COLORS.card
+    backgroundColor: COLORS.primary
   },
   selectSaveSlotNumber: { 
     fontWeight: 'bold', 
-    color: COLORS.textSub, 
-    fontSize: 10, 
+    color: COLORS.black, 
+    fontSize: 18, 
     letterSpacing: 1, 
     marginBottom: 4 
   },
   selectSaveInfo: { 
     fontSize: 18, 
     fontWeight: '900', 
-    color: COLORS.white 
+    color: COLORS.black 
   },
   selectSaveStats: { 
     fontSize: 16, 
     fontWeight: 'bold', 
-    color: COLORS.text, 
+    color: COLORS.black, 
     textAlign: 'right' 
   },
   selectSaveYear: { 
     fontSize: 11, 
-    color: COLORS.textSub, 
+    color: COLORS.black, 
     textAlign: 'right', 
     marginTop: 2 
   },
   selectSaveEmptyText: { 
-    color: COLORS.textSub, 
+    color: COLORS.black, 
     fontStyle: 'italic', 
     fontSize: 16 
   },
@@ -123,15 +123,15 @@ export const globalStyles = StyleSheet.create({
     position: 'absolute', 
     top: -10, 
     right: 10, 
-    backgroundColor: COLORS.card, 
+    backgroundColor: COLORS.white, 
     paddingHorizontal: 10, 
     paddingVertical: 4, 
     borderRadius: 10, 
     borderWidth: 1, 
-    borderColor: COLORS.primary 
+    borderColor: COLORS.black 
   },
   selectSaveDeleteText: { 
-    color: COLORS.primary, 
+    color: COLORS.black, 
     fontSize: 9, 
     fontWeight: '900' 
   },
