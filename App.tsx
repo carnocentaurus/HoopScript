@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Styles
 import { globalStyles } from './src/styles/globalStyles';
+import { COLORS } from './src/styles/theme';
 
 // Screen Imports
 import LoadingScreen from './src/screens/LoadingScreen';
