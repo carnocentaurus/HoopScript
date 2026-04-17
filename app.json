@@ -4,11 +4,11 @@
     "slug": "HoopScript",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/icon/hoopscript_icon_resized.png",
     "userInterfaceStyle": "light",
     //"newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/icon/hoopscript_icon_resized.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,14 +17,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon/hoopscript_icon_resized.png",
         "backgroundColor": "#ffffff"
       },
       //"edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/images/icon/hoopscript_icon_resized.png"
     }
   }
 }
