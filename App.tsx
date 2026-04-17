@@ -10,6 +10,7 @@ import { COLORS } from './src/styles/theme';
 // Screen Imports
 import LoadingScreen from './src/screens/LoadingScreen';
 import SelectSave from './src/screens/SelectSave';
+import YearSelectionScreen from './src/screens/YearSelectionScreen';
 import TeamSelection from './src/screens/TeamSelection';
 import TeamOverview from './src/screens/TeamOverview';
 import HomeScreen from './src/screens/HomeScreen';
@@ -562,27 +563,11 @@ function MainApp() {
   if (view === 'saveSelection') return <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} />;
   
   if (view === 'yearSelection') {
-    const years = Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 1950 + i).reverse();
     return (
-      <View style={globalStyles.blackContainer}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-          <TouchableOpacity onPress={() => setView('saveSelection')} style={{ marginRight: 15 }}>
-            <Icon name="chevron-back" size={32} color={COLORS.primary} />
-          </TouchableOpacity>
-          <Text style={[globalStyles.title, { marginBottom: 0, textAlign: 'left' }]}>SELECT STARTING YEAR</Text>
-        </View>
-        <ScrollView style={globalStyles.appScrollList}>
-          {years.map(year => (
-            <TouchableOpacity 
-              key={year} 
-              style={globalStyles.appYearButton}
-              onPress={() => handleYearSelect(year)}
-            >
-              <Text style={globalStyles.appYearText}>{year}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+      <YearSelectionScreen 
+        onSelectYear={handleYearSelect} 
+        onBack={() => setView('saveSelection')} 
+      />
     );
   }
 
