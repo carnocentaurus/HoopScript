@@ -35,7 +35,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
 
   return (
     <Screen>
-      <View style={[globalStyles.stHeader, { justifyContent: 'flex-start' }]}>
+      <View style={[globalStyles.stHeader, globalStyles.justifyStart]}>
         <TouchableOpacity onPress={onBack}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>

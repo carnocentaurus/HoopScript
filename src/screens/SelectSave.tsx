@@ -12,7 +12,7 @@ interface SelectSaveProps {
 
 const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
   return (
-    <Screen style={{ justifyContent: 'center', paddingHorizontal: 20 }}>
+    <Screen style={globalStyles.selectSaveContainer}>
       {[1, 2, 3].map((slotId) => {
         const saveData = saves[slotId - 1];
         return (

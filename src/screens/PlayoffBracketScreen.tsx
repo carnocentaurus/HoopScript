@@ -78,7 +78,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
           <Icon name="chevron-back" size={28} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={globalStyles.pbTitle}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
-        <View style={{ width: 60 }} />
+        <View style={globalStyles.headerSpacer} />
       </View>
 
       <ScrollView style={globalStyles.pbContent}>

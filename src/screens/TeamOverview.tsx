@@ -36,7 +36,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
           <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.toHeaderText}>{city}</Text>
-        <View style={{ width: 60 }} />
+        <View style={globalStyles.headerSpacer} />
       </View>
 
       <View style={globalStyles.toTeamStatsRow}>

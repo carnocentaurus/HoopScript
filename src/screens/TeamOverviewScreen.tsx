@@ -24,7 +24,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   const renderPlayerRow = (player: Player) => (
     <View style={globalStyles.tosPlayerCard} key={player.id}>
       <View style={globalStyles.tosPlayerHeader}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={globalStyles.flexRowAlignCenter}>
           <Text style={globalStyles.tosPlayerMain}>{player.lastName} <Text style={globalStyles.tosPlayerNum}>#{player.number}</Text></Text>
           {player.isRookie && (
             <View style={globalStyles.tosRookieBadge}>
@@ -63,7 +63,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
-        <View style={{ width: 60 }} />
+        <View style={globalStyles.headerSpacer} />
       </View>
 
       <ScrollView style={globalStyles.tosContainer} showsVerticalScrollIndicator={false}>
@@ -82,11 +82,11 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
         <Text style={globalStyles.tosSectionHeader}>STARTERS</Text>
         {starters.map(p => renderPlayerRow(p))}
 
-        <View style={{ height: 20 }} />
+        <View style={globalStyles.vSpacer20} />
         <Text style={globalStyles.tosSectionHeader}>BENCH</Text>
         {bench.map(p => renderPlayerRow(p))}
         
-        <View style={{ height: 40 }} />
+        <View style={globalStyles.vSpacer40} />
       </ScrollView>
     </Screen>
   );

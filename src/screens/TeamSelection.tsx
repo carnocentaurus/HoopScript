@@ -23,7 +23,7 @@ const TeamSelection = ({ onSelectTeam, onBack }: { onSelectTeam: (team: string) 
           <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.tsHeader}>Select Your Team</Text>
-        <View style={{ width: 60 }} />
+        <View style={globalStyles.headerSpacer} />
       </View>
       <FlatList
         data={TEAMS}

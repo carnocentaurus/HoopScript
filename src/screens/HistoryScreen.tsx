@@ -11,7 +11,7 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
     <View style={globalStyles.hiCardHeader}>
       <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
       <View style={globalStyles.hiChampRow}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
           <Icon name="trophy" size={20} color="#FFD700" style={{ marginRight: 8 }} />
           <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
         </View>
@@ -33,7 +33,7 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   return (
     <Screen>
-      <View style={[globalStyles.hiHeader, { justifyContent: 'flex-start' }]}>
+      <View style={globalStyles.hiHeader}>
         <TouchableOpacity onPress={onBack}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>

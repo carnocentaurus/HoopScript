@@ -47,9 +47,25 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold' 
   },
 
+  // --- COMMON UTILITIES ---
+  flex1: { flex: 1 },
+  flexRow: { flexDirection: 'row' },
+  flexRowAlignCenter: { flexDirection: 'row', alignItems: 'center' },
+  justifyStart: { justifyContent: 'flex-start' },
+  flexRowWrapBetween: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  centerContent: { justifyContent: 'center', alignItems: 'center' },
+  headerSpacer: { width: 60 },
+  vSpacer20: { height: 20 },
+  vSpacer40: { height: 40 },
+  mb10: { marginBottom: 10 },
+  mb20: { marginBottom: 20 },
+
   // --- APP / YEAR SELECTION ---
   appScrollList: {
     flex: 1,
+  },
+  appScrollListContent: { 
+    flexGrow: 1 
   },
   appYearButton: {
     padding: SPACING.m,
@@ -59,11 +75,20 @@ export const globalStyles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: COLORS.accent,
   },
+  appYearButtonPrimary: {
+    backgroundColor: COLORS.primary, 
+    borderLeftWidth: 0, 
+    width: '48%', 
+    marginBottom: 10 
+  },
   appYearText: {
     color: COLORS.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  appYearTextBlack: { 
+    color: COLORS.black 
   },
   yearSelectionHeader: {
     color: COLORS.textSub,
@@ -74,8 +99,22 @@ export const globalStyles = StyleSheet.create({
   },
 
   // --- LOADING SCREEN ---
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingLogo: {
+    width: 200,
+    height: 200,
+  },
 
   // --- SELECT SAVE SCREEN ---
+  selectSaveContainer: { 
+    justifyContent: 'center', 
+    paddingHorizontal: 20 
+  },
   selectSaveTitle: { 
     fontSize: 24, 
     fontWeight: '900', 
@@ -154,12 +193,10 @@ export const globalStyles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.primary,
   },
   homeYearText: {
-    color: COLORS.white,
-    fontSize: 14,
+    color: COLORS.textSub,
+    fontSize: 12,
     fontWeight: '900',
     letterSpacing: 1.5,
   },
@@ -217,7 +254,7 @@ export const globalStyles = StyleSheet.create({
   },
   homeSectionLabelCenter: { 
     color: COLORS.textSub, 
-    fontSize: 11, 
+    fontSize: 10, 
     fontWeight: '900', 
     textAlign: 'center', 
     letterSpacing: 2, 
@@ -324,7 +361,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'baseline' 
   },
   homeProgressLabel: { 
-    color: COLORS.textMuted, 
+    color: COLORS.textSub, 
     fontSize: 10, 
     fontWeight: '800', 
     letterSpacing: 1 
@@ -341,8 +378,8 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: COLORS.primary 
   },
   homeStatsText: { 
-    color: COLORS.text, 
-    fontSize: 14, 
+    color: COLORS.textSub, 
+    fontSize: 10, 
     fontWeight: '800' 
   },
   homeSeriesScoreContainer: { 
@@ -389,7 +426,7 @@ export const globalStyles = StyleSheet.create({
     lineHeight: 20 
   },
   homeSimButton: { 
-    backgroundColor: COLORS.secondary, 
+    backgroundColor: '#B34726', 
     margin: 20, 
     padding: 20, 
     borderRadius: 16, 
@@ -401,7 +438,7 @@ export const globalStyles = StyleSheet.create({
     elevation: 8 
   },
   homeSimButtonText: { 
-    color: COLORS.white, 
+    color: COLORS.black, 
     fontWeight: '900', 
     fontSize: 16, 
     letterSpacing: 1 
@@ -535,8 +572,8 @@ export const globalStyles = StyleSheet.create({
   hiCardHeader: { flexDirection: 'column' },
   hiYearText: { color: COLORS.accent, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
   hiChampRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  hiChampText: { color: COLORS.white, fontSize: 20, fontWeight: '900', flex: 1 },
-  hiChampStats: { alignItems: 'flex-end' },
+  hiChampText: { color: COLORS.white, fontSize: 20, fontWeight: '900', flex: 1, flexShrink: 1 },
+  hiChampStats: { alignItems: 'flex-end', minWidth: 50 },
   hiChampStatText: { color: COLORS.primary, fontSize: 10, fontWeight: '900' },
   hiUserSummary: { flexDirection: 'row', gap: 10, marginTop: 12, borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 12, alignItems: 'center' },
   hiUserLabel: { color: COLORS.textMuted, fontSize: 10, fontWeight: '900', letterSpacing: 1 },

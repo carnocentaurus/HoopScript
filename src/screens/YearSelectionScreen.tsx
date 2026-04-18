@@ -14,30 +14,25 @@ const YearSelectionScreen = ({ onSelectYear, onBack }: YearSelectionScreenProps)
   
   return (
     <View style={globalStyles.blackContainer}>
-      <TouchableOpacity onPress={onBack} style={{ marginBottom: 20 }}>
+      <TouchableOpacity onPress={onBack} style={globalStyles.mb20}>
         <Icon name="chevron-back" size={32} color={COLORS.primary} />
       </TouchableOpacity>
       <Text style={globalStyles.yearSelectionHeader}>START YEAR</Text>
       <ScrollView 
         style={globalStyles.appScrollList} 
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={globalStyles.appScrollListContent}
       >
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+        <View style={globalStyles.flexRowWrapBetween}>
           {years.map(year => (
             <TouchableOpacity 
               key={year} 
               style={[
                 globalStyles.appYearButton, 
-                { 
-                  backgroundColor: COLORS.primary, 
-                  borderLeftWidth: 0, 
-                  width: '48%', 
-                  marginBottom: 10 
-                }
+                globalStyles.appYearButtonPrimary
               ]}
               onPress={() => onSelectYear(year)}
             >
-              <Text style={[globalStyles.appYearText, { color: COLORS.black }]}>{year}</Text>
+              <Text style={[globalStyles.appYearText, globalStyles.appYearTextBlack]}>{year}</Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -23,10 +23,6 @@ const TeamMatchupCard = ({ team }: { team: any }) => {
         <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.defense}</Text><Text style={globalStyles.ratingLabel}>DEF</Text></View>
         <View style={globalStyles.ratingBox}><Text style={[globalStyles.ratingVal, globalStyles.ovrVal]}>{ratings.overall}</Text><Text style={globalStyles.ratingLabel}>OVR</Text></View>
       </View>
-
-      <View style={[globalStyles.homeVenueBadge]}>
-        <Text style={[globalStyles.homeVenueText, { color: COLORS.textSub }]}>{team.isHome ? "HOME" : "AWAY"}</Text>
-      </View>
     </View>
   );
 };
@@ -76,31 +72,31 @@ const HomeScreen = ({
   return (
     <Screen>
       {/* --- SEASON & YEAR HEADER --- */}
-      <View style={[globalStyles.homeSeasonHeader, { alignItems: 'center' }]}>
+      <View style={[globalStyles.homeSeasonHeader, globalStyles.flexRowAlignCenter]}>
         <TouchableOpacity onPress={onBackToSaves}>
            <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }} />
-        <View style={{ backgroundColor: COLORS.card, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 }}>
-          <Text style={{ color: COLORS.textSub, fontSize: 12, fontWeight: '900', letterSpacing: 1 }}>S{save.seasonCount} Y{save.currentYear}</Text>
+        <View style={globalStyles.flex1} />
+        <View style={globalStyles.homeYearBadge}>
+          <Text style={globalStyles.homeYearText}>S{save.seasonCount} Y{save.currentYear}</Text>
         </View>
-        <View style={{ flex: 1 }} />
+        <View style={globalStyles.flex1} />
         
         {/* RIGHT SIDE ICONS */}
-        <TouchableOpacity style={{ padding: 10 }} onPress={onViewHistory}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewHistory}>
           <Icon name="time-outline" size={32} color="#B34726" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 10 }} onPress={onViewTeam}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewTeam}>
           <Icon name="basketball-outline" size={32} color="#B34726" />
         </TouchableOpacity>
-        <TouchableOpacity style={{ padding: 10 }} onPress={onViewStandings}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewStandings}>
           <Icon name="podium-outline" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
 
       <View style={globalStyles.homeTopNav}>
         {(save.playoffs || isEndOfSeason) && (
-          <TouchableOpacity style={[globalStyles.homeStandingsBtn, { marginRight: 8 }]} onPress={onViewBracket}>
+          <TouchableOpacity style={globalStyles.homeStandingsBtn} onPress={onViewBracket}>
             <Text style={globalStyles.homeStandingsBtnText}>PLAYOFF BRACKET</Text>
           </TouchableOpacity>
         )}
@@ -123,7 +119,7 @@ const HomeScreen = ({
           </View>
         ) : (
           <>
-            <Text style={[globalStyles.homeSectionLabelCenter, { fontSize: 10, color: COLORS.textSub }]}>
+            <Text style={globalStyles.homeSectionLabelCenter}>
               {save.playoffs 
                 ? getPlayoffRoundTitle(save.playoffs.round) 
                 : save.gamesPlayed === 81 
@@ -134,11 +130,10 @@ const HomeScreen = ({
             <View style={globalStyles.homeMatchupWrapper}>
               <TeamMatchupCard team={LeftTeam} />
               <View style={globalStyles.homeVsContainer}>
-                <Text style={globalStyles.homeVsText}>AT</Text>
+                <Text style={[globalStyles.homeVsText, { fontSize: 12 }]}>AT</Text>
               </View>
               <TeamMatchupCard team={RightTeam} />
             </View>
-
             <View style={globalStyles.homeProgressSection}>
               {save.playoffs ? (
                 <View style={globalStyles.homeSeriesScoreContainer}>
@@ -155,8 +150,8 @@ const HomeScreen = ({
               ) : (
                 <>
                   <View style={globalStyles.homeProgressInfo}>
-                    <Text style={[globalStyles.homeProgressLabel, { fontSize: 10, color: COLORS.textSub }]}>SEASON PROGRESS</Text>
-                    <Text style={[globalStyles.homeStatsText, { fontSize: 10, color: COLORS.textSub }]}>{save.gamesPlayed} / {save.totalGames}</Text>
+                    <Text style={globalStyles.homeProgressLabel}>SEASON PROGRESS</Text>
+                    <Text style={globalStyles.homeStatsText}>{save.gamesPlayed} / {save.totalGames}</Text>
                   </View>
                   <View style={globalStyles.homeProgressBarBg}>
                     <View 
@@ -175,13 +170,13 @@ const HomeScreen = ({
 
       {!(isEliminated || isChampion || missedPlayoffs) && (
         <TouchableOpacity 
-          style={[globalStyles.homeSimButton, { backgroundColor: '#B34726' }]} 
+          style={globalStyles.homeSimButton} 
           onPress={isSeriesCompleted ? onSimDay : onQuickSim}
         >
-          <Text style={[globalStyles.homeSimButtonText, { color: COLORS.black }]}>
+          <Text style={globalStyles.homeSimButtonText}>
             {save.playoffs 
               ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
-              : "SIMULATE"}
+              : "QUICK SIM"}
           </Text>
         </TouchableOpacity>
       )}
