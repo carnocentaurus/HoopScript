@@ -43,14 +43,14 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={globalStyles.qsLogoPlaceholder}>{save.city.charAt(0)}</Text>
+        <Text style={[globalStyles.qsLogoPlaceholder, { backgroundColor: 'transparent' }]}>{save.city.charAt(0)}</Text>
         <Text style={globalStyles.qsCityName}>{save.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.defense}</Text><Text style={globalStyles.ratingLabel}>DEF</Text></View>
           <View style={globalStyles.ratingBox}><Text style={[globalStyles.ratingVal, globalStyles.ovrVal]}>{ratings.overall}</Text><Text style={globalStyles.ratingLabel}>OVR</Text></View>
         </View>
-        <Text style={[globalStyles.qsScore, isFinished && myScore > oppScore && globalStyles.qsWinner]}>{myScore}</Text>
+        <Text style={[globalStyles.qsScore, isFinished && myScore > oppScore && globalStyles.qsWinnerTerracotta]}>{myScore}</Text>
       </View>
     );
   };
@@ -60,14 +60,14 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={globalStyles.qsLogoPlaceholder}>{opponent.city.charAt(0)}</Text>
+        <Text style={[globalStyles.qsLogoPlaceholder, { backgroundColor: 'transparent' }]}>{opponent.city.charAt(0)}</Text>
         <Text style={globalStyles.qsCityName}>{opponent.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.defense}</Text><Text style={globalStyles.ratingLabel}>DEF</Text></View>
           <View style={globalStyles.ratingBox}><Text style={[globalStyles.ratingVal, globalStyles.ovrVal]}>{ratings.overall}</Text><Text style={globalStyles.ratingLabel}>OVR</Text></View>
         </View>
-        <Text style={[globalStyles.qsScore, isFinished && oppScore > myScore && globalStyles.qsWinner]}>{oppScore}</Text>
+        <Text style={[globalStyles.qsScore, isFinished && oppScore > myScore && globalStyles.qsWinnerTerracotta]}>{oppScore}</Text>
       </View>
     );
   };
@@ -76,7 +76,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
     <Screen>
       <View style={globalStyles.qsHeaderRow}>
         <TouchableOpacity onPress={onBack} style={globalStyles.qsBackBtn}>
-          <Icon name="chevron-back" size={30} color={COLORS.text} />
+          <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={globalStyles.qsScrollContent} showsVerticalScrollIndicator={false}>
@@ -96,8 +96,8 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
         {isFinished && result && (
           <View style={globalStyles.qsPostGame}>
-            <TouchableOpacity style={globalStyles.qsContinueButton} onPress={() => onFinish(result)}>
-              <Text style={globalStyles.qsContinueText}>CONTINUE</Text>
+            <TouchableOpacity style={globalStyles.qsContinueButtonTerracotta} onPress={() => onFinish(result)}>
+              <Text style={globalStyles.qsContinueTextBlack}>CONTINUE</Text>
             </TouchableOpacity>
           </View>
         )}

@@ -458,8 +458,9 @@ export const globalStyles = StyleSheet.create({
   qsOtBadge: { alignSelf: 'center', backgroundColor: COLORS.accent, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
   qsOtText: { color: COLORS.white, fontWeight: 'bold', fontSize: 11 },
   qsPostGame: { marginTop: 10, paddingHorizontal: 20 },
-  qsContinueButton: { backgroundColor: COLORS.white, padding: 18, borderRadius: 12, alignItems: 'center' },
-  qsContinueText: { fontWeight: '900', fontSize: 16, color: COLORS.black },
+  qsWinnerTerracotta: { color: '#B34726' },
+  qsContinueButtonTerracotta: { backgroundColor: '#B34726', padding: 18, borderRadius: 12, alignItems: 'center' },
+  qsContinueTextBlack: { fontWeight: '900', fontSize: 16, color: COLORS.black },
 
   // --- STANDINGS SCREEN ---
   stHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
