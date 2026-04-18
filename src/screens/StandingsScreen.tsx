@@ -35,12 +35,10 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
 
   return (
     <Screen>
-      <View style={globalStyles.stHeader}>
+      <View style={[globalStyles.stHeader, { justifyContent: 'flex-start' }]}>
         <TouchableOpacity onPress={onBack}>
-          <Icon name="chevron-back" size={30} color={COLORS.text} />
+          <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
-        <Text style={globalStyles.stTitle}>STANDINGS</Text>
-        <View style={{ width: 50 }} /> 
       </View>
 
       <View style={globalStyles.stTabBar}>
