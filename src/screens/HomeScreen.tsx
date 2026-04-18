@@ -181,7 +181,7 @@ const HomeScreen = ({
           <Text style={[globalStyles.homeSimButtonText, { color: COLORS.black }]}>
             {save.playoffs 
               ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
-              : "QUICK SIM"}
+              : "SIMULATE"}
           </Text>
         </TouchableOpacity>
       )}

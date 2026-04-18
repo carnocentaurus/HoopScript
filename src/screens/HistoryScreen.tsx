@@ -11,7 +11,10 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
     <View style={globalStyles.hiCardHeader}>
       <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
       <View style={globalStyles.hiChampRow}>
-        <Text style={globalStyles.hiChampText}>🏆 {item.champion.toUpperCase()}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <Icon name="trophy" size={20} color="#B34726" style={{ marginRight: 8 }} />
+          <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
+        </View>
         <View style={globalStyles.hiChampStats}>
           <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
           <Text style={globalStyles.hiChampStatText}>{item.championRank}</Text>
@@ -30,12 +33,10 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   return (
     <Screen>
-      <View style={globalStyles.hiHeader}>
-        <TouchableOpacity style={globalStyles.hiHeaderBack} onPress={onBack}>
-          <Icon name="chevron-back" size={28} color={COLORS.text} />
+      <View style={[globalStyles.hiHeader, { justifyContent: 'flex-start' }]}>
+        <TouchableOpacity onPress={onBack}>
+          <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
-        <Text style={globalStyles.hiHeaderTitle}>CAREER HISTORY</Text>
-        <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={globalStyles.hiScrollContent}>
