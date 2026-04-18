@@ -188,6 +188,73 @@ export const processAging = (roster: Player[]): Player[] => {
   return validateAndFixRoster(agedRoster);
 };
 
+export const generateFullBracket = (currentSave: GameSave): SeriesMatchup[] => {
+  const bracket: SeriesMatchup[] = [];
+  const conferences: ('East' | 'West')[] = ['East', 'West'];
+
+  conferences.forEach(conf => {
+    const teams = currentSave.standings
+      .filter(t => t.conf === conf)
+      .sort((a, b) => b.wins - a.wins)
+      .slice(0, 8);
+
+    const matchups = [[0, 7], [3, 4], [1, 6], [2, 5]];
+    
+    matchups.forEach((pair, index) => {
+      bracket.push({
+        id: `${conf.charAt(0)}${index + 1}`,
+        round: 1,
+        highSeed: teams[pair[0]].city,
+        lowSeed: teams[pair[1]].city,
+        highSeedWins: 0,
+        lowSeedWins: 0,
+        isCompleted: false,
+        conference: conf
+      });
+    });
+  });
+  return bracket;
+};
+
+export const calculateRank = (city: string, standings: any[]) => {
+  if (!standings || standings.length === 0) return "15";
+  const team = standings.find(t => t.city === city);
+  if (!team) return "15";
+  
+  const confTeams = standings
+    .filter(t => t.conf === team.conf)
+    .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+    
+  const index = confTeams.findIndex(t => t.city === city);
+  return (index + 1).toString();
+};
+
+export const getTeamStrength = (city: string, standings: any[]) => {
+  const teamData = standings.find(t => t.city === city);
+  if (!teamData || !teamData.roster || teamData.roster.length === 0) return 75;
+
+  const starters = teamData.roster.filter((p: any) => p.isStarter);
+  const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
+
+  const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
+  const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
+  
+  return (off + def) / 2;
+};
+
+export const getHighSeedWinProb = (highSeed: string, lowSeed: string, standings: any[]) => {
+  const highPower = getTeamStrength(highSeed, standings);
+  const lowPower = getTeamStrength(lowSeed, standings);
+  const highRank = parseInt(calculateRank(highSeed, standings));
+  const lowRank = parseInt(calculateRank(lowSeed, standings));
+
+  // Base 55% for higher seed (Home court + Closeness to top)
+  // + 1% for each rank difference
+  // + 1% for each OVR difference
+  let prob = 0.55 + (highPower - lowPower) / 100 + (lowRank - highRank) * 0.01;
+  return Math.max(0.2, Math.min(0.85, prob)); // Cap it between 20% and 85%
+};
+
 // --- DRAFT LOGIC ---
 
 // Approx 2019 NBA Lottery Odds (Percentage for #1 pick)
