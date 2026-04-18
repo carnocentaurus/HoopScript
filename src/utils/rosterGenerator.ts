@@ -47,13 +47,35 @@ export const generateRookie = (lastName?: string): Player => {
 };
 
 export const validateAndFixRoster = (roster: Player[]): Player[] => {
-  // 1. Sort by overall to identify the best players
-  const sorted = [...roster].sort((a, b) => b.overall - a.overall);
-  
-  // 2. Set top 5 as starters and ensure they are at least 75 OVR
+  // 1. Identify the best player for each starting position
+  const positions = ["PG", "SG", "SF", "PF", "C"] as const;
+  const starterIds = new Set<string>();
+
+  positions.forEach(pos => {
+    const bestAtPos = [...roster]
+      .filter(p => p.position === pos && !starterIds.has(p.id))
+      .sort((a, b) => b.overall - a.overall)[0];
+    
+    if (bestAtPos) {
+      starterIds.has(bestAtPos.id);
+      starterIds.add(bestAtPos.id);
+    }
+  });
+
+  // 2. If we don't have 5 starters (rare but possible), fill with next best overall
+  if (starterIds.size < 5) {
+    const remaining = [...roster]
+      .filter(p => !starterIds.has(p.id))
+      .sort((a, b) => b.overall - a.overall);
+    
+    for (let i = 0; i < (5 - starterIds.size); i++) {
+      if (remaining[i]) starterIds.add(remaining[i].id);
+    }
+  }
+
+  // 3. Update roster with starter flags and OVR minimums
   return roster.map(p => {
-    const rank = sorted.findIndex(s => s.id === p.id);
-    const isStarter = rank < 5;
+    const isStarter = starterIds.has(p.id);
     
     let finalOff = p.offense;
     let finalDef = p.defense;

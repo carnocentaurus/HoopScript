@@ -579,7 +579,7 @@ function MainApp() {
       lastName: p.name,
       age: 25, // Default age for preview
       number: index + 1,
-      position: ["PG", "SG", "SF", "PF", "C"][index] || "BN",
+      position: index < 5 ? ["PG", "SG", "SF", "PF", "C"][index] : ["PG", "SG", "SF", "PF", "C"][Math.floor(Math.random() * 5)],
       offense: p.off,
       defense: p.def,
       overall: Math.round((p.off + p.def) / 2),
