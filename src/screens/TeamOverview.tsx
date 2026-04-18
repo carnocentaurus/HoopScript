@@ -24,10 +24,24 @@ interface TeamOverviewProps {
 }
 
 const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) => {
+  const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+
+  const sortPlayersByPosition = (players: SimplePlayer[]) => {
+    return [...players].sort((a, b) => {
+      const orderA = POSITION_ORDER[a.position || ''] || 99;
+      const orderB = POSITION_ORDER[b.position || ''] || 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return b.overall - a.overall;
+    });
+  };
+
   // Map simple roster to what calculateTeamRatings expects if needed, 
   // though calculateTeamRatings currently expects Player[] from types/save.
   // We'll cast for now as the fields we need are there.
   const ratings = calculateTeamRatings(roster as any);
+
+  const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
+  const bench = sortPlayersByPosition(roster.filter(p => !p.isStarter));
 
   return (
     <Screen>
@@ -48,9 +62,9 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
       <FlatList
         data={[
           { type: 'header' as const, title: 'STARTERS' },
-          ...roster.filter(p => p.isStarter).map(p => ({ ...p, type: 'player' as const })),
+          ...starters.map(p => ({ ...p, type: 'player' as const })),
           { type: 'header' as const, title: 'BENCH' },
-          ...roster.filter(p => !p.isStarter).map(p => ({ ...p, type: 'player' as const }))
+          ...bench.map(p => ({ ...p, type: 'player' as const }))
         ]}
         keyExtractor={(item, index) => (item.type === 'header' ? `header-${item.title}` : (item.id || index.toString()))}
         renderItem={({ item }) => {

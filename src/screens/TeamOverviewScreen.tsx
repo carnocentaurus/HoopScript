@@ -15,8 +15,19 @@ interface TeamOverviewScreenProps {
 }
 
 const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
-  const starters = roster.filter(p => p.isStarter);
-  const bench = roster.filter(p => !p.isStarter);
+  const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+
+  const sortPlayersByPosition = (players: Player[]) => {
+    return [...players].sort((a, b) => {
+      const orderA = POSITION_ORDER[a.position] || 99;
+      const orderB = POSITION_ORDER[b.position] || 99;
+      if (orderA !== orderB) return orderA - orderB;
+      return b.overall - a.overall; // Secondary sort by overall
+    });
+  };
+
+  const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
+  const bench = sortPlayersByPosition(roster.filter(p => !p.isStarter));
   const ratings = calculateTeamRatings(roster);
 
   const championships = history?.filter(h => h.champion === city).length || 0;
