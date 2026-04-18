@@ -65,6 +65,13 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  yearSelectionHeader: {
+    color: COLORS.textSub,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
 
   // --- LOADING SCREEN ---
 
@@ -517,6 +524,7 @@ export const globalStyles = StyleSheet.create({
   toSectionHeaderText: { fontSize: 12, fontWeight: 'bold', color: COLORS.textSub, letterSpacing: 1 },
   toConfirmBtn: { backgroundColor: COLORS.primary, margin: 20, padding: 15, borderRadius: 10, alignItems: 'center' },
   toConfirmBtnText: { color: COLORS.white, fontWeight: 'bold', fontSize: 16 },
+  toConfirmBtnTextBlack: { color: COLORS.black, fontWeight: 'bold', fontSize: 16 },
 
   // --- HISTORY SCREEN ---
   hiHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: COLORS.border },

@@ -17,6 +17,7 @@ const YearSelectionScreen = ({ onSelectYear, onBack }: YearSelectionScreenProps)
       <TouchableOpacity onPress={onBack} style={{ marginBottom: 20 }}>
         <Icon name="chevron-back" size={32} color={COLORS.primary} />
       </TouchableOpacity>
+      <Text style={globalStyles.yearSelectionHeader}>START YEAR</Text>
       <ScrollView 
         style={globalStyles.appScrollList} 
         contentContainerStyle={{ flexGrow: 1 }}

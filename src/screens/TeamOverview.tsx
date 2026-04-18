@@ -35,7 +35,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
         <TouchableOpacity onPress={onBack} style={globalStyles.toBackBtn}>
           <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
-        <Text style={globalStyles.toHeaderText}>{city} Roster</Text>
+        <Text style={globalStyles.toHeaderText}>{city}</Text>
         <View style={{ width: 60 }} />
       </View>
 
@@ -76,7 +76,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
 
       {onConfirm && (
         <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={onConfirm}>
-          <Text style={globalStyles.toConfirmBtnText}>CHOOSE THIS TEAM</Text>
+          <Text style={globalStyles.toConfirmBtnTextBlack}>SELECT TEAM</Text>
         </TouchableOpacity>
       )}
     </Screen>
