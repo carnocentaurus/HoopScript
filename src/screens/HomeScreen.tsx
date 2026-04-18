@@ -178,7 +178,7 @@ const HomeScreen = ({
           style={[globalStyles.homeSimButton, { backgroundColor: '#B34726' }]} 
           onPress={isSeriesCompleted ? onSimDay : onQuickSim}
         >
-          <Text style={[globalStyles.homeSimButtonText, { color: COLORS.white }]}>
+          <Text style={[globalStyles.homeSimButtonText, { color: COLORS.black }]}>
             {save.playoffs 
               ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
               : "QUICK SIM"}
