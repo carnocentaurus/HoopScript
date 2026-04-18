@@ -60,7 +60,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
     <Screen>
       <View style={globalStyles.tosHeader}>
         <TouchableOpacity onPress={onBack} style={globalStyles.tosBackBtn}>
-          <Icon name="chevron-back" size={30} color={COLORS.text} />
+          <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
         <View style={{ width: 60 }} />
@@ -68,7 +68,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
 
       <ScrollView style={globalStyles.tosContainer} showsVerticalScrollIndicator={false}>
         <View style={globalStyles.tosTrophySection}>
-          <Text style={globalStyles.tosTrophyIcon}>🏆</Text>
+          <Icon name="trophy" size={32} color="#FFD700" />
           <Text style={globalStyles.tosTrophyCount}>{championships}</Text>
           <Text style={globalStyles.tosTrophyLabel}>CHAMPIONSHIPS</Text>
         </View>

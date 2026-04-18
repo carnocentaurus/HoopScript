@@ -12,7 +12,7 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
       <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
       <View style={globalStyles.hiChampRow}>
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <Icon name="trophy" size={20} color="#B34726" style={{ marginRight: 8 }} />
+          <Icon name="trophy" size={20} color="#FFD700" style={{ marginRight: 8 }} />
           <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
         </View>
         <View style={globalStyles.hiChampStats}>
