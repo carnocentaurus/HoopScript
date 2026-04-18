@@ -7,5 +7,8 @@
   1. Modify `src/styles/globalStyles.ts` (for layouts) or `src/styles/theme.ts` (for colors/branding).
   2. Export the new styles.
   3. Update the component to import and use those styles.
+
 - **Consistency:** Use the existing theme variables for colors to maintain the minimalist, flat-color aesthetic.
 - **TypeScript & React Native:** Always use `StyleSheet.create` for styles in `.ts` files to ensure full TypeScript support and performance optimization.
+- **Main Color:** Always use #B34726 as color whenever I say 'Terracotta'.
+- **Icons:** Always use `react-native-vector-icons` for icons.
