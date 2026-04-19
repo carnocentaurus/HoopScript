@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Animated, StyleSheet } from 'react-native';
-import { Ionicons as Icon } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
-import { COLORS } from '../styles/theme';
-
-interface LotteryResult {
-  city: string;
-  rank: number; // 1-14 (1 is worst record)
-  pick: number; // 1-14 (final pick)
-}
+import { LotteryResult } from '../types/save';
 
 interface DraftLotteryScreenProps {
   results: LotteryResult[];
@@ -17,205 +10,112 @@ interface DraftLotteryScreenProps {
 }
 
 const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) => {
-  const [revealedIndex, setRevealedIndex] = useState(15); // Start at 15 (none revealed)
+  const [phase, setViewPhase] = useState<'projected' | 'reveal'>('projected');
+  const [revealedCount, setRevealedCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   
-  // Sort results by pick descending (14 down to 1)
-  const sortedResults = [...results].sort((a, b) => b.pick - a.pick);
+  // revealOrder: index 0 is pick 14, index 13 is pick 1
+  const revealOrder = [...results].sort((a, b) => b.pick - a.pick); 
 
-  const revealNext = () => {
-    if (revealedIndex > 1) {
-      setRevealedIndex(prev => prev - 1);
-    } else {
-      setIsFinished(true);
+  useEffect(() => {
+    let interval: any;
+    if (phase === 'reveal' && revealedCount < 14) {
+      interval = setInterval(() => {
+        setRevealedCount(prev => {
+          if (prev >= 13) {
+            clearInterval(interval);
+            setIsFinished(true);
+            return 14;
+          }
+          return prev + 1;
+        });
+      }, 1000);
     }
-  };
+    return () => clearInterval(interval);
+  }, [phase, revealedCount]);
 
-  const currentRevealing = sortedResults.find(r => r.pick === revealedIndex);
+  if (phase === 'projected') {
+    const projected = [...results].sort((a, b) => a.rank - b.rank);
+
+    return (
+      <Screen>
+        <View style={globalStyles.dlHeader}>
+          <Text style={globalStyles.dlTitle}>DRAFT LOTTERY</Text>
+          <Text style={globalStyles.dlSubtitle}>PROJECTED DRAFT ORDER</Text>
+        </View>
+
+        <ScrollView style={globalStyles.dlProjectedList}>
+          {projected.map((res) => (
+            <View key={res.city} style={globalStyles.dlProjectedRow}>
+              <Text style={globalStyles.dlProjectedCity}>{res.city.toUpperCase()}</Text>
+              <Text style={globalStyles.dlProjectedPick}>PICK #{res.rank}</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+        <TouchableOpacity 
+          style={globalStyles.dlBeginBtn} 
+          onPress={() => setViewPhase('reveal')}
+        >
+          <Text style={globalStyles.dlBeginBtnText}>BEGIN LOTTERY</Text>
+        </TouchableOpacity>
+      </Screen>
+    );
+  }
+
+  // Reveal Phase
+  const currentPickIndex = Math.min(revealedCount, 13);
+  const currentRevealing = revealOrder[currentPickIndex];
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <Text style={styles.title}>DRAFT LOTTERY</Text>
-        <Text style={styles.subtitle}>REVEALING THE TOP 14 PICKS</Text>
+      <View style={globalStyles.dlHeader}>
+        <Text style={globalStyles.dlTitle}>DRAFT LOTTERY</Text>
+        <Text style={globalStyles.dlSubtitle}>REVEALING PICKS...</Text>
       </View>
 
-      <View style={styles.revealContainer}>
-        {revealedIndex > 14 ? (
-          <TouchableOpacity style={styles.startBtn} onPress={revealNext}>
-            <Text style={styles.startBtnText}>START LOTTERY REVEAL</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.activeReveal}>
-            <Text style={styles.pickLabel}>PICK #{revealedIndex}</Text>
-            <View style={styles.cityCard}>
-               <Text style={styles.cityName}>{currentRevealing?.city.toUpperCase()}</Text>
-               <Text style={styles.rankLabel}>PROBABILITY RANK: {currentRevealing?.rank}</Text>
-               {currentRevealing && currentRevealing.pick < currentRevealing.rank && (
-                 <View style={styles.jumpBadge}>
-                   <Text style={styles.jumpText}>JUMPED UP!</Text>
-                 </View>
-               )}
+      <View style={globalStyles.dlRevealContainer}>
+        <View style={globalStyles.dlActiveReveal}>
+          <Text style={globalStyles.dlPickLabel}>PICK #{currentRevealing.pick}</Text>
+          <View style={globalStyles.dlCityCard}>
+             <Text style={globalStyles.dlCityName}>{currentRevealing.city.toUpperCase()}</Text>
+             <Text style={globalStyles.dlRankLabel}>PROBABILITY RANK: {currentRevealing.rank}</Text>
+             {currentRevealing.pick < currentRevealing.rank && (
+               <View style={globalStyles.dlJumpBadge}>
+                 <Text style={globalStyles.dlJumpText}>JUMPED UP!</Text>
+               </View>
+             )}
+          </View>
+          
+          {isFinished && (
+            <TouchableOpacity 
+              style={globalStyles.dlBeginBtn} 
+              onPress={onComplete}
+            >
+              <Text style={globalStyles.dlBeginBtnText}>GO TO DRAFT</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      <View style={globalStyles.dlSummaryList}>
+        {revealOrder.map((res, idx) => {
+          const isRevealed = idx <= revealedCount;
+          return (
+            <View key={res.pick} style={[
+              globalStyles.dlSummaryItem, 
+              isRevealed && globalStyles.dlRevealedItem
+            ]}>
+              <Text style={globalStyles.dlSummaryPick}>#{res.pick}</Text>
+              <Text style={globalStyles.dlSummaryCity}>
+                {isRevealed ? res.city : "???"}
+              </Text>
             </View>
-            
-            {!isFinished ? (
-              <TouchableOpacity style={styles.nextBtn} onPress={revealNext}>
-                <Text style={styles.nextBtnText}>{revealedIndex === 1 ? "FINISH" : "NEXT PICK"}</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.finishBtn} onPress={onComplete}>
-                <Text style={styles.finishBtnText}>GO TO DRAFT</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
-      </View>
-
-      <View style={styles.summaryList}>
-        {sortedResults.map((res) => (
-          <View key={res.pick} style={[
-            styles.summaryItem, 
-            res.pick >= revealedIndex && styles.revealedItem
-          ]}>
-            <Text style={styles.summaryPick}>#{res.pick}</Text>
-            <Text style={styles.summaryCity}>
-              {res.pick >= revealedIndex ? res.city : "???"}
-            </Text>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </Screen>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  title: {
-    color: COLORS.primary,
-    fontSize: 28,
-    fontWeight: '900',
-    letterSpacing: 2,
-  },
-  subtitle: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-    fontWeight: '700',
-    marginTop: 5,
-  },
-  revealContainer: {
-    height: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  startBtn: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 12,
-  },
-  startBtnText: {
-    color: COLORS.black,
-    fontWeight: '900',
-    fontSize: 16,
-  },
-  activeReveal: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  pickLabel: {
-    color: COLORS.textMuted,
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 10,
-  },
-  cityCard: {
-    backgroundColor: COLORS.card,
-    width: '100%',
-    padding: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: COLORS.border,
-    marginBottom: 30,
-  },
-  cityName: {
-    color: COLORS.white,
-    fontSize: 32,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  rankLabel: {
-    color: COLORS.textSub,
-    fontSize: 12,
-    fontWeight: '700',
-    marginTop: 10,
-  },
-  jumpBadge: {
-    backgroundColor: COLORS.success,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginTop: 15,
-  },
-  jumpText: {
-    color: COLORS.white,
-    fontSize: 10,
-    fontWeight: '900',
-  },
-  nextBtn: {
-    backgroundColor: '#333',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 12,
-  },
-  nextBtnText: {
-    color: COLORS.white,
-    fontWeight: '900',
-  },
-  finishBtn: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 12,
-  },
-  finishBtnText: {
-    color: COLORS.black,
-    fontWeight: '900',
-  },
-  summaryList: {
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 10,
-    justifyContent: 'center',
-  },
-  summaryItem: {
-    width: '45%',
-    flexDirection: 'row',
-    backgroundColor: COLORS.card,
-    margin: 5,
-    padding: 10,
-    borderRadius: 8,
-    opacity: 0.3,
-  },
-  revealedItem: {
-    opacity: 1,
-    borderColor: COLORS.primary,
-    borderWidth: 1,
-  },
-  summaryPick: {
-    color: COLORS.primary,
-    fontWeight: '900',
-    width: 30,
-  },
-  summaryCity: {
-    color: COLORS.white,
-    fontWeight: '700',
-  },
-});
 
 export default DraftLotteryScreen;
