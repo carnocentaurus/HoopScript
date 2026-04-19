@@ -41,7 +41,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
   const ratings = calculateTeamRatings(roster as any);
 
   const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
-  const bench = sortPlayersByPosition(roster.filter(p => !p.isStarter));
+  const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
 
   return (
     <Screen>

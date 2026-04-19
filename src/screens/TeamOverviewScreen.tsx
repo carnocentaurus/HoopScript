@@ -27,7 +27,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   };
 
   const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
-  const bench = sortPlayersByPosition(roster.filter(p => !p.isStarter));
+  const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
   const ratings = calculateTeamRatings(roster);
 
   const championships = history?.filter(h => h.champion === city).length || 0;
