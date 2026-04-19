@@ -87,7 +87,7 @@ const HomeScreen = ({
           <Icon name="time-outline" size={32} color="#B34726" />
         </TouchableOpacity>
         <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewTeam}>
-          <Icon name="basketball-outline" size={32} color="#B34726" />
+          <Icon name="people-outline" size={32} color="#B34726" />
         </TouchableOpacity>
         <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewStandings}>
           <Icon name="podium-outline" size={32} color="#B34726" />
@@ -97,11 +97,6 @@ const HomeScreen = ({
       <View style={globalStyles.homeMainContent}>
         {(isEliminated || isChampion || missedPlayoffs) ? (
           <View style={globalStyles.homeEndSeasonContainer}>
-            {isChampion ? (
-              <Text style={globalStyles.homeEndSeasonIcon}>🏆</Text>
-            ) : (
-              <Icon name="basketball" size={64} color="#B34726" style={{ marginBottom: 20 }} />
-            )}
             <Text style={globalStyles.homeEndSeasonTitle}>
               {isChampion ? "LEAGUE CHAMPIONS" : "SEASON COMPLETE"}
             </Text>

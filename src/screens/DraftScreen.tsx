@@ -121,7 +121,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         <View style={globalStyles.drHeaderTop}>
           <Text style={globalStyles.drTitle}>ROOKIE DRAFT</Text>
           <TouchableOpacity onPress={onViewTeam}>
-            <Icon name="basketball-outline" size={32} color="#B34726" />
+            <Icon name="people-outline" size={32} color="#B34726" />
           </TouchableOpacity>
         </View>
 
