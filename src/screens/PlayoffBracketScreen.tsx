@@ -12,9 +12,10 @@ interface PlayoffProps {
   onSimDay: () => void;
   onBack: () => void;
   onStartNewSeason: () => void;
+  onViewFullBracket: () => void;
 }
 
-const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: PlayoffProps) => {
+const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onViewFullBracket }: PlayoffProps) => {
   const currentRound = save.playoffs?.round || 1;
   const roundMatchups = save.playoffBracket?.filter(s => s.round === currentRound) || [];
   
@@ -99,6 +100,10 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
           </View>
         )}
       </ScrollView>
+
+      <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta, globalStyles.mb0]} onPress={onViewFullBracket}>
+        <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>FULL BRACKET</Text>
+      </TouchableOpacity>
 
       {/* Button Logic: Show "Start New Season" if Finals are over, otherwise "Simulate Day" */}
       {isFinalsOver ? (

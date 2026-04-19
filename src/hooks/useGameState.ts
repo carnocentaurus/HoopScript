@@ -19,7 +19,7 @@ import {
 
 const STORAGE_KEY = '@hoopscript_saves';
 
-export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft';
+export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'fullBracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft';
 
 export const useGameState = () => {
   const [view, setView] = useState<ViewState>('loading');

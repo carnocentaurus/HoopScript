@@ -14,6 +14,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import QuickSimScreen from './src/screens/QuickSimScreen';
 import StandingsScreen from './src/screens/StandingsScreen';
 import PlayoffBracketScreen from './src/screens/PlayoffBracketScreen'; 
+import FullPlayoffBracketScreen from './src/screens/FullPlayoffBracketScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import DraftScreen from './src/screens/DraftScreen';
@@ -77,7 +78,8 @@ function MainApp() {
   }
 
   if (view === 'standings') return <StandingsScreen save={save} onBack={() => setView('home')} onViewTeam={city => { setSelectedTeamCity(city); setView('myTeamOverview'); }} />;
-  if (view === 'bracket') return <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} />;
+  if (view === 'bracket') return <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} onViewFullBracket={() => setView('fullBracket')} />;
+  if (view === 'fullBracket') return <FullPlayoffBracketScreen save={save} onBack={() => setView('bracket')} />;
   if (view === 'history') return <HistoryScreen save={save} onBack={() => setView('home')} />;
   if (view === 'lottery' && save.lotteryResults) return <DraftLotteryScreen results={save.lotteryResults} onComplete={() => setView('draft')} />;
   if (view === 'draft' && save.draftState) return <DraftScreen userCity={save.city} draftState={save.draftState} onPick={handleDraftPick} onComplete={handleDraftComplete} onViewTeam={() => { setSelectedTeamCity(save.city); setView('myTeamOverview'); }} />;

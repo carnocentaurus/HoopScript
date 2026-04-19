@@ -58,8 +58,10 @@ export const globalStyles = StyleSheet.create({
   vSpacer20: { height: 20 },
   vSpacer40: { height: 40 },
   mb10: { marginBottom: 10 },
+  mb15: { marginBottom: 15 },
   mb20: { marginBottom: 20 },
   mb30: { marginBottom: 30 },
+  mb0: { marginBottom: 0 },
   mr8: { marginRight: 8 },
   pb20: { paddingBottom: 20 },
   fs12: { fontSize: 12 },
@@ -633,6 +635,10 @@ export const globalStyles = StyleSheet.create({
   pbSimDayBtnText: { color: COLORS.white, fontWeight: 'bold' },
   pbChampContainer: { alignItems: 'center', marginTop: 20, padding: 20 },
   pbChampText: { fontSize: 20, fontWeight: '900', color: COLORS.white },
+
+  // --- FULL PLAYOFF BRACKET SCREEN ---
+  fpbRoundContainer: { marginBottom: 30 },
+  fpbRoundTitle: { color: COLORS.textSub, fontSize: 14, fontWeight: '900', letterSpacing: 2, marginBottom: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingBottom: 5 },
 
   // --- TEAM SELECTION SCREEN ---
   tsHeader: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginVertical: 20, flex: 1, color: COLORS.white },
