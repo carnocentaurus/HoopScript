@@ -489,7 +489,7 @@ export const globalStyles = StyleSheet.create({
   qsVs: { color: COLORS.border, fontWeight: '900', fontSize: 18 },
   qsWinner: { color: COLORS.success },
   qsOtBadge: { alignSelf: 'center', backgroundColor: COLORS.accent, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
-  qsOtText: { color: COLORS.white, fontWeight: 'bold', fontSize: 11 },
+  qsOtText: { color: COLORS.black, fontWeight: '900', fontSize: 11 },
   qsPostGame: { marginTop: 10, paddingHorizontal: 20 },
   qsWinnerTerracotta: { color: '#B34726' },
   qsContinueButtonTerracotta: { backgroundColor: '#B34726', padding: 18, borderRadius: 12, alignItems: 'center' },
