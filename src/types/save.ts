@@ -81,6 +81,8 @@ export interface LotteryResult {
   city: string;
   rank: number;
   pick: number;
+  conference?: 'East' | 'West';
+  confRank?: number;
 }
 
 export interface DraftState {

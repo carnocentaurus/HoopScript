@@ -16,6 +16,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
   
   // revealOrder: index 0 is pick 14, index 13 is pick 1
   const revealOrder = [...results].sort((a, b) => b.pick - a.pick); 
+  const displayResults = [...results].sort((a, b) => a.pick - b.pick);
 
   useEffect(() => {
     let interval: any;
@@ -47,8 +48,13 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
         <ScrollView style={globalStyles.dlProjectedList}>
           {projected.map((res) => (
             <View key={res.city} style={globalStyles.dlProjectedRow}>
-              <Text style={globalStyles.dlProjectedCity}>{res.city.toUpperCase()}</Text>
-              <Text style={globalStyles.dlProjectedPick}>PICK #{res.rank}</Text>
+              <View>
+                <Text style={globalStyles.dlProjectedCity}>{res.city}</Text>
+                <Text style={globalStyles.dlProjectedSub}>
+                  {res.confRank}th in {res.conference}
+                </Text>
+              </View>
+              <Text style={globalStyles.dlProjectedPick}>Pick #{res.rank}</Text>
             </View>
           ))}
         </ScrollView>
@@ -69,51 +75,63 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
 
   return (
     <Screen>
-      <View style={globalStyles.dlHeader}>
-        <Text style={globalStyles.dlTitle}>DRAFT LOTTERY</Text>
-        <Text style={globalStyles.dlSubtitle}>REVEALING PICKS...</Text>
-      </View>
-
-      <View style={globalStyles.dlRevealContainer}>
-        <View style={globalStyles.dlActiveReveal}>
-          <Text style={globalStyles.dlPickLabel}>PICK #{currentRevealing.pick}</Text>
-          <View style={globalStyles.dlCityCard}>
-             <Text style={globalStyles.dlCityName}>{currentRevealing.city.toUpperCase()}</Text>
-             <Text style={globalStyles.dlRankLabel}>PROBABILITY RANK: {currentRevealing.rank}</Text>
-             {currentRevealing.pick < currentRevealing.rank && (
-               <View style={globalStyles.dlJumpBadge}>
-                 <Text style={globalStyles.dlJumpText}>JUMPED UP!</Text>
-               </View>
-             )}
-          </View>
-          
-          {isFinished && (
-            <TouchableOpacity 
-              style={globalStyles.dlBeginBtn} 
-              onPress={onComplete}
-            >
-              <Text style={globalStyles.dlBeginBtnText}>GO TO DRAFT</Text>
-            </TouchableOpacity>
-          )}
+      <ScrollView contentContainerStyle={globalStyles.pbContent}>
+        <View style={globalStyles.dlHeader}>
+          <Text style={globalStyles.dlTitle}>DRAFT LOTTERY</Text>
+          <Text style={globalStyles.dlSubtitle}>REVEALING PICKS...</Text>
         </View>
-      </View>
 
-      <View style={globalStyles.dlSummaryList}>
-        {revealOrder.map((res, idx) => {
-          const isRevealed = idx <= revealedCount;
-          return (
-            <View key={res.pick} style={[
-              globalStyles.dlSummaryItem, 
-              isRevealed && globalStyles.dlRevealedItem
-            ]}>
-              <Text style={globalStyles.dlSummaryPick}>#{res.pick}</Text>
-              <Text style={globalStyles.dlSummaryCity}>
-                {isRevealed ? res.city : "???"}
-              </Text>
+        <View style={globalStyles.dlRevealContainer}>
+          <View style={globalStyles.dlActiveReveal}>
+            <Text style={globalStyles.dlPickLabel}>Pick #{currentRevealing.pick}</Text>
+            <View style={globalStyles.dlCityCard}>
+               <Text style={globalStyles.dlCityName}>{currentRevealing.city}</Text>
+               <Text style={globalStyles.dlRankLabel}>PROBABILITY RANK: {currentRevealing.rank}</Text>
             </View>
-          );
-        })}
-      </View>
+          </View>
+        </View>
+
+        <View style={globalStyles.dlSummaryList}>
+          {displayResults.map((res) => {
+            // Find if this team has been revealed yet. 
+            // The reveal order is from pick 14 down to pick 1.
+            // A team is revealed if its pick number >= currentRevealing.pick
+            const isRevealed = res.pick >= currentRevealing.pick || isFinished;
+            
+            let pickColorStyle = {};
+            if (isRevealed) {
+              if (res.pick < res.rank) pickColorStyle = globalStyles.textSuccess;
+              else if (res.pick > res.rank) pickColorStyle = globalStyles.textError;
+            }
+
+            return (
+              <View key={res.pick} style={[
+                globalStyles.dlSummaryItem, 
+                isRevealed && globalStyles.dlRevealedItem
+              ]}>
+                <Text style={[globalStyles.dlSummaryPick, pickColorStyle]}>#{res.pick}</Text>
+                <Text style={globalStyles.dlSummaryCity}>
+                  {isRevealed ? res.city : "???"}
+                </Text>
+                {isRevealed && (
+                  <Text style={globalStyles.dlSummaryProj}>
+                    PROJ: #{res.rank}
+                  </Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
+
+        {isFinished && (
+          <TouchableOpacity 
+            style={globalStyles.dlBeginBtn} 
+            onPress={onComplete}
+          >
+            <Text style={globalStyles.dlBeginBtnText}>GO TO DRAFT</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
     </Screen>
   );
 };

@@ -10,6 +10,7 @@ export const COLORS = {
   white: '#FFFFFF',
   black: '#000000',
   success: '#4CAF50',
+  error: '#E53935',
   border: '#333333',
   darkBg: '#000000',
   darkCard: '#111111',

@@ -296,11 +296,21 @@ export const generateDraftOrder = (save: GameSave): { fullOrder: string[], lotte
     
   const lotteryOrder = [...top4, ...remainingLottery];
   
-  const lotteryResults: LotteryResult[] = lotteryOrder.map((city, idx) => ({
-    city,
-    pick: idx + 1,
-    rank: lotteryTeams.findIndex(t => t.city === city) + 1
-  }));
+  const lotteryResults: LotteryResult[] = lotteryOrder.map((city, idx) => {
+    const team = standings.find(t => t.city === city)!;
+    const confStandings = standings
+      .filter(t => t.conf === team.conf)
+      .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+    const confRank = confStandings.findIndex(t => t.city === city) + 1;
+
+    return {
+      city,
+      pick: idx + 1,
+      rank: lotteryTeams.findIndex(t => t.city === city) + 1,
+      conference: team.conf,
+      confRank
+    };
+  });
 
   const playoffOrder = playoffTeams.map(t => t.city);
   const round1 = [...lotteryOrder, ...playoffOrder];
