@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, DraftState } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
@@ -90,7 +91,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
             <View style={[globalStyles.drSummaryRow, item.teamCity === userCity && globalStyles.drUserSummaryRow]}>
               <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
               <View style={globalStyles.drSummaryInfo}>
-                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.drUserSummaryText]}>
+                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && { color: '#B34726' }]}>
                   {item.teamCity.toUpperCase()}
                 </Text>
                 <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
@@ -104,8 +105,11 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
           contentContainerStyle={globalStyles.drListContainer}
         />
 
-        <TouchableOpacity style={globalStyles.drStartSeasonBtn} onPress={onComplete}>
-          <Text style={globalStyles.drStartSeasonBtnText}>PROCEED TO NEXT SEASON</Text>
+        <TouchableOpacity 
+          style={[globalStyles.drStartSeasonBtn, { backgroundColor: '#B34726' }]} 
+          onPress={onComplete}
+        >
+          <Text style={[globalStyles.drStartSeasonBtnText, { color: 'black', fontWeight: '900' }]}>NEXT SEASON</Text>
         </TouchableOpacity>
       </Screen>
     );
@@ -116,8 +120,8 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       <View style={globalStyles.drHeader}>
         <View style={globalStyles.drHeaderTop}>
           <Text style={globalStyles.drTitle}>ROOKIE DRAFT</Text>
-          <TouchableOpacity style={globalStyles.drTeamViewBtn} onPress={onViewTeam}>
-            <Text style={globalStyles.drTeamViewBtnText}>TEAM OVERVIEW</Text>
+          <TouchableOpacity onPress={onViewTeam}>
+            <Icon name="basketball-outline" size={32} color="#B34726" />
           </TouchableOpacity>
         </View>
 
@@ -131,8 +135,14 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       </View>
 
       {!isUserTurn && !isCompleted && (
-        <TouchableOpacity style={globalStyles.drSimBtn} onPress={handleSimToUserPick} disabled={simulating}>
-          <Text style={globalStyles.drSimBtnText}>{simulating ? "SIMULATING..." : "SIM TO MY PICK"}</Text>
+        <TouchableOpacity 
+          style={[globalStyles.drSimBtn, { backgroundColor: '#B34726' }]} 
+          onPress={handleSimToUserPick} 
+          disabled={simulating}
+        >
+          <Text style={[globalStyles.drSimBtnText, { color: 'black', fontWeight: '900' }]}>
+            {simulating ? "SIMULATING..." : "SIM TO MY PICK"}
+          </Text>
         </TouchableOpacity>
       )}
 
