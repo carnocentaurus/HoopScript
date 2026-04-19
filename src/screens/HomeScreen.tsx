@@ -94,18 +94,14 @@ const HomeScreen = ({
         </TouchableOpacity>
       </View>
 
-      <View style={globalStyles.homeTopNav}>
-        {(save.playoffs || isEndOfSeason) && (
-          <TouchableOpacity style={globalStyles.homeStandingsBtn} onPress={onViewBracket}>
-            <Text style={globalStyles.homeStandingsBtnText}>PLAYOFF BRACKET</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
       <View style={globalStyles.homeMainContent}>
         {(isEliminated || isChampion || missedPlayoffs) ? (
           <View style={globalStyles.homeEndSeasonContainer}>
-            <Text style={globalStyles.homeEndSeasonIcon}>{isChampion ? "🏆" : "🏀"}</Text>
+            {isChampion ? (
+              <Text style={globalStyles.homeEndSeasonIcon}>🏆</Text>
+            ) : (
+              <Icon name="basketball" size={64} color="#B34726" style={{ marginBottom: 20 }} />
+            )}
             <Text style={globalStyles.homeEndSeasonTitle}>
               {isChampion ? "LEAGUE CHAMPIONS" : "SEASON COMPLETE"}
             </Text>
@@ -168,18 +164,22 @@ const HomeScreen = ({
         )}
       </View>
 
-      {!(isEliminated || isChampion || missedPlayoffs) && (
-        <TouchableOpacity 
-          style={globalStyles.homeSimButton} 
-          onPress={isSeriesCompleted ? onSimDay : onQuickSim}
-        >
-          <Text style={globalStyles.homeSimButtonText}>
-            {save.playoffs 
-              ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
-              : "QUICK SIM"}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <View style={globalStyles.homeBottomButtonsContainer}>
+        {isEndOfSeason && (
+          <TouchableOpacity style={globalStyles.homeBracketButton} onPress={onViewBracket}>
+            <Text style={globalStyles.homeBracketButtonText}>PLAYOFF BRACKET</Text>
+          </TouchableOpacity>
+        )}
+
+        {save.gamesPlayed < 82 && (
+          <TouchableOpacity 
+            style={globalStyles.homeSimButton} 
+            onPress={onQuickSim}
+          >
+            <Text style={globalStyles.homeSimButtonText}>QUICK SIM</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </Screen>
   );
 };

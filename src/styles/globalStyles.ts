@@ -425,16 +425,18 @@ export const globalStyles = StyleSheet.create({
     marginTop: 10, 
     lineHeight: 20 
   },
+  homeBottomButtonsContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+  },
   homeSimButton: { 
     backgroundColor: '#B34726', 
-    margin: 20, 
+    marginHorizontal: 20, 
     padding: 20, 
     borderRadius: 16, 
     alignItems: 'center', 
-    position: 'absolute', 
-    bottom: 40, 
-    left: 0, 
-    right: 0, 
     elevation: 8 
   },
   homeSimButtonText: { 
@@ -442,6 +444,20 @@ export const globalStyles = StyleSheet.create({
     fontWeight: '900', 
     fontSize: 16, 
     letterSpacing: 1 
+  },
+  homeBracketButton: {
+    backgroundColor: '#B34726',
+    marginHorizontal: 20,
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    elevation: 8,
+  },
+  homeBracketButtonText: {
+    color: COLORS.black,
+    fontWeight: '900',
+    fontSize: 16,
+    letterSpacing: 1,
   },
 
   // --- QUICK SIM SCREEN ---
