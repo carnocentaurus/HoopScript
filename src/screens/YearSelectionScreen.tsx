@@ -17,7 +17,7 @@ const YearSelectionScreen = ({ onSelectYear, onBack }: YearSelectionScreenProps)
       <TouchableOpacity onPress={onBack} style={globalStyles.mb20}>
         <Icon name="chevron-back" size={32} color={COLORS.primary} />
       </TouchableOpacity>
-      <Text style={globalStyles.yearSelectionHeader}>START YEAR</Text>
+      <Text style={globalStyles.homeSectionLabelCenter}>START YEAR</Text>
       <ScrollView 
         style={globalStyles.appScrollList} 
         contentContainerStyle={globalStyles.appScrollListContent}
