@@ -47,21 +47,25 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
             <View style={globalStyles.pbTeamRow}>
               <View style={globalStyles.pbTeamInfo}>
                 <Text style={globalStyles.pbRankLabel}>{getRank(series.highSeed)}</Text>
-                <Text style={[globalStyles.pbTeamName, series.highSeedWins === 4 && globalStyles.pbWinner]}>
+                <Text style={[globalStyles.pbTeamName, series.highSeedWins === 4 && { color: '#B34726' }]}>
                   {series.highSeed}
                 </Text>
               </View>
-              <Text style={globalStyles.pbScore}>{series.highSeedWins}</Text>
+              <Text style={[globalStyles.pbScore, series.highSeedWins === 4 && { color: '#B34726' }]}>
+                {series.highSeedWins}
+              </Text>
             </View>
 
             <View style={globalStyles.pbTeamRow}>
               <View style={globalStyles.pbTeamInfo}>
                 <Text style={globalStyles.pbRankLabel}>{getRank(series.lowSeed)}</Text>
-                <Text style={[globalStyles.pbTeamName, series.lowSeedWins === 4 && globalStyles.pbWinner]}>
+                <Text style={[globalStyles.pbTeamName, series.lowSeedWins === 4 && { color: '#B34726' }]}>
                   {series.lowSeed}
                 </Text>
               </View>
-              <Text style={globalStyles.pbScore}>{series.lowSeedWins}</Text>
+              <Text style={[globalStyles.pbScore, series.lowSeedWins === 4 && { color: '#B34726' }]}>
+                {series.lowSeedWins}
+              </Text>
             </View>
           </View>
         ))}
@@ -88,8 +92,9 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
         
         {isFinalsOver && (
           <View style={globalStyles.pbChampContainer}>
+            <Icon name="trophy" size={120} color="#FFD700" style={{ marginBottom: 30 }} />
             <Text style={globalStyles.pbChampText}>
-              🏆 {roundMatchups[0].highSeedWins === 4 ? roundMatchups[0].highSeed : roundMatchups[0].lowSeed} CHAMPIONS
+              CHAMPIONS: {(roundMatchups[0].highSeedWins === 4 ? roundMatchups[0].highSeed : roundMatchups[0].lowSeed).toUpperCase()}
             </Text>
           </View>
         )}
@@ -97,13 +102,13 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason }: Play
 
       {/* Button Logic: Show "Start New Season" if Finals are over, otherwise "Simulate Day" */}
       {isFinalsOver ? (
-        <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn]} onPress={onStartNewSeason}>
-          <Text style={globalStyles.pbSimDayBtnText}>START NEW SEASON</Text>
+        <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn, { backgroundColor: '#B34726' }]} onPress={onStartNewSeason}>
+          <Text style={[globalStyles.pbSimDayBtnText, { color: COLORS.black, fontWeight: '900' }]}>START NEW SEASON</Text>
         </TouchableOpacity>
       ) : (
         (save.playoffs?.isEliminated || isSeriesCompleted) && (
-          <TouchableOpacity style={globalStyles.pbSimDayBtn} onPress={onSimDay}>
-            <Text style={globalStyles.pbSimDayBtnText}>SIMULATE DAY</Text>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, { backgroundColor: '#B34726' }]} onPress={onSimDay}>
+            <Text style={[globalStyles.pbSimDayBtnText, { color: COLORS.black, fontWeight: '900' }]}>SIMULATE DAY</Text>
           </TouchableOpacity>
         )
       )}
