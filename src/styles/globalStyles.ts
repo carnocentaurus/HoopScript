@@ -269,6 +269,14 @@ export const globalStyles = StyleSheet.create({
     letterSpacing: 2, 
     marginBottom: 25 
   },
+  homeSectionLabelCenterBold: { 
+    color: COLORS.textSub, 
+    fontSize: 10, 
+    fontWeight: '900', 
+    textAlign: 'center', 
+    letterSpacing: 2, 
+    marginBottom: 5 
+  },
   homeMatchupWrapper: { 
     flexDirection: 'row', 
     alignItems: 'center', 

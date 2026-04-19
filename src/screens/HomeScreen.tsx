@@ -112,7 +112,7 @@ const HomeScreen = ({
           <>
             <Text style={globalStyles.homeSectionLabelCenter}>
               {save.playoffs 
-                ? getPlayoffRoundTitle(save.playoffs.round) 
+                ? `${getPlayoffRoundTitle(save.playoffs.round)} - BEST OF 7` 
                 : save.gamesPlayed === 81 
                   ? "SEASON FINALE" 
                   : "UPCOMING MATCHUP"}
@@ -129,13 +129,13 @@ const HomeScreen = ({
               {save.playoffs ? (
                 <View style={globalStyles.homeSeriesScoreContainer}>
                   <Text style={globalStyles.homeSeriesLabel}>
-                    {isSeriesCompleted ? "SERIES WON - WAITING FOR NEXT ROUND" : "BEST OF SEVEN SERIES"}
+                    {isSeriesCompleted ? "SERIES WON - WAITING FOR NEXT ROUND" : ""}
                   </Text>
                   <Text style={globalStyles.homeSeriesScoreText}>
-                    {save.playoffs.myWins} — {save.playoffs.oppWins}
+                    {LeftTeam.isUser ? save.playoffs.myWins : save.playoffs.oppWins} — {RightTeam.isUser ? save.playoffs.myWins : save.playoffs.oppWins}
                   </Text>
                   <Text style={globalStyles.homeSeriesSubText}>
-                    {isSeriesCompleted ? "OTHER MATCHUPS IN PROGRESS" : "FIRST TO 4 WINS ADVANCES"}
+                    {isSeriesCompleted ? "OTHER MATCHUPS IN PROGRESS" : ""}
                   </Text>
                 </View>
               ) : (
@@ -160,18 +160,24 @@ const HomeScreen = ({
       </View>
 
       <View style={globalStyles.homeBottomButtonsContainer}>
-        {isEndOfSeason && (
+        {/* Show Playoff Bracket button if season is over and team missed playoffs or is finished */}
+        {(missedPlayoffs || isEliminated || isChampion) && (
           <TouchableOpacity style={globalStyles.homeBracketButton} onPress={onViewBracket}>
             <Text style={globalStyles.homeBracketButtonText}>PLAYOFF BRACKET</Text>
           </TouchableOpacity>
         )}
 
-        {save.gamesPlayed < 82 && (
+        {/* Show Sim button if regular season is active OR active in playoffs */}
+        {((save.gamesPlayed < 82) || (save.playoffs && !isEliminated && !isChampion)) && (
           <TouchableOpacity 
             style={globalStyles.homeSimButton} 
-            onPress={onQuickSim}
+            onPress={save.playoffs && isSeriesCompleted ? onSimDay : onQuickSim}
           >
-            <Text style={globalStyles.homeSimButtonText}>QUICK SIM</Text>
+            <Text style={globalStyles.homeSimButtonText}>
+              {save.playoffs 
+                ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
+                : "QUICK SIM"}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
