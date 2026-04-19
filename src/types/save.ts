@@ -77,6 +77,12 @@ export interface DraftPick {
   player?: Player;
 }
 
+export interface LotteryResult {
+  city: string;
+  rank: number;
+  pick: number;
+}
+
 export interface DraftState {
   currentPickIndex: number;
   picks: DraftPick[];
@@ -106,4 +112,5 @@ export interface GameSave {
   currentYear: number;
   seasonCount: number;
   draftState?: DraftState | null;
+  lotteryResults?: LotteryResult[] | null;
 }

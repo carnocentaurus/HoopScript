@@ -19,7 +19,7 @@ import {
 
 const STORAGE_KEY = '@hoopscript_saves';
 
-export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview' | 'draft';
+export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft';
 
 export const useGameState = () => {
   const [view, setView] = useState<ViewState>('loading');
@@ -292,14 +292,15 @@ export const useGameState = () => {
       userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
     });
 
-    const draftOrder = generateDraftOrder(currentSave);
+    const { fullOrder, lotteryResults } = generateDraftOrder(currentSave);
+    currentSave.lotteryResults = lotteryResults;
     currentSave.draftState = {
       currentPickIndex: 0,
-      picks: draftOrder.map((city, idx) => ({ round: idx < 30 ? 1 : 2, overall: idx + 1, teamCity: city })),
+      picks: fullOrder.map((city, idx) => ({ round: idx < 30 ? 1 : 2, overall: idx + 1, teamCity: city })),
       pool: generateDraftPool(75), isCompleted: false
     };
     saveAndSet(updatedSaves);
-    setView('draft');
+    setView('lottery');
   };
 
   const handleDraftPick = (player: Player) => {

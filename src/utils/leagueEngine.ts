@@ -260,11 +260,10 @@ export const getHighSeedWinProb = (highSeed: string, lowSeed: string, standings:
 // Approx 2019 NBA Lottery Odds (Percentage for #1 pick)
 const LOTTERY_ODDS = [140, 140, 140, 125, 105, 90, 75, 60, 45, 30, 20, 15, 10, 5];
 
-export const generateDraftOrder = (save: GameSave): string[] => {
+export const generateDraftOrder = (save: GameSave): { fullOrder: string[], lotteryResults: LotteryResult[] } => {
   const standings = [...save.standings].sort((a, b) => a.wins - b.wins || b.losses - a.losses);
   
   // 1. Identify non-playoff teams (Bottom 14)
-  // Non-playoff teams are those that didn't make the bracket
   const playoffTeamCities = new Set<string>();
   save.playoffBracket?.forEach(s => {
     playoffTeamCities.add(s.highSeed);
@@ -275,7 +274,7 @@ export const generateDraftOrder = (save: GameSave): string[] => {
   const playoffTeams = standings.filter(t => playoffTeamCities.has(t.city));
 
   // 2. Run Lottery for top 4 picks
-  const lotteryOrder: string[] = [];
+  const top4: string[] = [];
   const pool: string[] = [];
   
   lotteryTeams.forEach((team, index) => {
@@ -283,26 +282,34 @@ export const generateDraftOrder = (save: GameSave): string[] => {
     for (let i = 0; i < tickets; i++) pool.push(team.city);
   });
 
-  while (lotteryOrder.length < 4 && pool.length > 0) {
+  while (top4.length < 4 && pool.length > 0) {
     const winner = pool[Math.floor(Math.random() * pool.length)];
-    if (!lotteryOrder.includes(winner)) {
-      lotteryOrder.push(winner);
+    if (!top4.includes(winner)) {
+      top4.push(winner);
     }
   }
 
   // 3. Combine with remaining teams
   const remainingLottery = lotteryTeams
-    .filter(t => !lotteryOrder.includes(t.city))
+    .filter(t => !top4.includes(t.city))
     .map(t => t.city);
     
-  const playoffOrder = playoffTeams.map(t => t.city);
-
-  const round1 = [...lotteryOrder, ...remainingLottery, ...playoffOrder];
+  const lotteryOrder = [...top4, ...remainingLottery];
   
-  // 4. Round 2 is just strict inverse of standings
+  const lotteryResults: LotteryResult[] = lotteryOrder.map((city, idx) => ({
+    city,
+    pick: idx + 1,
+    rank: lotteryTeams.findIndex(t => t.city === city) + 1
+  }));
+
+  const playoffOrder = playoffTeams.map(t => t.city);
+  const round1 = [...lotteryOrder, ...playoffOrder];
   const round2 = standings.map(t => t.city);
 
-  return [...round1, ...round2];
+  return { 
+    fullOrder: [...round1, ...round2], 
+    lotteryResults 
+  };
 };
 
 export const generateDraftPool = (count: number = 75): Player[] => {
