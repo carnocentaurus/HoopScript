@@ -284,13 +284,18 @@ export const useGameState = () => {
     const champData = currentSave.standings.find(t => t.city === champ);
 
     if (!currentSave.history) currentSave.history = [];
-    currentSave.history.push({
-      seasonIndex: currentSave.seasonCount, year: currentSave.currentYear, champion: champ,
-      championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
-      championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
-      userRecord: `${currentSave.wins}-${currentSave.losses}`,
-      userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
-    });
+    
+    // Prevent duplicate entries for the same season
+    const alreadyRecorded = currentSave.history.some(h => h.seasonIndex === currentSave.seasonCount);
+    if (!alreadyRecorded) {
+      currentSave.history.push({
+        seasonIndex: currentSave.seasonCount, year: currentSave.currentYear, champion: champ,
+        championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
+        championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
+        userRecord: `${currentSave.wins}-${currentSave.losses}`,
+        userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
+      });
+    }
 
     const { fullOrder, lotteryResults } = generateDraftOrder(currentSave);
     currentSave.lotteryResults = lotteryResults;
