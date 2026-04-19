@@ -43,7 +43,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={[globalStyles.qsLogoPlaceholder, { backgroundColor: 'transparent' }]}>{save.city.charAt(0)}</Text>
+        <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{save.city.charAt(0)}</Text>
         <Text style={globalStyles.qsCityName}>{save.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>
@@ -60,7 +60,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={[globalStyles.qsLogoPlaceholder, { backgroundColor: 'transparent' }]}>{opponent.city.charAt(0)}</Text>
+        <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{opponent.city.charAt(0)}</Text>
         <Text style={globalStyles.qsCityName}>{opponent.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>

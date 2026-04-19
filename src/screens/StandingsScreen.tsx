@@ -70,7 +70,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
         data={filteredTeams}
         keyExtractor={(item) => item.city}
         renderItem={renderTeam}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={globalStyles.pb20}
       />
     </Screen>
   );

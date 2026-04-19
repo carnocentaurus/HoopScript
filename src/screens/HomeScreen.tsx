@@ -121,7 +121,7 @@ const HomeScreen = ({
             <View style={globalStyles.homeMatchupWrapper}>
               <TeamMatchupCard team={LeftTeam} />
               <View style={globalStyles.homeVsContainer}>
-                <Text style={[globalStyles.homeVsText, { fontSize: 12 }]}>AT</Text>
+                <Text style={[globalStyles.homeVsText, globalStyles.fs12]}>AT</Text>
               </View>
               <TeamMatchupCard team={RightTeam} />
             </View>

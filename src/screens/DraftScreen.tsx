@@ -91,7 +91,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
             <View style={[globalStyles.drSummaryRow, item.teamCity === userCity && globalStyles.drUserSummaryRow]}>
               <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
               <View style={globalStyles.drSummaryInfo}>
-                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && { color: '#B34726' }]}>
+                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.textTerracotta]}>
                   {item.teamCity.toUpperCase()}
                 </Text>
                 <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
@@ -106,10 +106,10 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         />
 
         <TouchableOpacity 
-          style={[globalStyles.drStartSeasonBtn, { backgroundColor: '#B34726' }]} 
+          style={[globalStyles.drStartSeasonBtn, globalStyles.bgTerracotta]} 
           onPress={onComplete}
         >
-          <Text style={[globalStyles.drStartSeasonBtnText, { color: 'black', fontWeight: '900' }]}>NEXT SEASON</Text>
+          <Text style={[globalStyles.drStartSeasonBtnText, globalStyles.textBlackBold]}>NEXT SEASON</Text>
         </TouchableOpacity>
       </Screen>
     );
@@ -136,11 +136,11 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
 
       {!isUserTurn && !isCompleted && (
         <TouchableOpacity 
-          style={[globalStyles.drSimBtn, { backgroundColor: '#B34726' }]} 
+          style={[globalStyles.drSimBtn, globalStyles.bgTerracotta]} 
           onPress={handleSimToUserPick} 
           disabled={simulating}
         >
-          <Text style={[globalStyles.drSimBtnText, { color: 'black', fontWeight: '900' }]}>
+          <Text style={[globalStyles.drSimBtnText, globalStyles.textBlackBold]}>
             {simulating ? "SIMULATING..." : "SIM TO MY PICK"}
           </Text>
         </TouchableOpacity>

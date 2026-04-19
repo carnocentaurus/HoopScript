@@ -59,6 +59,15 @@ export const globalStyles = StyleSheet.create({
   vSpacer40: { height: 40 },
   mb10: { marginBottom: 10 },
   mb20: { marginBottom: 20 },
+  mb30: { marginBottom: 30 },
+  mr8: { marginRight: 8 },
+  pb20: { paddingBottom: 20 },
+  fs12: { fontSize: 12 },
+  fw900: { fontWeight: '900' },
+  bgTransparent: { backgroundColor: 'transparent' },
+  bgTerracotta: { backgroundColor: '#B34726' },
+  textTerracotta: { color: '#B34726' },
+  textBlackBold: { color: COLORS.black, fontWeight: '900' },
 
   // --- APP / YEAR SELECTION ---
   appScrollList: {

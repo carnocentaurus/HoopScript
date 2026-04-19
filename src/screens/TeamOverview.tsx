@@ -90,7 +90,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
 
       {onConfirm && (
         <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={onConfirm}>
-          <Text style={[globalStyles.toConfirmBtnTextBlack, { fontWeight: '900' }]}>SELECT TEAM</Text>
+          <Text style={[globalStyles.toConfirmBtnTextBlack, globalStyles.fw900]}>SELECT TEAM</Text>
         </TouchableOpacity>
       )}
     </Screen>
