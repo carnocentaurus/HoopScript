@@ -101,15 +101,16 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
         )}
       </ScrollView>
 
-      <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta, globalStyles.mb0]} onPress={onViewFullBracket}>
-        <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>FULL BRACKET</Text>
-      </TouchableOpacity>
-
-      {/* Button Logic: Show "Start New Season" if Finals are over, otherwise "Simulate Day" */}
+      {/* Button Logic: Show "Full Bracket" and "Start New Season" if Finals are over, otherwise "Simulate Day" */}
       {isFinalsOver ? (
-        <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn, globalStyles.bgTerracotta]} onPress={onStartNewSeason}>
-          <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>START NEW SEASON</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta, globalStyles.mb10]} onPress={onViewFullBracket}>
+            <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>FULL BRACKET</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn, globalStyles.bgTerracotta]} onPress={onStartNewSeason}>
+            <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>START NEW SEASON</Text>
+          </TouchableOpacity>
+        </>
       ) : (
         (save.playoffs?.isEliminated || isSeriesCompleted) && (
           <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta]} onPress={onSimDay}>
