@@ -68,6 +68,8 @@ export interface SeasonHistory {
   championRank: string;
   userRecord: string; // e.g., "50-32"
   userRank: string;   // e.g., "3rd in West"
+  standings?: TeamStanding[];
+  playoffBracket?: SeriesMatchup[];
 }
 
 export interface DraftPick {

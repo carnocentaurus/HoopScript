@@ -293,7 +293,9 @@ export const useGameState = () => {
         championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
         championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
         userRecord: `${currentSave.wins}-${currentSave.losses}`,
-        userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`
+        userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`,
+        standings: JSON.parse(JSON.stringify(currentSave.standings)),
+        playoffBracket: JSON.parse(JSON.stringify(currentSave.playoffBracket || []))
       });
     }
 

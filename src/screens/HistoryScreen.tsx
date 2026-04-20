@@ -1,16 +1,53 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { GameSave, SeasonHistory } from '../types/save';
+import { GameSave, SeasonHistory, TeamStanding, SeriesMatchup } from '../types/save';
 import Screen from '../components/Screen';
+import StandingsScreen from './StandingsScreen';
+import FullPlayoffBracketScreen from './FullPlayoffBracketScreen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 
-const HistoryItem = ({ item }: { item: SeasonHistory }) => (
+const HistoryItem = ({ 
+  item, 
+  onViewStandings, 
+  onViewBracket 
+}: { 
+  item: SeasonHistory, 
+  onViewStandings: () => void, 
+  onViewBracket: () => void 
+}) => (
   <View style={globalStyles.hiHistoryCard}>
     <View style={globalStyles.hiCardHeader}>
-      <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
-      <View style={globalStyles.hiChampRow}>
+      <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
+        <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
+        <View style={globalStyles.flexRow}>
+          <TouchableOpacity 
+            style={{ marginLeft: 15 }} 
+            onPress={onViewStandings}
+            disabled={!item.standings}
+          >
+            <Icon 
+              name="podium-outline" 
+              size={24} 
+              color={item.standings ? COLORS.primary : COLORS.grayLighter} 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={{ marginLeft: 15 }} 
+            onPress={onViewBracket}
+            disabled={!item.playoffBracket}
+          >
+            <Icon 
+              name="git-network-outline" 
+              size={24} 
+              color={item.playoffBracket ? COLORS.primary : COLORS.grayLighter} 
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
         <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
           <Icon name="trophy" size={20} color="#FFD700" style={globalStyles.mr8} />
           <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
@@ -31,12 +68,17 @@ const HistoryItem = ({ item }: { item: SeasonHistory }) => (
 );
 
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
+  const [selectedStandings, setSelectedStandings] = useState<TeamStanding[] | null>(null);
+  const [selectedBracket, setSelectedBracket] = useState<SeriesMatchup[] | null>(null);
+
   return (
     <Screen>
       <View style={globalStyles.hiHeader}>
         <TouchableOpacity onPress={onBack}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
+        <Text style={globalStyles.hiHeaderTitle}>LEAGUE HISTORY</Text>
+        <View style={{ width: 32 }} />
       </View>
 
       <ScrollView contentContainerStyle={globalStyles.hiScrollContent}>
@@ -46,10 +88,36 @@ const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void })
           </View>
         ) : (
           [...save.history].reverse().map((item, idx) => (
-            <HistoryItem key={idx} item={item} />
+            <HistoryItem 
+              key={idx} 
+              item={item} 
+              onViewStandings={() => item.standings && setSelectedStandings(item.standings)}
+              onViewBracket={() => item.playoffBracket && setSelectedBracket(item.playoffBracket)}
+            />
           ))
         )}
       </ScrollView>
+
+      {/* Historical Standings Modal */}
+      <Modal visible={!!selectedStandings} animationType="slide">
+        {selectedStandings && (
+          <StandingsScreen 
+            save={{ ...save, standings: selectedStandings }} 
+            onBack={() => setSelectedStandings(null)} 
+            onViewTeam={() => {}} // Disable team overview in historical view for now
+          />
+        )}
+      </Modal>
+
+      {/* Historical Bracket Modal */}
+      <Modal visible={!!selectedBracket} animationType="slide">
+        {selectedBracket && (
+          <FullPlayoffBracketScreen 
+            save={{ ...save, playoffBracket: selectedBracket }} 
+            onBack={() => setSelectedBracket(null)} 
+          />
+        )}
+      </Modal>
     </Screen>
   );
 };
