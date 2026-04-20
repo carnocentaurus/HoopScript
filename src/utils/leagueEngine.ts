@@ -334,3 +334,37 @@ export const generateDraftPool = (count: number = 75): Player[] => {
   }).sort((a, b) => b.overall - a.overall);
 };
 
+export const trimRosters = (standings: TeamStanding[]): TeamStanding[] => {
+  return standings.map(team => {
+    if (team.roster.length <= 15) return team;
+
+    // Helper to get position frequency
+    const getPosCount = (roster: Player[], pos: string) => 
+      roster.filter(p => p.position === pos).length;
+
+    // Sort to determine who to KEEP (top 15)
+    const sortedRoster = [...team.roster].sort((a, b) => {
+      // 1. Overall Rating (Higher is better)
+      if (b.overall !== a.overall) return b.overall - a.overall;
+      
+      // 2. Age (Younger is better)
+      if (a.age !== b.age) return a.age - b.age;
+      
+      // 3. Position Density (Rarer position is better)
+      const countA = getPosCount(team.roster, a.position);
+      const countB = getPosCount(team.roster, b.position);
+      if (countA !== countB) return countA - countB;
+      
+      // 4. Random tie-breaker
+      return Math.random() - 0.5;
+    });
+
+    const trimmedRoster = sortedRoster.slice(0, 15);
+
+    return {
+      ...team,
+      roster: validateAndFixRoster(trimmedRoster)
+    };
+  });
+};
+

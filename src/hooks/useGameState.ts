@@ -14,7 +14,8 @@ import {
   generateDraftPool,
   generateFullBracket,
   calculateRank,
-  getHighSeedWinProb
+  getHighSeedWinProb,
+  trimRosters
 } from '../utils/leagueEngine';
 
 const STORAGE_KEY = '@hoopscript_saves';
@@ -339,7 +340,16 @@ export const useGameState = () => {
 
     currentSave.wins = 0; currentSave.losses = 0; currentSave.gamesPlayed = 0;
     currentSave.currentYear += 1; currentSave.seasonCount += 1;
-    currentSave.standings = currentSave.standings.map(team => ({ ...team, wins: 0, losses: 0, roster: processAging(team.roster) }));
+    
+    // Process aging and then trim rosters to 15 players
+    const agedStandings = currentSave.standings.map(team => ({ 
+      ...team, 
+      wins: 0, 
+      losses: 0, 
+      roster: processAging(team.roster) 
+    }));
+    
+    currentSave.standings = trimRosters(agedStandings);
 
     const myTeam = currentSave.standings.find(t => t.city === currentSave.city);
     if (myTeam) currentSave.roster = myTeam.roster;
