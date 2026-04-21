@@ -1,4 +1,4 @@
-import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup } from '../types/save';
+import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult } from '../types/save';
 import { generateRoster, generateRookie, validateAndFixRoster } from './rosterGenerator';
 import { PlayerStat } from './gameSim';
 

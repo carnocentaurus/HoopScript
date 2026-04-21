@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, DraftState } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { TEAM_LOGOS } from '../data/teams';
 
 interface DraftScreenProps {
   userCity: string;
@@ -87,21 +88,26 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         <FlatList
           data={picks}
           keyExtractor={(item) => `final-${item.overall}`}
-          renderItem={({ item }) => (
-            <View style={[globalStyles.drSummaryRow, item.teamCity === userCity && globalStyles.drUserSummaryRow]}>
-              <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
-              <View style={globalStyles.drSummaryInfo}>
-                <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.textTerracotta]}>
-                  {item.teamCity.toUpperCase()}
-                </Text>
-                <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
+          renderItem={({ item }) => {
+            const logo = TEAM_LOGOS[item.teamCity];
+
+            return (
+              <View style={[globalStyles.drSummaryRow, item.teamCity === userCity && globalStyles.drUserSummaryRow]}>
+                <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
+                {logo && <Image source={logo} style={globalStyles.drLogoImage} />}
+                <View style={globalStyles.drSummaryInfo}>
+                  <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.textTerracotta]}>
+                    {item.teamCity.toUpperCase()}
+                  </Text>
+                  <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
+                </View>
+                <View style={globalStyles.drSummaryRating}>
+                  <Text style={globalStyles.drSummaryRatingVal}>{item.player?.overall}</Text>
+                  <Text style={globalStyles.drSummaryRatingLabel}>OVR</Text>
+                </View>
               </View>
-              <View style={globalStyles.drSummaryRating}>
-                <Text style={globalStyles.drSummaryRatingVal}>{item.player?.overall}</Text>
-                <Text style={globalStyles.drSummaryRatingLabel}>OVR</Text>
-              </View>
-            </View>
-          )}
+            );
+          }}
           contentContainerStyle={globalStyles.drListContainer}
         />
 
@@ -128,7 +134,12 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         {currentPick && (
           <View style={globalStyles.drOnClockCard}>
             <Text style={globalStyles.drOnClockLabel}>ON THE CLOCK</Text>
-            <Text style={globalStyles.drOnClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
+            <View style={globalStyles.flexRowAlignCenter}>
+               {TEAM_LOGOS[currentPick.teamCity] && (
+                 <Image source={TEAM_LOGOS[currentPick.teamCity]} style={globalStyles.stLogoImage} />
+               )}
+               <Text style={globalStyles.drOnClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
+            </View>
             <Text style={globalStyles.drPickNumber}>Round {currentPick.round} | Pick {currentPick.overall}</Text>
           </View>
         )}

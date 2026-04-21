@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, SeasonHistory, TeamStanding, SeriesMatchup } from '../types/save';
 import Screen from '../components/Screen';
@@ -7,6 +7,7 @@ import StandingsScreen from './StandingsScreen';
 import FullPlayoffBracketScreen from './FullPlayoffBracketScreen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 
 const HistoryItem = ({ 
   item, 
@@ -16,56 +17,61 @@ const HistoryItem = ({
   item: SeasonHistory, 
   onViewStandings: () => void, 
   onViewBracket: () => void 
-}) => (
-  <View style={globalStyles.hiHistoryCard}>
-    <View style={globalStyles.hiCardHeader}>
-      <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
-        <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
-        <View style={globalStyles.flexRow}>
-          <TouchableOpacity 
-            style={{ marginLeft: 15 }} 
-            onPress={onViewStandings}
-            disabled={!item.standings}
-          >
-            <Icon 
-              name="podium-outline" 
-              size={24} 
-              color={item.standings ? COLORS.primary : COLORS.grayLighter} 
-            />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={{ marginLeft: 15 }} 
-            onPress={onViewBracket}
-            disabled={!item.playoffBracket}
-          >
-            <Icon 
-              name="git-network-outline" 
-              size={24} 
-              color={item.playoffBracket ? COLORS.primary : COLORS.grayLighter} 
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-      
-      <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
-        <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
-          <Icon name="trophy" size={20} color="#FFD700" style={globalStyles.mr8} />
-          <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
-        </View>
-        <View style={globalStyles.hiChampStats}>
-          <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
-          <Text style={globalStyles.hiChampStatText}>{item.championRank}</Text>
-        </View>
-      </View>
-    </View>
+}) => {
+  const logo = TEAM_LOGOS[item.champion];
 
-    <View style={globalStyles.hiUserSummary}>
-      <Text style={globalStyles.hiUserLabel}>YOUR TEAM:</Text>
-      <Text style={globalStyles.hiUserStat}>{item.userRecord}</Text>
-      <Text style={globalStyles.hiUserStat}>{item.userRank}</Text>
+  return (
+    <View style={globalStyles.hiHistoryCard}>
+      <View style={globalStyles.hiCardHeader}>
+        <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
+          <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
+          <View style={globalStyles.flexRow}>
+            <TouchableOpacity 
+              style={{ marginLeft: 15 }} 
+              onPress={onViewStandings}
+              disabled={!item.standings}
+            >
+              <Icon 
+                name="podium-outline" 
+                size={24} 
+                color={item.standings ? COLORS.primary : COLORS.grayLighter} 
+              />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={{ marginLeft: 15 }} 
+              onPress={onViewBracket}
+              disabled={!item.playoffBracket}
+            >
+              <Icon 
+                name="git-network-outline" 
+                size={24} 
+                color={item.playoffBracket ? COLORS.primary : COLORS.grayLighter} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
+          <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
+            <Icon name="trophy" size={20} color="#FFD700" style={globalStyles.mr8} />
+            {logo && <Image source={logo} style={globalStyles.hiLogoImage} />}
+            <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
+          </View>
+          <View style={globalStyles.hiChampStats}>
+            <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
+            <Text style={globalStyles.hiChampStatText}>{item.championRank}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={globalStyles.hiUserSummary}>
+        <Text style={globalStyles.hiUserLabel}>YOUR TEAM:</Text>
+        <Text style={globalStyles.hiUserStat}>{item.userRecord}</Text>
+        <Text style={globalStyles.hiUserStat}>{item.userRank}</Text>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   const [selectedStandings, setSelectedStandings] = useState<TeamStanding[] | null>(null);

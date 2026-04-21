@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { LotteryResult } from '../types/save';
+import { TEAM_LOGOS } from '../data/teams';
 
 interface DraftLotteryScreenProps {
   results: LotteryResult[];
@@ -46,17 +47,23 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
         </View>
 
         <ScrollView style={globalStyles.dlProjectedList}>
-          {projected.map((res) => (
-            <View key={res.city} style={globalStyles.dlProjectedRow}>
-              <View>
-                <Text style={globalStyles.dlProjectedCity}>{res.city}</Text>
-                <Text style={globalStyles.dlProjectedSub}>
-                  {res.confRank}th in {res.conference}
-                </Text>
+          {projected.map((res) => {
+            const logo = TEAM_LOGOS[res.city];
+            return (
+              <View key={res.city} style={globalStyles.dlProjectedRow}>
+                <View style={globalStyles.flexRowAlignCenter}>
+                  {logo && <Image source={logo} style={globalStyles.stLogoImage} />}
+                  <View>
+                    <Text style={globalStyles.dlProjectedCity}>{res.city}</Text>
+                    <Text style={globalStyles.dlProjectedSub}>
+                      {res.confRank}th in {res.conference}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={globalStyles.dlProjectedPick}>Pick #{res.rank}</Text>
               </View>
-              <Text style={globalStyles.dlProjectedPick}>Pick #{res.rank}</Text>
-            </View>
-          ))}
+            );
+          })}
         </ScrollView>
 
         <TouchableOpacity 
@@ -72,6 +79,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
   // Reveal Phase
   const currentPickIndex = Math.min(revealedCount, 13);
   const currentRevealing = revealOrder[currentPickIndex];
+  const revealLogo = TEAM_LOGOS[currentRevealing.city];
 
   return (
     <Screen>
@@ -85,6 +93,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
           <View style={globalStyles.dlActiveReveal}>
             <Text style={globalStyles.dlPickLabel}>Pick #{currentRevealing.pick}</Text>
             <View style={globalStyles.dlCityCard}>
+               {revealLogo && <Image source={revealLogo} style={globalStyles.dlLogoImage} />}
                <Text style={globalStyles.dlCityName}>{currentRevealing.city}</Text>
                <Text style={globalStyles.dlRankLabel}>PROBABILITY RANK: {currentRevealing.rank}</Text>
             </View>
@@ -97,6 +106,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
             // The reveal order is from pick 14 down to pick 1.
             // A team is revealed if its pick number >= currentRevealing.pick
             const isRevealed = res.pick >= currentRevealing.pick || isFinished;
+            const logo = TEAM_LOGOS[res.city];
             
             let pickColorStyle = {};
             if (isRevealed) {
@@ -110,6 +120,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
                 isRevealed && globalStyles.dlRevealedItem
               ]}>
                 <Text style={[globalStyles.dlSummaryPick, pickColorStyle]}>#{res.pick}</Text>
+                {isRevealed && logo && <Image source={logo} style={globalStyles.dlSummaryLogoImage} />}
                 <Text style={globalStyles.dlSummaryCity}>
                   {isRevealed ? res.city : "???"}
                 </Text>

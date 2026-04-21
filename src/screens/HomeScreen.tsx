@@ -1,20 +1,26 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 
 const TeamMatchupCard = ({ team }: { team: any }) => {
   const ratings = calculateTeamRatings(team.roster);
+  const logo = TEAM_LOGOS[team.city];
 
   return (
     <View style={[globalStyles.homeMatchupCard, team.isUser && globalStyles.homeUserCard]}>
-      <Text style={[globalStyles.homeMatchupLogo, team.isUser ? globalStyles.homeUserLogoText : globalStyles.homeOppLogoText]}>
-        {team.city.charAt(0)}
-      </Text>
+      {logo ? (
+        <Image source={logo} style={globalStyles.homeMatchupLogoImage} />
+      ) : (
+        <Text style={[globalStyles.homeMatchupLogo, team.isUser ? globalStyles.homeUserLogoText : globalStyles.homeOppLogoText]}>
+          {team.city.charAt(0)}
+        </Text>
+      )}
       <Text style={globalStyles.homeMatchupCity}>{team.city}</Text>
       <Text style={globalStyles.homeMatchupSub}>{team.rank} | {team.record}</Text>
       

@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 
 interface TeamOverviewScreenProps {
   city: string;
@@ -16,6 +17,7 @@ interface TeamOverviewScreenProps {
 
 const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
   const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+  const logo = TEAM_LOGOS[city];
 
   const sortPlayersByPosition = (players: Player[]) => {
     return [...players].sort((a, b) => {
@@ -73,7 +75,10 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
         <TouchableOpacity onPress={onBack} style={globalStyles.tosBackBtn}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
-        <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
+        <View style={globalStyles.flexRowAlignCenter}>
+          {logo && <Image source={logo} style={[globalStyles.mr8, { width: 30, height: 30, resizeMode: 'contain' }]} />}
+          <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
+        </View>
         <View style={globalStyles.headerSpacer} />
       </View>
 

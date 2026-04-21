@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 
 interface StandingsProps {
   save: GameSave;
@@ -19,19 +20,24 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     .filter(t => t.conf === activeConf)
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
 
-  const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => (
-    <TouchableOpacity 
-      style={[globalStyles.stTeamRow, item.city === save.city && globalStyles.stUserRow]}
-      onPress={() => onViewTeam(item.city)}
-    >
-      <Text style={globalStyles.stRankText}>{index + 1}</Text>
-      <Text style={globalStyles.stCityName}>{item.city}</Text>
-      <View style={globalStyles.stRecordCols}>
-        <Text style={globalStyles.stRecordText}>{item.wins}</Text>
-        <Text style={globalStyles.stRecordText}>{item.losses}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => {
+    const logo = TEAM_LOGOS[item.city];
+    
+    return (
+      <TouchableOpacity 
+        style={[globalStyles.stTeamRow, item.city === save.city && globalStyles.stUserRow]}
+        onPress={() => onViewTeam(item.city)}
+      >
+        <Text style={globalStyles.stRankText}>{index + 1}</Text>
+        {logo && <Image source={logo} style={globalStyles.stLogoImage} />}
+        <Text style={globalStyles.stCityName}>{item.city}</Text>
+        <View style={globalStyles.stRecordCols}>
+          <Text style={globalStyles.stRecordText}>{item.wins}</Text>
+          <Text style={globalStyles.stRecordText}>{item.losses}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Screen>

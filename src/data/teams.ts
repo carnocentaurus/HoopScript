@@ -5,4 +5,37 @@ export const TEAMS = [
   "Minnesota", "New Orleans", "New York", "Oklahoma City", "Orlando", 
   "Philadelphia", "Phoenix", "Portland", "Sacramento", "San Antonio", 
   "San Diego", "San Francisco", "Toronto", "Utah", "Washington"
-].sort(); // This ensures alphabetical order automatically
+].sort();
+
+export const TEAM_LOGOS: Record<string, any> = {
+  "Atlanta": require("../../assets/images/teams_logo/hoopscript_atlanta_logo.png"),
+  "Boston": require("../../assets/images/teams_logo/hoopscript_boston_logo.png"),
+  "Brooklyn": require("../../assets/images/teams_logo/hoopscript_brooklyn_logo.png"),
+  "Charlotte": require("../../assets/images/teams_logo/hoopscript_charlotte_logo.png"),
+  "Chicago": require("../../assets/images/teams_logo/hoopscript_chicago_logo.png"),
+  "Cleveland": require("../../assets/images/teams_logo/hoopscript_cleveland_logo.png"),
+  "Dallas": require("../../assets/images/teams_logo/hoopscript_dallas_logo.png"),
+  "Denver": require("../../assets/images/teams_logo/hoopscript_denver_logo.png"),
+  "Detroit": require("../../assets/images/teams_logo/hoopscript_detroit_logo.png"),
+  "Houston": require("../../assets/images/teams_logo/hoopscript_houston_logo.png"),
+  "Indiana": require("../../assets/images/teams_logo/hoopscript_indiana_logo.png"),
+  "Los Angeles": require("../../assets/images/teams_logo/hoopscript_losangeles_logo.png"),
+  "Memphis": require("../../assets/images/teams_logo/hoopscript_memphis_logo.png"),
+  "Miami": require("../../assets/images/teams_logo/hoopscript_miami_logo.png"),
+  "Milwaukee": require("../../assets/images/teams_logo/hoopscript_milwaukee_logo.png"),
+  "Minnesota": require("../../assets/images/teams_logo/hoopscript_minnesota_logo.png"),
+  "New Orleans": require("../../assets/images/teams_logo/hoopscript_neworleans_logo.png"),
+  "New York": require("../../assets/images/teams_logo/hoopscript_newyork_logo.png"),
+  "Oklahoma City": require("../../assets/images/teams_logo/hoopscript_oklahomacity_logo.png"),
+  "Orlando": require("../../assets/images/teams_logo/hoopscript_orlando_logo.png"),
+  "Philadelphia": require("../../assets/images/teams_logo/hoopscript_philadelphia_logo.png"),
+  "Phoenix": require("../../assets/images/teams_logo/hoopscript_phoenix_logo.png"),
+  "Portland": require("../../assets/images/teams_logo/hoopscript_portland_logo.png"),
+  "Sacramento": require("../../assets/images/teams_logo/hoopscript_sacramento_logo.png"),
+  "San Antonio": require("../../assets/images/teams_logo/hoopscript_sanantonio_logo.png"),
+  "San Diego": require("../../assets/images/teams_logo/hoopscript_sandiego_logo.png"),
+  "San Francisco": require("../../assets/images/teams_logo/hoopscript_sanfrancisco_logo.png"),
+  "Toronto": require("../../assets/images/teams_logo/hoopscript_toronto_logo.png"),
+  "Utah": require("../../assets/images/teams_logo/hoopscript_utah_logo.png"),
+  "Washington": require("../../assets/images/teams_logo/hoopscript_washington_logo.png"),
+};

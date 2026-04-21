@@ -324,6 +324,12 @@ export const globalStyles = StyleSheet.create({
     fontWeight: '900', 
     marginBottom: 12 
   },
+  homeMatchupLogoImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 12,
+    resizeMode: 'contain'
+  },
   homeUserLogoText: { 
     color: COLORS.text 
   },
@@ -488,6 +494,7 @@ export const globalStyles = StyleSheet.create({
   qsScoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   qsTeamSide: { alignItems: 'center', flex: 1 },
   qsLogoPlaceholder: { fontSize: 40, color: COLORS.white, fontWeight: '900', backgroundColor: COLORS.grayLight, width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
+  qsLogoImage: { width: 80, height: 80, marginBottom: 10, resizeMode: 'contain' },
   qsCityName: { color: COLORS.textSub, fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
   qsScore: { color: COLORS.text, fontSize: 54, fontWeight: '900', marginTop: 10 },
   qsVs: { color: COLORS.border, fontWeight: '900', fontSize: 18 },
@@ -515,6 +522,7 @@ export const globalStyles = StyleSheet.create({
   stTeamRow: { flexDirection: 'row', padding: 15, alignItems: 'center', borderBottomWidth: 1, borderColor: COLORS.border },
   stUserRow: { backgroundColor: COLORS.grayLight },
   stRankText: { width: 30, fontWeight: 'bold', color: COLORS.textSub },
+  stLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
   stCityName: { flex: 1, fontWeight: '600', fontSize: 16, color: COLORS.text },
   stRecordCols: { flexDirection: 'row', width: 60, justifyContent: 'space-between' },
   stRecordText: { width: 25, textAlign: 'center', fontWeight: 'bold', color: COLORS.text },
@@ -545,6 +553,7 @@ export const globalStyles = StyleSheet.create({
   drSummaryRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.card, padding: 12, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: COLORS.border },
   drUserSummaryRow: { borderColor: COLORS.primary, backgroundColor: COLORS.grayLight },
   drSummaryPick: { width: 40, fontSize: 12, fontWeight: '900', color: COLORS.textMuted },
+  drLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
   drSummaryInfo: { flex: 1 },
   drSummaryTeam: { fontSize: 10, fontWeight: '900', color: COLORS.primary },
   drUserSummaryText: { color: COLORS.secondary },
@@ -609,6 +618,7 @@ export const globalStyles = StyleSheet.create({
   hiHistoryCard: { backgroundColor: COLORS.card, borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: COLORS.border },
   hiCardHeader: { flexDirection: 'column' },
   hiYearText: { color: COLORS.accent, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
+  hiLogoImage: { width: 18, height: 18, marginRight: 6, resizeMode: 'contain' },
   hiChampRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
   hiChampText: { color: COLORS.white, fontSize: 20, fontWeight: '900', flex: 1, flexShrink: 1 },
   hiChampStats: { alignItems: 'flex-end', minWidth: 50 },
@@ -629,6 +639,7 @@ export const globalStyles = StyleSheet.create({
   pbTeamRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 6, alignItems: 'center' },
   pbTeamInfo: { flexDirection: 'row', alignItems: 'center' },
   pbRankLabel: { fontSize: 12, color: COLORS.textSub, fontWeight: 'bold', width: 22, textAlign: 'left' },
+  pbLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
   pbTeamName: { fontSize: 16, fontWeight: '700', color: COLORS.text },
   pbWinner: { color: COLORS.primary },
   pbScore: { fontSize: 16, fontWeight: '900', color: COLORS.text },
@@ -652,6 +663,7 @@ export const globalStyles = StyleSheet.create({
   tcCard: { flex: 1, alignItems: 'center', margin: 8, paddingVertical: 10 },
   tcLogoCircle: { width: 50, height: 50, borderRadius: 25, backgroundColor: COLORS.grayLight, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
   tcLogoLetter: { fontSize: 24, fontWeight: '600', color: COLORS.text },
+  tcLogoImage: { width: 40, height: 40, resizeMode: 'contain' },
   tcCityText: { fontSize: 12, textAlign: 'center', color: COLORS.text },
 
   // --- DRAFT LOTTERY SCREEN ---
@@ -664,12 +676,14 @@ export const globalStyles = StyleSheet.create({
   dlActiveReveal: { alignItems: 'center', width: '100%' },
   dlPickLabel: { color: COLORS.textMuted, fontSize: 18, fontWeight: '900', marginBottom: 10 },
   dlCityCard: { backgroundColor: COLORS.card, width: '100%', padding: 30, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: COLORS.border, marginBottom: 10 },
+  dlLogoImage: { width: 100, height: 100, marginBottom: 20, resizeMode: 'contain' },
   dlCityName: { color: COLORS.white, fontSize: 32, fontWeight: '900', textAlign: 'center' },
   dlRankLabel: { color: COLORS.textSub, fontSize: 12, fontWeight: '700', marginTop: 10 },
   dlSummaryList: { padding: 15 },
   dlSummaryItem: { flexDirection: 'row', backgroundColor: COLORS.card, marginBottom: 8, padding: 15, borderRadius: 12, alignItems: 'center', opacity: 0.3 },
   dlRevealedItem: { opacity: 1, borderColor: COLORS.border, borderWidth: 1 },
   dlSummaryPick: { color: COLORS.primary, fontWeight: '900', width: 40, fontSize: 16 },
+  dlSummaryLogoImage: { width: 24, height: 24, marginRight: 10, resizeMode: 'contain' },
   dlSummaryCity: { color: COLORS.white, fontWeight: '800', flex: 1, fontSize: 16 },
   dlSummaryProj: { color: COLORS.textSub, fontSize: 12, fontWeight: 'bold' },
   dlProjectedList: { flex: 1, paddingHorizontal: 20 },

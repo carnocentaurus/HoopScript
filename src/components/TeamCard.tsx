@@ -1,6 +1,7 @@
 import React from 'react';
-import { TouchableOpacity, Text, View } from 'react-native';
+import { TouchableOpacity, Text, View, Image } from 'react-native';
 import { globalStyles } from '../styles/globalStyles';
+import { TEAM_LOGOS } from '../data/teams';
 
 interface TeamCardProps {
   city: string;
@@ -8,12 +9,16 @@ interface TeamCardProps {
 }
 
 const TeamCard = ({ city, onPress }: TeamCardProps) => {
-  const initial = city.charAt(0);
+  const logo = TEAM_LOGOS[city];
 
   return (
     <TouchableOpacity style={globalStyles.tcCard} onPress={onPress}>
       <View style={globalStyles.tcLogoCircle}>
-        <Text style={globalStyles.tcLogoLetter}>{initial}</Text>
+        {logo ? (
+          <Image source={logo} style={globalStyles.tcLogoImage} />
+        ) : (
+          <Text style={globalStyles.tcLogoLetter}>{city.charAt(0)}</Text>
+        )}
       </View>
       <Text style={globalStyles.tcCityText}>{city}</Text>
     </TouchableOpacity>

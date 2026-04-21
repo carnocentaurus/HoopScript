@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave } from '../types/save';
@@ -7,6 +7,7 @@ import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 
 const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void, onBack: () => void }) => {
   const [myScore, setMyScore] = useState(0);
@@ -40,10 +41,15 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
   const UserTeam = () => {
     const ratings = calculateTeamRatings(save.roster);
+    const logo = TEAM_LOGOS[save.city];
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{save.city.charAt(0)}</Text>
+        {logo ? (
+          <Image source={logo} style={globalStyles.qsLogoImage} />
+        ) : (
+          <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{save.city.charAt(0)}</Text>
+        )}
         <Text style={globalStyles.qsCityName}>{save.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>
@@ -57,10 +63,15 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
   const OpponentTeam = () => {
     const ratings = calculateTeamRatings(opponent.roster);
+    const logo = TEAM_LOGOS[opponent.city];
 
     return (
       <View style={globalStyles.qsTeamSide}>
-        <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{opponent.city.charAt(0)}</Text>
+        {logo ? (
+          <Image source={logo} style={globalStyles.qsLogoImage} />
+        ) : (
+          <Text style={[globalStyles.qsLogoPlaceholder, globalStyles.bgTransparent]}>{opponent.city.charAt(0)}</Text>
+        )}
         <Text style={globalStyles.qsCityName}>{opponent.city}</Text>
         <View style={globalStyles.ratingsContainer}>
           <View style={globalStyles.ratingBox}><Text style={globalStyles.ratingVal}>{ratings.offense}</Text><Text style={globalStyles.ratingLabel}>OFF</Text></View>
