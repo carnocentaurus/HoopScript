@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon/hoopscript_icon_resized.png",
     "userInterfaceStyle": "light",
-    //"newArchEnabled": true,
     "splash": {
       "image": "./assets/images/icon/hoopscript_icon_resized.png",
       "resizeMode": "contain",
@@ -20,11 +19,13 @@
         "foregroundImage": "./assets/images/icon/hoopscript_icon_resized.png",
         "backgroundColor": "#ffffff"
       },
-      //"edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/images/icon/hoopscript_icon_resized.png"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

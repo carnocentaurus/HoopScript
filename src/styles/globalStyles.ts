@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { COLORS, SPACING } from './theme';
+import { COLORS, SPACING, FONTS } from './theme';
 
 export const globalStyles = StyleSheet.create({
   // --- COMMON ---
@@ -17,13 +17,18 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  baseText: {
+    fontFamily: FONTS.secondary,
+    color: COLORS.text,
+  },
   title: {
     color: COLORS.white,
     fontSize: 24,
-    fontWeight: '900',
+    fontFamily: FONTS.primary,
     marginBottom: SPACING.l,
     textAlign: 'center',
     letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   ratingsContainer: { 
     flexDirection: 'row', 
@@ -35,7 +40,7 @@ export const globalStyles = StyleSheet.create({
   },
   ratingVal: { 
     fontSize: 13, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary,
     color: COLORS.white 
   },
   ovrVal: { 
@@ -44,7 +49,8 @@ export const globalStyles = StyleSheet.create({
   ratingLabel: { 
     fontSize: 8, 
     color: COLORS.textSub, 
-    fontWeight: 'bold' 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
 
   // --- COMMON UTILITIES ---
@@ -69,7 +75,7 @@ export const globalStyles = StyleSheet.create({
   bgTransparent: { backgroundColor: 'transparent' },
   bgTerracotta: { backgroundColor: '#B34726' },
   textTerracotta: { color: '#B34726' },
-  textBlackBold: { color: COLORS.black, fontWeight: '900' },
+  textBlackBold: { color: COLORS.black, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   textSuccess: { color: COLORS.success },
   textError: { color: COLORS.error },
 
@@ -97,16 +103,18 @@ export const globalStyles = StyleSheet.create({
   appYearText: {
     color: COLORS.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FONTS.secondary,
     textAlign: 'center',
   },
   appYearTextBlack: { 
-    color: COLORS.black 
+    color: COLORS.black,
+    fontFamily: FONTS.secondary,
   },
   yearSelectionHeader: {
     color: COLORS.textSub,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -130,7 +138,8 @@ export const globalStyles = StyleSheet.create({
   },
   selectSaveTitle: { 
     fontSize: 24, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
     textAlign: 'center', 
     marginBottom: 40, 
     letterSpacing: 2,
@@ -150,7 +159,8 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: COLORS.primary
   },
   selectSaveSlotNumber: { 
-    fontWeight: 'bold', 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
     color: COLORS.black, 
     fontSize: 18, 
     letterSpacing: 1, 
@@ -158,12 +168,14 @@ export const globalStyles = StyleSheet.create({
   },
   selectSaveInfo: { 
     fontSize: 18, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
     color: COLORS.black 
   },
   selectSaveStats: { 
     fontSize: 16, 
-    fontWeight: 'bold', 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
     color: COLORS.black, 
     textAlign: 'right' 
   },
@@ -171,12 +183,14 @@ export const globalStyles = StyleSheet.create({
     fontSize: 11, 
     color: COLORS.black, 
     textAlign: 'right', 
-    marginTop: 2 
+    marginTop: 2,
+    fontFamily: FONTS.secondary,
   },
   selectSaveEmptyText: { 
     color: COLORS.black, 
     fontStyle: 'italic', 
-    fontSize: 16 
+    fontSize: 16,
+    fontFamily: FONTS.secondary,
   },
   selectSaveDeleteBtn: { 
     position: 'absolute', 
@@ -192,7 +206,8 @@ export const globalStyles = StyleSheet.create({
   selectSaveDeleteText: { 
     color: COLORS.black, 
     fontSize: 9, 
-    fontWeight: '900' 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
 
   // --- HOME SCREEN ---
@@ -210,8 +225,9 @@ export const globalStyles = StyleSheet.create({
   homeYearText: {
     color: COLORS.textSub,
     fontSize: 12,
-    fontWeight: '900',
+    fontFamily: FONTS.primary,
     letterSpacing: 1.5,
+    textTransform: 'uppercase',
   },
   homeBackBtn: {
     backgroundColor: COLORS.card,
@@ -232,8 +248,9 @@ export const globalStyles = StyleSheet.create({
   homeHistoryBtnText: {
     color: COLORS.textSub,
     fontSize: 10,
-    fontWeight: '900',
+    fontFamily: FONTS.primary,
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   homeTopNav: { 
     flexDirection: 'row', 
@@ -256,9 +273,10 @@ export const globalStyles = StyleSheet.create({
   },
   homeStandingsBtnText: { 
     fontSize: 10, 
-    fontWeight: '800', 
+    fontFamily: FONTS.primary, 
     color: COLORS.text, 
-    letterSpacing: 1 
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   homeMainContent: { 
     flex: 1, 
@@ -268,18 +286,20 @@ export const globalStyles = StyleSheet.create({
   homeSectionLabelCenter: { 
     color: COLORS.textSub, 
     fontSize: 10, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary, 
     textAlign: 'center', 
     letterSpacing: 2, 
-    marginBottom: 25 
+    marginBottom: 25,
+    textTransform: 'uppercase',
   },
   homeSectionLabelCenterBold: { 
     color: COLORS.textSub, 
     fontSize: 10, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary, 
     textAlign: 'center', 
     letterSpacing: 2, 
-    marginBottom: 5 
+    marginBottom: 5,
+    textTransform: 'uppercase',
   },
   homeMatchupWrapper: { 
     flexDirection: 'row', 
@@ -317,12 +337,14 @@ export const globalStyles = StyleSheet.create({
   homeUserBadgeText: { 
     color: COLORS.white, 
     fontSize: 9, 
-    fontWeight: '900' 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
   homeMatchupLogo: { 
     fontSize: 42, 
-    fontWeight: '900', 
-    marginBottom: 12 
+    fontFamily: FONTS.primary, 
+    marginBottom: 12,
+    textTransform: 'uppercase',
   },
   homeMatchupLogoImage: {
     width: 60,
@@ -331,14 +353,18 @@ export const globalStyles = StyleSheet.create({
     resizeMode: 'contain'
   },
   homeUserLogoText: { 
-    color: COLORS.text 
+    color: COLORS.text,
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
   homeOppLogoText: { 
-    color: COLORS.grayLighter 
+    color: COLORS.grayLighter,
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
   homeMatchupCity: { 
     fontSize: 16, 
-    fontWeight: '800', 
+    fontFamily: FONTS.primary, 
     color: COLORS.text, 
     textTransform: 'uppercase' 
   },
@@ -346,7 +372,8 @@ export const globalStyles = StyleSheet.create({
     color: COLORS.textMuted, 
     fontSize: 11, 
     marginTop: 4, 
-    fontWeight: '600' 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
   homeVenueBadge: { 
     marginTop: 15, 
@@ -362,9 +389,10 @@ export const globalStyles = StyleSheet.create({
   },
   homeVenueText: { 
     fontSize: 10, 
-    fontWeight: '800', 
+    fontFamily: FONTS.primary, 
     color: COLORS.primary, 
-    letterSpacing: 0.5 
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   homeVsContainer: { 
     width: 40, 
@@ -372,8 +400,9 @@ export const globalStyles = StyleSheet.create({
   },
   homeVsText: { 
     color: COLORS.grayLighter, 
-    fontWeight: '900', 
-    fontSize: 16 
+    fontFamily: FONTS.primary, 
+    fontSize: 16,
+    textTransform: 'uppercase',
   },
   homeProgressSection: { 
     marginTop: 60, 
@@ -390,8 +419,9 @@ export const globalStyles = StyleSheet.create({
   homeProgressLabel: { 
     color: COLORS.textSub, 
     fontSize: 10, 
-    fontWeight: '800', 
-    letterSpacing: 1 
+    fontFamily: FONTS.primary, 
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   homeProgressBarBg: { 
     width: '100%', 
@@ -407,7 +437,8 @@ export const globalStyles = StyleSheet.create({
   homeStatsText: { 
     color: COLORS.textSub, 
     fontSize: 10, 
-    fontWeight: '800' 
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
   },
   homeSeriesScoreContainer: { 
     alignItems: 'center' 
@@ -415,21 +446,24 @@ export const globalStyles = StyleSheet.create({
   homeSeriesLabel: { 
     color: COLORS.textSub, 
     fontSize: 9, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary, 
     letterSpacing: 1.5, 
-    marginBottom: 8 
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   homeSeriesScoreText: { 
     color: COLORS.text, 
     fontSize: 32, 
-    fontWeight: '900', 
-    letterSpacing: 10 
+    fontFamily: FONTS.primary, 
+    letterSpacing: 10,
+    textTransform: 'uppercase',
   },
   homeSeriesSubText: { 
     color: COLORS.textMuted, 
     fontSize: 10, 
-    fontWeight: '700', 
-    marginTop: 8 
+    fontFamily: FONTS.primary, 
+    marginTop: 8,
+    textTransform: 'uppercase',
   },
   homeEndSeasonContainer: { 
     alignItems: 'center', 
@@ -441,16 +475,18 @@ export const globalStyles = StyleSheet.create({
   },
   homeEndSeasonTitle: { 
     fontSize: 22, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary, 
     color: COLORS.text, 
-    textAlign: 'center' 
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   homeEndSeasonSub: { 
     fontSize: 14, 
     color: COLORS.textMuted, 
     textAlign: 'center', 
     marginTop: 10, 
-    lineHeight: 20 
+    lineHeight: 20,
+    fontFamily: FONTS.secondary,
   },
   homeBottomButtonsContainer: {
     position: 'absolute',
@@ -468,9 +504,10 @@ export const globalStyles = StyleSheet.create({
   },
   homeSimButtonText: { 
     color: COLORS.black, 
-    fontWeight: '900', 
+    fontFamily: FONTS.primary, 
     fontSize: 16, 
-    letterSpacing: 1 
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   homeBracketButton: {
     backgroundColor: '#B34726',
@@ -482,9 +519,10 @@ export const globalStyles = StyleSheet.create({
   },
   homeBracketButtonText: {
     color: COLORS.black,
-    fontWeight: '900',
+    fontFamily: FONTS.primary,
     fontSize: 16,
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
 
   // --- QUICK SIM SCREEN ---
@@ -493,168 +531,168 @@ export const globalStyles = StyleSheet.create({
   qsBackBtn: { padding: 10, width: 60 },
   qsScoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   qsTeamSide: { alignItems: 'center', flex: 1 },
-  qsLogoPlaceholder: { fontSize: 40, color: COLORS.white, fontWeight: '900', backgroundColor: COLORS.grayLight, width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
+  qsLogoPlaceholder: { fontSize: 40, color: COLORS.white, fontFamily: FONTS.primary, textTransform: 'uppercase', backgroundColor: COLORS.grayLight, width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
   qsLogoImage: { width: 80, height: 80, marginBottom: 10, resizeMode: 'contain' },
-  qsCityName: { color: COLORS.textSub, fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' },
-  qsScore: { color: COLORS.text, fontSize: 54, fontWeight: '900', marginTop: 10 },
-  qsVs: { color: COLORS.border, fontWeight: '900', fontSize: 18 },
+  qsCityName: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  qsScore: { color: COLORS.text, fontSize: 54, fontFamily: FONTS.primary, marginTop: 10 },
+  qsVs: { color: COLORS.border, fontFamily: FONTS.primary, fontSize: 18, textTransform: 'uppercase' },
   qsWinner: { color: COLORS.success },
   qsOtBadge: { alignSelf: 'center', backgroundColor: COLORS.accent, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, marginBottom: 10 },
-  qsOtText: { color: COLORS.black, fontWeight: '900', fontSize: 11 },
+  qsOtText: { color: COLORS.black, fontFamily: FONTS.primary, fontSize: 11, textTransform: 'uppercase' },
   qsPostGame: { marginTop: 10, paddingHorizontal: 20 },
   qsWinnerTerracotta: { color: '#B34726' },
   qsContinueButtonTerracotta: { backgroundColor: '#B34726', padding: 18, borderRadius: 12, alignItems: 'center' },
-  qsContinueTextBlack: { fontWeight: '900', fontSize: 16, color: COLORS.black },
+  qsContinueTextBlack: { fontFamily: FONTS.primary, fontSize: 16, color: COLORS.black, textTransform: 'uppercase' },
 
   // --- STANDINGS SCREEN ---
   stHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
-  stTitle: { fontSize: 18, fontWeight: '900', letterSpacing: 1, color: COLORS.white },
+  stTitle: { fontSize: 18, fontFamily: FONTS.primary, letterSpacing: 1, color: COLORS.white, textTransform: 'uppercase' },
   stTabBar: { flexDirection: 'row', borderBottomWidth: 1, borderColor: COLORS.border },
   stTab: { flex: 1, padding: 15, alignItems: 'center' },
   stActiveTab: { borderBottomWidth: 3, borderColor: COLORS.primary },
-  stTabText: { color: COLORS.textMuted, fontWeight: 'bold' },
-  stActiveTabText: { color: COLORS.white },
+  stTabText: { color: COLORS.textMuted, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  stActiveTabText: { color: COLORS.white, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   stTableHeader: { flexDirection: 'row', padding: 15, backgroundColor: COLORS.card, borderBottomWidth: 1, borderColor: COLORS.border },
-  stHeaderRank: { width: 30, fontSize: 10, color: COLORS.textMuted, fontWeight: 'bold' },
-  stHeaderTeam: { flex: 1, fontSize: 10, color: COLORS.textMuted, fontWeight: 'bold' },
+  stHeaderRank: { width: 30, fontSize: 10, color: COLORS.textMuted, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  stHeaderTeam: { flex: 1, fontSize: 10, color: COLORS.textMuted, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   stRecordColsHeader: { flexDirection: 'row', width: 60, justifyContent: 'space-between' },
-  stHeaderStat: { fontSize: 10, color: COLORS.textMuted, fontWeight: 'bold', width: 25, textAlign: 'center' },
+  stHeaderStat: { fontSize: 10, color: COLORS.textMuted, fontFamily: FONTS.primary, width: 25, textAlign: 'center', textTransform: 'uppercase' },
   stTeamRow: { flexDirection: 'row', padding: 15, alignItems: 'center', borderBottomWidth: 1, borderColor: COLORS.border },
   stUserRow: { backgroundColor: COLORS.grayLight },
-  stRankText: { width: 30, fontWeight: 'bold', color: COLORS.textSub },
+  stRankText: { width: 30, fontFamily: FONTS.primary, color: COLORS.textSub },
   stLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
-  stCityName: { flex: 1, fontWeight: '600', fontSize: 16, color: COLORS.text },
+  stCityName: { flex: 1, fontFamily: FONTS.secondary, fontSize: 16, color: COLORS.text },
   stRecordCols: { flexDirection: 'row', width: 60, justifyContent: 'space-between' },
-  stRecordText: { width: 25, textAlign: 'center', fontWeight: 'bold', color: COLORS.text },
+  stRecordText: { width: 25, textAlign: 'center', fontFamily: FONTS.primary, color: COLORS.text },
 
   // --- DRAFT SCREEN ---
   drHeader: { padding: 20, alignItems: 'center', backgroundColor: COLORS.darkBg },
   drHeaderTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: 15 },
-  drTitle: { color: COLORS.white, fontSize: 12, fontWeight: '900', letterSpacing: 4, marginBottom: 0 },
+  drTitle: { color: COLORS.white, fontSize: 12, fontFamily: FONTS.primary, letterSpacing: 4, marginBottom: 0, textTransform: 'uppercase' },
   drTeamViewBtn: { backgroundColor: COLORS.secondary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 15, borderWidth: 1, borderColor: COLORS.border },
-  drTeamViewBtnText: { color: COLORS.textSub, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
+  drTeamViewBtnText: { color: COLORS.textSub, fontSize: 9, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
   drOnClockCard: { alignItems: 'center' },
-  drOnClockLabel: { color: COLORS.primary, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
-  drOnClockTeam: { color: COLORS.white, fontSize: 24, fontWeight: '900', marginVertical: 4 },
-  drPickNumber: { color: COLORS.textSub, fontSize: 12, fontWeight: 'bold' },
+  drOnClockLabel: { color: COLORS.primary, fontSize: 10, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
+  drOnClockTeam: { color: COLORS.white, fontSize: 24, fontFamily: FONTS.primary, marginVertical: 4, textTransform: 'uppercase' },
+  drPickNumber: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.secondary },
   drSimBtn: { backgroundColor: COLORS.secondary, margin: 15, padding: 12, borderRadius: 8, alignItems: 'center' },
-  drSimBtnText: { color: COLORS.white, fontWeight: '900', fontSize: 12, letterSpacing: 1 },
+  drSimBtnText: { color: COLORS.white, fontFamily: FONTS.primary, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase' },
   drListContainer: { paddingHorizontal: 15, paddingBottom: 20 },
-  drListHeader: { fontSize: 12, fontWeight: '900', color: COLORS.textMuted, marginVertical: 15, letterSpacing: 1 },
+  drListHeader: { fontSize: 12, fontFamily: FONTS.primary, color: COLORS.textMuted, marginVertical: 15, letterSpacing: 1, textTransform: 'uppercase' },
   drPlayerCard: { flexDirection: 'row', backgroundColor: COLORS.card, padding: 15, borderRadius: 12, marginBottom: 10, alignItems: 'center', elevation: 2 },
   drPlayerInfo: { flex: 1 },
-  drPlayerName: { fontSize: 18, fontWeight: '900', color: COLORS.text },
-  drPlayerSub: { color: COLORS.textMuted, fontWeight: 'bold', fontSize: 12, marginTop: 2 },
+  drPlayerName: { fontSize: 18, fontFamily: FONTS.secondary, color: COLORS.text },
+  drPlayerSub: { color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 12, marginTop: 2, textTransform: 'uppercase' },
   drRatingBox: { alignItems: 'center', marginRight: 15 },
-  drRatingVal: { fontSize: 20, fontWeight: '900', color: COLORS.primary },
-  drRatingLabel: { fontSize: 8, color: COLORS.textSub, fontWeight: 'bold' },
+  drRatingVal: { fontSize: 20, fontFamily: FONTS.primary, color: COLORS.primary },
+  drRatingLabel: { fontSize: 8, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   drPickBtn: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 },
-  drPickBtnText: { color: COLORS.white, fontWeight: '900', fontSize: 12 },
+  drPickBtnText: { color: COLORS.white, fontFamily: FONTS.primary, fontSize: 12, textTransform: 'uppercase' },
   drSummaryRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.card, padding: 12, borderRadius: 10, marginBottom: 8, borderWidth: 1, borderColor: COLORS.border },
   drUserSummaryRow: { borderColor: COLORS.primary, backgroundColor: COLORS.grayLight },
-  drSummaryPick: { width: 40, fontSize: 12, fontWeight: '900', color: COLORS.textMuted },
+  drSummaryPick: { width: 40, fontSize: 12, fontFamily: FONTS.primary, color: COLORS.textMuted },
   drLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
   drSummaryInfo: { flex: 1 },
-  drSummaryTeam: { fontSize: 10, fontWeight: '900', color: COLORS.primary },
-  drUserSummaryText: { color: COLORS.secondary },
-  drSummaryPlayer: { fontSize: 14, fontWeight: '800', color: COLORS.text },
+  drSummaryTeam: { fontSize: 10, fontFamily: FONTS.primary, color: COLORS.primary, textTransform: 'uppercase' },
+  drUserSummaryText: { color: COLORS.secondary, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  drSummaryPlayer: { fontSize: 14, fontFamily: FONTS.secondary, color: COLORS.text },
   drSummaryRating: { alignItems: 'center' },
-  drSummaryRatingVal: { fontSize: 14, fontWeight: '900', color: COLORS.text },
-  drSummaryRatingLabel: { fontSize: 7, fontWeight: 'bold', color: COLORS.textSub },
+  drSummaryRatingVal: { fontSize: 14, fontFamily: FONTS.primary, color: COLORS.text },
+  drSummaryRatingLabel: { fontSize: 7, fontFamily: FONTS.primary, color: COLORS.textSub, textTransform: 'uppercase' },
   drStartSeasonBtn: { backgroundColor: COLORS.secondary, margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
-  drStartSeasonBtnText: { color: COLORS.white, fontWeight: '900', fontSize: 14, letterSpacing: 1 },
+  drStartSeasonBtnText: { color: COLORS.white, fontFamily: FONTS.primary, fontSize: 14, letterSpacing: 1, textTransform: 'uppercase' },
 
   // --- TEAM OVERVIEW SCREEN ---
   tosHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, paddingVertical: 10 },
   tosBackBtn: { width: 60 },
-  tosTitle: { color: COLORS.white, fontSize: 18, fontWeight: '900', letterSpacing: 1 },
+  tosTitle: { color: COLORS.white, fontSize: 18, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
   tosContainer: { flex: 1, paddingHorizontal: 15 },
   tosTrophySection: { alignItems: 'center', backgroundColor: COLORS.darkBg, padding: 20, borderRadius: 15, marginVertical: 15 },
   tosTrophyIcon: { fontSize: 32 },
-  tosTrophyCount: { color: COLORS.white, fontSize: 24, fontWeight: '900', marginTop: 5 },
-  tosTrophyLabel: { color: COLORS.textSub, fontSize: 10, fontWeight: 'bold', letterSpacing: 1 },
+  tosTrophyCount: { color: COLORS.white, fontSize: 24, fontFamily: FONTS.primary, marginTop: 5 },
+  tosTrophyLabel: { color: COLORS.textSub, fontSize: 10, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
   tosTeamRatingsRow: { flexDirection: 'row', justifyContent: 'center', gap: 40, marginBottom: 25, backgroundColor: COLORS.background, padding: 15, borderRadius: 12 },
   tosTeamRatingBox: { alignItems: 'center' },
-  tosTeamRatingVal: { fontSize: 22, fontWeight: '900', color: COLORS.white },
+  tosTeamRatingVal: { fontSize: 22, fontFamily: FONTS.primary, color: COLORS.white },
   tosTeamOvrVal: { color: COLORS.primary },
-  tosTeamRatingLabel: { fontSize: 9, color: COLORS.textMuted, fontWeight: '800', marginTop: 2 },
-  tosSectionHeader: { color: COLORS.textSub, fontSize: 12, fontWeight: '900', letterSpacing: 2, marginBottom: 10, marginLeft: 5 },
+  tosTeamRatingLabel: { fontSize: 9, color: COLORS.textMuted, fontFamily: FONTS.primary, marginTop: 2, textTransform: 'uppercase' },
+  tosSectionHeader: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.primary, letterSpacing: 2, marginBottom: 10, marginLeft: 5, textTransform: 'uppercase' },
   tosPlayerCard: { backgroundColor: COLORS.card, borderRadius: 12, padding: 15, marginBottom: 12, borderWidth: 1, borderColor: COLORS.border, elevation: 2 },
   tosPlayerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  tosPlayerMain: { fontSize: 18, fontWeight: '900', color: COLORS.text },
-  tosPlayerNum: { color: COLORS.accent, fontSize: 14 },
-  tosPlayerPos: { color: COLORS.textMuted, fontWeight: 'bold', fontSize: 12 },
+  tosPlayerMain: { fontSize: 18, fontFamily: FONTS.secondary, color: COLORS.text },
+  tosPlayerNum: { color: COLORS.accent, fontSize: 14, fontFamily: FONTS.primary },
+  tosPlayerPos: { color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 12, textTransform: 'uppercase' },
   tosRatingsRow: { flexDirection: 'row', gap: 15 },
   tosRatingItem: { alignItems: 'center' },
-  tosRatingVal: { fontSize: 16, fontWeight: 'bold', color: COLORS.text },
+  tosRatingVal: { fontSize: 16, fontFamily: FONTS.primary, color: COLORS.text },
   tosOvrVal: { color: COLORS.primary },
-  tosRatingLabel: { fontSize: 8, color: COLORS.textSub, fontWeight: 'bold' },
+  tosRatingLabel: { fontSize: 8, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   tosRookieBadge: { backgroundColor: '#F6AD55', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 },
-  tosRookieBadgeText: { color: COLORS.white, fontSize: 8, fontWeight: '900', letterSpacing: 0.5 },
+  tosRookieBadgeText: { color: COLORS.white, fontSize: 8, fontFamily: FONTS.primary, letterSpacing: 0.5, textTransform: 'uppercase' },
 
   // --- TEAM OVERVIEW (PREVIEW) ---
   toHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginVertical: 15 },
   toBackBtn: { padding: 10, width: 60 },
-  toHeaderText: { fontSize: 20, fontWeight: 'bold', flex: 1, textAlign: 'center', color: COLORS.white },
+  toHeaderText: { fontSize: 20, fontFamily: FONTS.secondary, flex: 1, textAlign: 'center', color: COLORS.white },
   toTeamStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 30, marginBottom: 20 },
   toStatBox: { alignItems: 'center' },
-  toStatVal: { fontSize: 24, fontWeight: 'bold', color: COLORS.white },
-  toStatLabel: { fontSize: 10, color: COLORS.textSub },
+  toStatVal: { fontSize: 24, fontFamily: FONTS.primary, color: COLORS.white },
+  toStatLabel: { fontSize: 10, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   toPlayerCard: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, alignItems: 'center' },
-  toPlayerPos: { width: 40, fontWeight: 'bold', color: COLORS.textSub },
-  toPlayerName: { flex: 1, fontSize: 16, color: COLORS.text },
-  toPlayerOvr: { fontWeight: 'bold', fontSize: 16, color: COLORS.text },
+  toPlayerPos: { width: 40, fontFamily: FONTS.primary, color: COLORS.textSub, textTransform: 'uppercase' },
+  toPlayerName: { flex: 1, fontSize: 16, color: COLORS.text, fontFamily: FONTS.secondary },
+  toPlayerOvr: { fontFamily: FONTS.primary, fontSize: 16, color: COLORS.text },
   toSectionHeader: { backgroundColor: COLORS.card, padding: 10, paddingHorizontal: 15 },
-  toSectionHeaderText: { fontSize: 12, fontWeight: 'bold', color: COLORS.textSub, letterSpacing: 1 },
+  toSectionHeaderText: { fontSize: 12, fontFamily: FONTS.primary, color: COLORS.textSub, letterSpacing: 1, textTransform: 'uppercase' },
   toConfirmBtn: { backgroundColor: COLORS.primary, margin: 20, padding: 15, borderRadius: 10, alignItems: 'center' },
-  toConfirmBtnText: { color: COLORS.white, fontWeight: 'bold', fontSize: 16 },
-  toConfirmBtnTextBlack: { color: COLORS.black, fontWeight: 'bold', fontSize: 16 },
+  toConfirmBtnText: { color: COLORS.white, fontFamily: FONTS.primary, fontSize: 16, textTransform: 'uppercase' },
+  toConfirmBtnTextBlack: { color: COLORS.black, fontFamily: FONTS.primary, fontSize: 16, textTransform: 'uppercase' },
 
   // --- HISTORY SCREEN ---
   hiHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   hiHeaderBack: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-  hiHeaderTitle: { color: COLORS.white, fontSize: 18, fontWeight: '900', letterSpacing: 2 },
+  hiHeaderTitle: { color: COLORS.white, fontSize: 18, fontFamily: FONTS.primary, letterSpacing: 2, textTransform: 'uppercase' },
   hiScrollContent: { padding: 15 },
   hiHistoryCard: { backgroundColor: COLORS.card, borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: COLORS.border },
   hiCardHeader: { flexDirection: 'column' },
-  hiYearText: { color: COLORS.accent, fontSize: 12, fontWeight: '900', letterSpacing: 1 },
+  hiYearText: { color: COLORS.accent, fontSize: 12, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
   hiLogoImage: { width: 18, height: 18, marginRight: 6, resizeMode: 'contain' },
   hiChampRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  hiChampText: { color: COLORS.white, fontSize: 20, fontWeight: '900', flex: 1, flexShrink: 1 },
+  hiChampText: { color: COLORS.white, fontSize: 20, fontFamily: FONTS.primary, flex: 1, flexShrink: 1, textTransform: 'uppercase' },
   hiChampStats: { alignItems: 'flex-end', minWidth: 50 },
-  hiChampStatText: { color: COLORS.primary, fontSize: 10, fontWeight: '900' },
+  hiChampStatText: { color: COLORS.primary, fontSize: 10, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   hiUserSummary: { flexDirection: 'row', gap: 10, marginTop: 12, borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 12, alignItems: 'center' },
-  hiUserLabel: { color: COLORS.textMuted, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
-  hiUserStat: { color: COLORS.textSub, fontSize: 13, fontWeight: 'bold' },
+  hiUserLabel: { color: COLORS.textMuted, fontSize: 10, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
+  hiUserStat: { color: COLORS.textSub, fontSize: 13, fontFamily: FONTS.secondary },
   hiEmptyContainer: { padding: 40, alignItems: 'center' },
-  hiEmptyText: { color: COLORS.textMuted, fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
+  hiEmptyText: { color: COLORS.textMuted, fontSize: 16, fontFamily: FONTS.secondary, textAlign: 'center' },
 
   // --- PLAYOFF BRACKET SCREEN ---
   pbHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },
-  pbTitle: { fontSize: 18, fontWeight: '900', color: COLORS.white },
+  pbTitle: { fontSize: 18, fontFamily: FONTS.primary, color: COLORS.white, textTransform: 'uppercase' },
   pbContent: { padding: 16 },
   pbConferenceSection: { marginBottom: 20 },
-  pbConferenceHeader: { fontSize: 12, fontWeight: '900', color: COLORS.textSub, letterSpacing: 1.5, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingBottom: 4 },
+  pbConferenceHeader: { fontSize: 12, fontFamily: FONTS.primary, color: COLORS.textSub, letterSpacing: 1.5, marginBottom: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingBottom: 4, textTransform: 'uppercase' },
   pbSeriesCard: { backgroundColor: COLORS.card, borderRadius: 12, padding: 15, marginBottom: 12, elevation: 2 },
   pbTeamRow: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 6, alignItems: 'center' },
   pbTeamInfo: { flexDirection: 'row', alignItems: 'center' },
-  pbRankLabel: { fontSize: 12, color: COLORS.textSub, fontWeight: 'bold', width: 22, textAlign: 'left' },
+  pbRankLabel: { fontSize: 12, color: COLORS.textSub, fontFamily: FONTS.primary, width: 22, textAlign: 'left' },
   pbLogoImage: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
-  pbTeamName: { fontSize: 16, fontWeight: '700', color: COLORS.text },
-  pbWinner: { color: COLORS.primary },
-  pbScore: { fontSize: 16, fontWeight: '900', color: COLORS.text },
+  pbTeamName: { fontSize: 16, fontFamily: FONTS.secondary, color: COLORS.text },
+  pbWinner: { color: COLORS.primary, fontFamily: FONTS.secondary },
+  pbScore: { fontSize: 16, fontFamily: FONTS.primary, color: COLORS.text },
   pbSimDayBtn: { backgroundColor: COLORS.secondary, margin: 20, padding: 18, borderRadius: 12, alignItems: 'center' },
   pbNextSeasonBtn: { backgroundColor: COLORS.success },
-  pbSimDayBtnText: { color: COLORS.white, fontWeight: 'bold' },
+  pbSimDayBtnText: { color: COLORS.white, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   pbChampContainer: { alignItems: 'center', marginTop: 20, padding: 20 },
-  pbChampText: { fontSize: 20, fontWeight: '900', color: COLORS.white },
+  pbChampText: { fontSize: 20, fontFamily: FONTS.primary, color: COLORS.white, textTransform: 'uppercase' },
 
   // --- FULL PLAYOFF BRACKET SCREEN ---
   fpbRoundContainer: { marginBottom: 30 },
-  fpbRoundTitle: { color: COLORS.textSub, fontSize: 14, fontWeight: '900', letterSpacing: 2, marginBottom: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingBottom: 5 },
+  fpbRoundTitle: { color: COLORS.textSub, fontSize: 14, fontFamily: FONTS.primary, letterSpacing: 2, marginBottom: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, paddingBottom: 5, textTransform: 'uppercase' },
 
   // --- TEAM SELECTION SCREEN ---
-  tsHeader: { fontSize: 20, fontWeight: '700', textAlign: 'center', marginVertical: 20, flex: 1, color: COLORS.white },
+  tsHeader: { fontSize: 20, fontFamily: FONTS.secondary, textAlign: 'center', marginVertical: 20, flex: 1, color: COLORS.white },
   tsHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15 },
   tsBackBtn: { padding: 10, width: 60 },
   tsListContent: { paddingHorizontal: 10 },
@@ -662,33 +700,33 @@ export const globalStyles = StyleSheet.create({
   // --- TEAM CARD COMPONENT ---
   tcCard: { flex: 1, alignItems: 'center', margin: 8, paddingVertical: 10 },
   tcLogoCircle: { width: 50, height: 50, borderRadius: 25, backgroundColor: COLORS.grayLight, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
-  tcLogoLetter: { fontSize: 24, fontWeight: '600', color: COLORS.text },
+  tcLogoLetter: { fontSize: 24, fontFamily: FONTS.primary, color: COLORS.text, textTransform: 'uppercase' },
   tcLogoImage: { width: 40, height: 40, resizeMode: 'contain' },
-  tcCityText: { fontSize: 12, textAlign: 'center', color: COLORS.text },
+  tcCityText: { fontSize: 12, textAlign: 'center', color: COLORS.text, fontFamily: FONTS.secondary },
 
   // --- DRAFT LOTTERY SCREEN ---
   dlHeader: { padding: 20, alignItems: 'center' },
-  dlTitle: { color: COLORS.primary, fontSize: 28, fontWeight: '900', letterSpacing: 2 },
-  dlSubtitle: { color: COLORS.textMuted, fontSize: 12, fontWeight: '700', marginTop: 5 },
+  dlTitle: { color: COLORS.primary, fontSize: 28, fontFamily: FONTS.primary, letterSpacing: 2, textTransform: 'uppercase' },
+  dlSubtitle: { color: COLORS.textMuted, fontSize: 12, fontFamily: FONTS.primary, marginTop: 5, textTransform: 'uppercase' },
   dlRevealContainer: { height: 280, justifyContent: 'center', alignItems: 'center', padding: 20 },
   dlBeginBtn: { backgroundColor: '#B34726', marginHorizontal: 20, marginVertical: 20, padding: 20, borderRadius: 16, alignItems: 'center', elevation: 8 },
-  dlBeginBtnText: { color: COLORS.black, fontWeight: '900', fontSize: 16, letterSpacing: 1 },
+  dlBeginBtnText: { color: COLORS.black, fontFamily: FONTS.primary, fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' },
   dlActiveReveal: { alignItems: 'center', width: '100%' },
-  dlPickLabel: { color: COLORS.textMuted, fontSize: 18, fontWeight: '900', marginBottom: 10 },
+  dlPickLabel: { color: COLORS.textMuted, fontSize: 18, fontFamily: FONTS.primary, marginBottom: 10, textTransform: 'uppercase' },
   dlCityCard: { backgroundColor: COLORS.card, width: '100%', padding: 30, borderRadius: 20, alignItems: 'center', borderWidth: 2, borderColor: COLORS.border, marginBottom: 10 },
   dlLogoImage: { width: 100, height: 100, marginBottom: 20, resizeMode: 'contain' },
-  dlCityName: { color: COLORS.white, fontSize: 32, fontWeight: '900', textAlign: 'center' },
-  dlRankLabel: { color: COLORS.textSub, fontSize: 12, fontWeight: '700', marginTop: 10 },
+  dlCityName: { color: COLORS.white, fontSize: 32, fontFamily: FONTS.primary, textAlign: 'center', textTransform: 'uppercase' },
+  dlRankLabel: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.primary, marginTop: 10, textTransform: 'uppercase' },
   dlSummaryList: { padding: 15 },
   dlSummaryItem: { flexDirection: 'row', backgroundColor: COLORS.card, marginBottom: 8, padding: 15, borderRadius: 12, alignItems: 'center', opacity: 0.3 },
   dlRevealedItem: { opacity: 1, borderColor: COLORS.border, borderWidth: 1 },
-  dlSummaryPick: { color: COLORS.primary, fontWeight: '900', width: 40, fontSize: 16 },
+  dlSummaryPick: { color: COLORS.primary, fontFamily: FONTS.primary, width: 40, fontSize: 16, textTransform: 'uppercase' },
   dlSummaryLogoImage: { width: 24, height: 24, marginRight: 10, resizeMode: 'contain' },
-  dlSummaryCity: { color: COLORS.white, fontWeight: '800', flex: 1, fontSize: 16 },
-  dlSummaryProj: { color: COLORS.textSub, fontSize: 12, fontWeight: 'bold' },
+  dlSummaryCity: { color: COLORS.white, fontFamily: FONTS.secondary, flex: 1, fontSize: 16 },
+  dlSummaryProj: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   dlProjectedList: { flex: 1, paddingHorizontal: 20 },
   dlProjectedRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border, alignItems: 'center' },
-  dlProjectedCity: { color: COLORS.white, fontSize: 16, fontWeight: 'bold' },
-  dlProjectedSub: { color: COLORS.textMuted, fontSize: 11, fontWeight: '600', marginTop: 2 },
-  dlProjectedPick: { color: COLORS.primary, fontSize: 16, fontWeight: '900' },
+  dlProjectedCity: { color: COLORS.white, fontSize: 16, fontFamily: FONTS.secondary },
+  dlProjectedSub: { color: COLORS.textMuted, fontSize: 11, fontFamily: FONTS.secondary, marginTop: 2 },
+  dlProjectedPick: { color: COLORS.primary, fontSize: 16, fontFamily: FONTS.primary, textTransform: 'uppercase' },
 });

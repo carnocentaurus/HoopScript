@@ -19,6 +19,11 @@ export const COLORS = {
   grayBackground: '#000000',
 };
 
+export const FONTS = {
+  primary: 'Oswald',
+  secondary: 'Inter',
+};
+
 export const SPACING = {
   xs: 4,
   s: 8,
