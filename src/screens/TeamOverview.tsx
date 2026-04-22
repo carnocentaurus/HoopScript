@@ -55,7 +55,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
     <Screen>
       <View style={globalStyles.toHeaderRow}>
         <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
-          <Icon name="chevron-back" size={30} color={COLORS.text} />
+          <Icon name="chevron-back" size={30} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={globalStyles.toHeaderText}>{city}</Text>
         <View style={globalStyles.headerSpacer} />

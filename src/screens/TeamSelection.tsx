@@ -28,9 +28,8 @@ const TeamSelection = ({ onSelectTeam, onBack }: { onSelectTeam: (team: string) 
     <Screen>
       <View style={globalStyles.tsHeaderRow}>
         <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tsBackBtn}>
-          <Icon name="chevron-back" size={30} color={COLORS.text} />
+          <Icon name="chevron-back" size={30} color={COLORS.primary} />
         </TouchableOpacity>
-        <Text style={globalStyles.tsHeader}>Select Your Team</Text>
         <View style={globalStyles.headerSpacer} />
       </View>
       <FlatList

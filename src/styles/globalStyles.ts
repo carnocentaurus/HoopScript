@@ -109,6 +109,7 @@ export const globalStyles = StyleSheet.create({
   appYearTextBlack: { 
     color: COLORS.black,
     fontFamily: FONTS.secondary,
+    textAlign: 'center',
   },
   yearSelectionHeader: {
     color: COLORS.textSub,

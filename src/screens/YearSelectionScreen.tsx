@@ -39,7 +39,7 @@ const YearSelectionScreen = ({ onSelectYear, onBack }: YearSelectionScreenProps)
               ]}
               onPress={() => handlePress(() => onSelectYear(year))}
             >
-              <Text style={[globalStyles.appYearText, globalStyles.appYearTextBlack, globalStyles.baseText]}>{year}</Text>
+              <Text style={globalStyles.appYearTextBlack}>{year}</Text>
             </TouchableOpacity>
           ))}
         </View>
