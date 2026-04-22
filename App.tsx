@@ -39,7 +39,7 @@ function MainApp() {
       try {
         await Font.loadAsync({
           'Oswald': require('./assets/fonts/Oswald.ttf'),
-          'Inter': require('./assets/fonts/Inter.ttf'),
+          'RobotoCondensed': require('./assets/fonts/RobotoCondensed.ttf'),
         });
       } catch (e) {
         console.warn(e);

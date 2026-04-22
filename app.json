@@ -31,7 +31,7 @@
     },
     "plugins": [
       "expo-font",
-      "expo-av"
+      "expo-audio"
     ],
     "extra": {
       "eas": {

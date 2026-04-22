@@ -21,7 +21,7 @@ export const COLORS = {
 
 export const FONTS = {
   primary: 'Oswald',
-  secondary: 'Inter',
+  secondary: 'RobotoCondensed',
 };
 
 export const SPACING = {
