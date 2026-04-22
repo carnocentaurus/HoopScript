@@ -7,6 +7,7 @@ import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 const TeamMatchupCard = ({ team }: { team: any }) => {
   const ratings = calculateTeamRatings(team.roster);
@@ -56,6 +57,7 @@ const HomeScreen = ({
   onViewTeam: () => void,
   onBackToSaves: () => void
 }) => {
+  const { playClickSound } = useSound();
 
   const isEndOfSeason = save.gamesPlayed === 82; // Adjust field name to match your state if needed
   const isEliminated = save.playoffs?.isEliminated;
@@ -75,11 +77,16 @@ const HomeScreen = ({
     return "PLAYOFFS";
   };
 
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   return (
     <Screen>
       {/* --- SEASON & YEAR HEADER --- */}
       <View style={[globalStyles.homeSeasonHeader, globalStyles.flexRowAlignCenter]}>
-        <TouchableOpacity onPress={onBackToSaves}>
+        <TouchableOpacity onPress={() => handlePress(onBackToSaves)}>
            <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <View style={globalStyles.flex1} />
@@ -89,13 +96,13 @@ const HomeScreen = ({
         <View style={globalStyles.flex1} />
         
         {/* RIGHT SIDE ICONS */}
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewHistory}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewHistory)}>
           <Icon name="time-outline" size={32} color="#B34726" />
         </TouchableOpacity>
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewTeam}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewTeam)}>
           <Icon name="people-outline" size={32} color="#B34726" />
         </TouchableOpacity>
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={onViewStandings}>
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewStandings)}>
           <Icon name="podium-outline" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
@@ -168,7 +175,7 @@ const HomeScreen = ({
       <View style={globalStyles.homeBottomButtonsContainer}>
         {/* Show Playoff Bracket button if season is over and team missed playoffs or is finished */}
         {(missedPlayoffs || isEliminated || isChampion) && (
-          <TouchableOpacity style={globalStyles.homeBracketButton} onPress={onViewBracket}>
+          <TouchableOpacity style={globalStyles.homeBracketButton} onPress={() => handlePress(onViewBracket)}>
             <Text style={globalStyles.homeBracketButtonText}>PLAYOFF BRACKET</Text>
           </TouchableOpacity>
         )}
@@ -177,7 +184,7 @@ const HomeScreen = ({
         {((save.gamesPlayed < 82) || (save.playoffs && !isEliminated && !isChampion)) && (
           <TouchableOpacity 
             style={globalStyles.homeSimButton} 
-            onPress={save.playoffs && isSeriesCompleted ? onSimDay : onQuickSim}
+            onPress={() => handlePress(save.playoffs && isSeriesCompleted ? onSimDay : onQuickSim)}
           >
             <Text style={globalStyles.homeSimButtonText}>
               {save.playoffs 

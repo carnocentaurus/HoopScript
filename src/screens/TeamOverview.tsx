@@ -5,6 +5,7 @@ import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { useSound } from '../hooks/useSound';
 
 interface SimplePlayer {
   id?: string;
@@ -24,8 +25,15 @@ interface TeamOverviewProps {
 }
 
 const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) => {
-  const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+  const { playClickSound } = useSound();
 
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
+  const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
+// ... rest of component logic ...
   const sortPlayersByPosition = (players: SimplePlayer[]) => {
     return [...players].sort((a, b) => {
       const orderA = POSITION_ORDER[a.position || ''] || 99;
@@ -46,7 +54,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
   return (
     <Screen>
       <View style={globalStyles.toHeaderRow}>
-        <TouchableOpacity onPress={onBack} style={globalStyles.toBackBtn}>
+        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
           <Icon name="chevron-back" size={30} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={globalStyles.toHeaderText}>{city}</Text>
@@ -89,7 +97,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
       />
 
       {onConfirm && (
-        <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={onConfirm}>
+        <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={() => handlePress(onConfirm)}>
           <Text style={[globalStyles.toConfirmBtnTextBlack, globalStyles.fw900]}>SELECT TEAM</Text>
         </TouchableOpacity>
       )}

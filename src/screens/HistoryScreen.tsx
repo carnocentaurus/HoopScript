@@ -8,6 +8,7 @@ import FullPlayoffBracketScreen from './FullPlayoffBracketScreen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 const HistoryItem = ({ 
   item, 
@@ -19,6 +20,12 @@ const HistoryItem = ({
   onViewBracket: () => void 
 }) => {
   const logo = TEAM_LOGOS[item.champion];
+  const { playClickSound } = useSound();
+  
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
 
   return (
     <View style={globalStyles.hiHistoryCard}>
@@ -28,7 +35,7 @@ const HistoryItem = ({
           <View style={globalStyles.flexRow}>
             <TouchableOpacity 
               style={{ marginLeft: 15 }} 
-              onPress={onViewStandings}
+              onPress={() => handlePress(onViewStandings)}
               disabled={!item.standings}
             >
               <Icon 
@@ -39,7 +46,7 @@ const HistoryItem = ({
             </TouchableOpacity>
             <TouchableOpacity 
               style={{ marginLeft: 15 }} 
-              onPress={onViewBracket}
+              onPress={() => handlePress(onViewBracket)}
               disabled={!item.playoffBracket}
             >
               <Icon 
@@ -76,11 +83,17 @@ const HistoryItem = ({
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
   const [selectedStandings, setSelectedStandings] = useState<TeamStanding[] | null>(null);
   const [selectedBracket, setSelectedBracket] = useState<SeriesMatchup[] | null>(null);
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
 
   return (
     <Screen>
       <View style={globalStyles.hiHeader}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => handlePress(onBack)}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <Text style={globalStyles.hiHeaderTitle}>LEAGUE HISTORY</Text>

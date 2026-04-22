@@ -6,6 +6,7 @@ import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 // Added onStartNewSeason to the props interface
 interface PlayoffProps {
@@ -17,6 +18,13 @@ interface PlayoffProps {
 }
 
 const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onViewFullBracket }: PlayoffProps) => {
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   const currentRound = save.playoffs?.round || 1;
   const roundMatchups = save.playoffBracket?.filter(s => s.round === currentRound) || [];
   
@@ -87,7 +95,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
   return (
     <Screen>
       <View style={globalStyles.pbHeader}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => handlePress(onBack)}>
           <Icon name="chevron-back" size={28} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={globalStyles.pbTitle}>{isFinalsOver ? "FINALS COMPLETE" : `ROUND ${currentRound}`}</Text>
@@ -112,16 +120,16 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
       {/* Button Logic: Show "Full Bracket" and "Start New Season" if Finals are over, otherwise "Simulate Day" */}
       {isFinalsOver ? (
         <>
-          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta, globalStyles.mb10]} onPress={onViewFullBracket}>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta, globalStyles.mb10]} onPress={() => handlePress(onViewFullBracket)}>
             <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>FULL BRACKET</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn, globalStyles.bgTerracotta]} onPress={onStartNewSeason}>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.pbNextSeasonBtn, globalStyles.bgTerracotta]} onPress={() => handlePress(onStartNewSeason)}>
             <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>START NEW SEASON</Text>
           </TouchableOpacity>
         </>
       ) : (
         (save.playoffs?.isEliminated || isSeriesCompleted) && (
-          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta]} onPress={onSimDay}>
+          <TouchableOpacity style={[globalStyles.pbSimDayBtn, globalStyles.bgTerracotta]} onPress={() => handlePress(onSimDay)}>
             <Text style={[globalStyles.pbSimDayBtnText, globalStyles.textBlackBold]}>SIMULATE DAY</Text>
           </TouchableOpacity>
         )

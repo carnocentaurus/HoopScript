@@ -7,6 +7,7 @@ import { TEAM_ROSTERS } from './src/data/rosters';
 import { validateAndFixRoster } from './src/utils/rosterGenerator';
 import { calculateRank } from './src/utils/leagueEngine';
 import { useGameState } from './src/hooks/useGameState';
+import { globalStyles } from './src/styles/globalStyles';
 
 import LoadingScreen from './src/screens/LoadingScreen';
 import SelectSave from './src/screens/SelectSave';
@@ -60,7 +61,7 @@ function MainApp() {
   }
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+    <View style={globalStyles.mainView} onLayout={onLayoutRootView}>
       {view === 'loading' && <LoadingScreen />}
       {view === 'saveSelection' && <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} />}
       {view === 'yearSelection' && <YearSelectionScreen onSelectYear={handleYearSelect} onBack={() => setView('saveSelection')} />}

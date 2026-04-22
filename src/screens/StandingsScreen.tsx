@@ -6,6 +6,7 @@ import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 interface StandingsProps {
   save: GameSave;
@@ -15,6 +16,12 @@ interface StandingsProps {
 
 const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
   const [activeConf, setActiveConf] = useState<'East' | 'West'>(save.conference);
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
 
   const filteredTeams = save.standings
     .filter(t => t.conf === activeConf)
@@ -26,7 +33,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     return (
       <TouchableOpacity 
         style={[globalStyles.stTeamRow, item.city === save.city && globalStyles.stUserRow]}
-        onPress={() => onViewTeam(item.city)}
+        onPress={() => handlePress(() => onViewTeam(item.city))}
       >
         <Text style={globalStyles.stRankText}>{index + 1}</Text>
         {logo && <Image source={logo} style={globalStyles.stLogoImage} />}
@@ -42,7 +49,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
   return (
     <Screen>
       <View style={[globalStyles.stHeader, globalStyles.justifyStart]}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => handlePress(onBack)}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
@@ -50,14 +57,14 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
       <View style={globalStyles.stTabBar}>
         <TouchableOpacity 
           style={[globalStyles.stTab, activeConf === 'West' && globalStyles.stActiveTab]} 
-          onPress={() => setActiveConf('West')}
+          onPress={() => handlePress(() => setActiveConf('West'))}
         >
           <Text style={[globalStyles.stTabText, activeConf === 'West' && globalStyles.stActiveTabText]}>WEST</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={[globalStyles.stTab, activeConf === 'East' && globalStyles.stActiveTab]} 
-          onPress={() => setActiveConf('East')}
+          onPress={() => handlePress(() => setActiveConf('East'))}
         >
           <Text style={[globalStyles.stTabText, activeConf === 'East' && globalStyles.stActiveTabText]}>EAST</Text>
         </TouchableOpacity>

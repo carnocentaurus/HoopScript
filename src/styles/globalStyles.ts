@@ -729,4 +729,7 @@ export const globalStyles = StyleSheet.create({
   dlProjectedCity: { color: COLORS.white, fontSize: 16, fontFamily: FONTS.secondary },
   dlProjectedSub: { color: COLORS.textMuted, fontSize: 11, fontFamily: FONTS.secondary, marginTop: 2 },
   dlProjectedPick: { color: COLORS.primary, fontSize: 16, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  mainView: {
+    flex: 1,
+  },
 });

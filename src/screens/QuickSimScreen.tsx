@@ -8,15 +8,23 @@ import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, opponent: any, onFinish: (result: GameResult) => void, onBack: () => void }) => {
+  const { playClickSound } = useSound();
   const [myScore, setMyScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<GameResult | null>(null);
 
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   useEffect(() => {
     const gameResult = simulateGame(save, opponent);
+// ... rest of useEffect remains the same ...
     setResult(gameResult);
 
     const finalMy = gameResult.myScore;
@@ -28,6 +36,11 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
       setMyScore(prev => Math.min(finalMy, prev + Math.floor(Math.random() * 8)));
       setOppScore(prev => Math.min(finalOpp, prev + Math.floor(Math.random() * 8)));
       
+      // Play a subtle tap sound periodically during sim
+      if (count % 4 === 0) {
+        playClickSound();
+      }
+
       if (count > 30) {
         clearInterval(interval);
         setMyScore(finalMy);
@@ -86,7 +99,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
   return (
     <Screen>
       <View style={globalStyles.qsHeaderRow}>
-        <TouchableOpacity onPress={onBack} style={globalStyles.qsBackBtn}>
+        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.qsBackBtn}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
@@ -107,7 +120,7 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
 
         {isFinished && result && (
           <View style={globalStyles.qsPostGame}>
-            <TouchableOpacity style={globalStyles.qsContinueButtonTerracotta} onPress={() => onFinish(result)}>
+            <TouchableOpacity style={globalStyles.qsContinueButtonTerracotta} onPress={() => handlePress(() => onFinish(result))}>
               <Text style={globalStyles.qsContinueTextBlack}>CONTINUE</Text>
             </TouchableOpacity>
           </View>

@@ -5,6 +5,7 @@ import { Player, DraftState } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 interface DraftScreenProps {
   userCity: string;
@@ -18,6 +19,12 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
   const { currentPickIndex, picks, pool, isCompleted } = draftState;
   const currentPick = picks[currentPickIndex];
   const isUserTurn = currentPick?.teamCity === userCity;
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
 
   const [simulating, setSimulating] = useState(false);
 
@@ -25,6 +32,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
     if (!isUserTurn && currentPickIndex < picks.length && !simulating && !isCompleted) {
       // Auto-pick for AI with a slight delay
       const timer = setTimeout(() => {
+        playClickSound(); // Sound for AI pick
         const bestPlayer = pool.sort((a, b) => b.overall - a.overall)[0];
         onPick(bestPlayer);
       }, 800);
@@ -44,6 +52,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         return;
       }
 
+      playClickSound(); // Sound for each simulated pick
       const bestPlayer = currentPool.sort((a, b) => b.overall - a.overall)[0];
       onPick(bestPlayer);
       currentPool = currentPool.filter(p => p.id !== bestPlayer.id);
@@ -64,12 +73,12 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       {isUserTurn && !simulating && (
         <TouchableOpacity 
           style={globalStyles.drPickBtn} 
-          onPress={() => {
+          onPress={() => handlePress(() => {
             Alert.alert("Draft Player", `Are you sure you want to draft ${item.lastName}?`, [
               { text: "Cancel", style: "cancel" },
               { text: "Draft", onPress: () => onPick(item) }
             ]);
-          }}
+          })}
         >
           <Text style={globalStyles.drPickBtnText}>PICK</Text>
         </TouchableOpacity>
@@ -113,7 +122,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
 
         <TouchableOpacity 
           style={[globalStyles.drStartSeasonBtn, globalStyles.bgTerracotta]} 
-          onPress={onComplete}
+          onPress={() => handlePress(onComplete)}
         >
           <Text style={[globalStyles.drStartSeasonBtnText, globalStyles.textBlackBold]}>NEXT SEASON</Text>
         </TouchableOpacity>
@@ -126,7 +135,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       <View style={globalStyles.drHeader}>
         <View style={globalStyles.drHeaderTop}>
           <Text style={globalStyles.drTitle}>ROOKIE DRAFT</Text>
-          <TouchableOpacity onPress={onViewTeam}>
+          <TouchableOpacity onPress={() => handlePress(onViewTeam)}>
             <Icon name="people-outline" size={32} color="#B34726" />
           </TouchableOpacity>
         </View>
@@ -148,7 +157,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       {!isUserTurn && !isCompleted && (
         <TouchableOpacity 
           style={[globalStyles.drSimBtn, globalStyles.bgTerracotta]} 
-          onPress={handleSimToUserPick} 
+          onPress={() => handlePress(handleSimToUserPick)} 
           disabled={simulating}
         >
           <Text style={[globalStyles.drSimBtnText, globalStyles.textBlackBold]}>

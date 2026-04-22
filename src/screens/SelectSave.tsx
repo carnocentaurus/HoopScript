@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
+import { useSound } from '../hooks/useSound';
 
 interface SelectSaveProps {
   saves: (GameSave | null)[];
@@ -11,6 +12,13 @@ interface SelectSaveProps {
 }
 
 const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   return (
     <Screen style={globalStyles.selectSaveContainer}>
       {[1, 2, 3].map((slotId) => {
@@ -19,7 +27,7 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
           <View key={slotId} style={globalStyles.selectSaveSlotWrapper}>
             <TouchableOpacity 
               style={globalStyles.selectSaveSlotCard} 
-              onPress={() => onSelectSlot(slotId)}
+              onPress={() => handlePress(() => onSelectSlot(slotId))}
             >
               <View>
                 {!saveData && (
@@ -40,7 +48,7 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
             {saveData && (
               <TouchableOpacity 
                 style={globalStyles.selectSaveDeleteBtn} 
-                onPress={() => onDeleteSlot(slotId)}
+                onPress={() => handlePress(() => onDeleteSlot(slotId))}
               >
                 <Text style={globalStyles.selectSaveDeleteText}>RESET</Text>
               </TouchableOpacity>

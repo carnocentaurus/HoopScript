@@ -19,13 +19,24 @@
         "foregroundImage": "./assets/images/icon/hoopscript_icon_resized.png",
         "backgroundColor": "#ffffff"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "package": "com.carnocentaurus.HoopScript"
     },
     "web": {
       "favicon": "./assets/images/icon/hoopscript_icon_resized.png"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-av"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f36aaf0d-7c26-4db4-b079-0225ae1c25d4"
+      }
+    }
   }
 }

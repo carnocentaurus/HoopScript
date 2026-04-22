@@ -7,6 +7,7 @@ import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 interface TeamOverviewScreenProps {
   city: string;
@@ -16,6 +17,13 @@ interface TeamOverviewScreenProps {
 }
 
 const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
   const logo = TEAM_LOGOS[city];
 
@@ -72,7 +80,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   return (
     <Screen>
       <View style={globalStyles.tosHeader}>
-        <TouchableOpacity onPress={onBack} style={globalStyles.tosBackBtn}>
+        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tosBackBtn}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <View style={globalStyles.flexRowAlignCenter}>

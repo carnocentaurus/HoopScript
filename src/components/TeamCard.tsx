@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, View, Image } from 'react-native';
 import { globalStyles } from '../styles/globalStyles';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 interface TeamCardProps {
   city: string;
@@ -10,9 +11,15 @@ interface TeamCardProps {
 
 const TeamCard = ({ city, onPress }: TeamCardProps) => {
   const logo = TEAM_LOGOS[city];
+  const { playClickSound } = useSound();
+
+  const handlePress = () => {
+    playClickSound();
+    onPress();
+  };
 
   return (
-    <TouchableOpacity style={globalStyles.tcCard} onPress={onPress}>
+    <TouchableOpacity style={globalStyles.tcCard} onPress={handlePress}>
       <View style={globalStyles.tcLogoCircle}>
         {logo ? (
           <Image source={logo} style={globalStyles.tcLogoImage} />

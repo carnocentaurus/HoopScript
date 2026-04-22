@@ -4,6 +4,7 @@ import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { LotteryResult } from '../types/save';
 import { TEAM_LOGOS } from '../data/teams';
+import { useSound } from '../hooks/useSound';
 
 interface DraftLotteryScreenProps {
   results: LotteryResult[];
@@ -14,6 +15,12 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
   const [phase, setViewPhase] = useState<'projected' | 'reveal'>('projected');
   const [revealedCount, setRevealedCount] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const { playClickSound } = useSound();
+  
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
   
   // revealOrder: index 0 is pick 14, index 13 is pick 1
   const revealOrder = [...results].sort((a, b) => b.pick - a.pick); 
@@ -23,6 +30,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
     let interval: any;
     if (phase === 'reveal' && revealedCount < 14) {
       interval = setInterval(() => {
+        playClickSound(); // Play sound on each reveal
         setRevealedCount(prev => {
           if (prev >= 13) {
             clearInterval(interval);
@@ -68,7 +76,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
 
         <TouchableOpacity 
           style={globalStyles.dlBeginBtn} 
-          onPress={() => setViewPhase('reveal')}
+          onPress={() => handlePress(() => setViewPhase('reveal'))}
         >
           <Text style={globalStyles.dlBeginBtnText}>BEGIN LOTTERY</Text>
         </TouchableOpacity>
@@ -137,7 +145,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
         {isFinished && (
           <TouchableOpacity 
             style={globalStyles.dlBeginBtn} 
-            onPress={onComplete}
+            onPress={() => handlePress(onComplete)}
           >
             <Text style={globalStyles.dlBeginBtnText}>GO TO DRAFT</Text>
           </TouchableOpacity>

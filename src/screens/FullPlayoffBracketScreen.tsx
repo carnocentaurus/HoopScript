@@ -5,6 +5,7 @@ import { GameSave, SeriesMatchup } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { useSound } from '../hooks/useSound';
 
 interface FullBracketProps {
   save: GameSave;
@@ -12,6 +13,13 @@ interface FullBracketProps {
 }
 
 const FullPlayoffBracketScreen = ({ save, onBack }: FullBracketProps) => {
+  const { playClickSound } = useSound();
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   const getRank = (city: string) => {
     const team = save.standings.find(t => t.city === city);
     if (!team) return "";
@@ -73,10 +81,11 @@ const FullPlayoffBracketScreen = ({ save, onBack }: FullBracketProps) => {
   return (
     <Screen>
       <View style={globalStyles.pbHeader}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => handlePress(onBack)}>
           <Icon name="chevron-back" size={28} color="#B34726" />
         </TouchableOpacity>
         <Text style={globalStyles.pbTitle}>FULL BRACKET</Text>
+
         <View style={globalStyles.headerSpacer} />
       </View>
 
