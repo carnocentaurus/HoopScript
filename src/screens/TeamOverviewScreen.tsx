@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, SeasonHistory } from '../types/save';
@@ -8,6 +8,7 @@ import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
+import ChampionshipsScreen from './ChampionshipsScreen';
 
 interface TeamOverviewScreenProps {
   city: string;
@@ -18,11 +19,16 @@ interface TeamOverviewScreenProps {
 
 const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
   const { playClickSound } = useSound();
+  const [showChampionships, setShowChampionships] = useState(false);
 
   const handlePress = (action: () => void) => {
     playClickSound();
     action();
   };
+
+  if (showChampionships && history) {
+    return <ChampionshipsScreen city={city} history={history} onBack={() => setShowChampionships(false)} />;
+  }
 
   const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
   const logo = TEAM_LOGOS[city];
@@ -39,8 +45,6 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
   const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
   const ratings = calculateTeamRatings(roster);
-
-  const championships = history?.filter(h => h.champion === city).length || 0;
 
   const renderPlayerRow = (player: Player) => (
     <View style={globalStyles.tosPlayerCard} key={player.id}>
@@ -84,18 +88,14 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
           <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tosBackBtn}>
             <Icon name="chevron-back" size={32} color="#B34726" />
           </TouchableOpacity>
-          <View style={globalStyles.headerSpacer} />
+          <TouchableOpacity onPress={() => handlePress(() => setShowChampionships(true))}>
+            <Icon name="trophy" size={32} color="#FFD700" />
+          </TouchableOpacity>
         </View>
 
         <View style={globalStyles.toLogoBanner}>
           {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
           <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
-        </View>
-
-        <View style={globalStyles.tosTrophySection}>
-          <Icon name="trophy" size={32} color="#FFD700" />
-          <Text style={globalStyles.tosTrophyCount}>{championships}</Text>
-          <Text style={globalStyles.tosTrophyLabel}>CHAMPIONSHIPS</Text>
         </View>
 
         <View style={globalStyles.tosTeamRatingsRow}>
