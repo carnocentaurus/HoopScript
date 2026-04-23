@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
 interface SimplePlayer {
@@ -50,6 +51,7 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
 
   const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
   const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
+  const logo = TEAM_LOGOS[city];
 
   return (
     <Screen>
@@ -57,7 +59,10 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
         <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
           <Icon name="chevron-back" size={30} color={COLORS.primary} />
         </TouchableOpacity>
-        <Text style={globalStyles.toHeaderText}>{city}</Text>
+        <View style={globalStyles.flexRowAlignCenter}>
+          {logo && <Image source={logo} style={globalStyles.tosLogoImage} />}
+          <Text style={globalStyles.toHeaderText}>{city}</Text>
+        </View>
         <View style={globalStyles.headerSpacer} />
       </View>
 

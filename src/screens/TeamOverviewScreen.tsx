@@ -84,7 +84,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <View style={globalStyles.flexRowAlignCenter}>
-          {logo && <Image source={logo} style={[globalStyles.mr8, { width: 30, height: 30, resizeMode: 'contain' }]} />}
+          {logo && <Image source={logo} style={globalStyles.tosLogoImage} />}
           <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
         </View>
         <View style={globalStyles.headerSpacer} />
