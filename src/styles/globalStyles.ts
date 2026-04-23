@@ -633,13 +633,24 @@ export const globalStyles = StyleSheet.create({
   tosRookieBadgeText: { color: COLORS.white, fontSize: 8, fontFamily: FONTS.primary, letterSpacing: 0.5, textTransform: 'uppercase' },
 
   // --- TEAM OVERVIEW (PREVIEW) ---
-  toHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginVertical: 15 },
+  toHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginVertical: 15, zIndex: 1 },
   toBackBtn: { padding: 10, width: 60 },
-  toHeaderText: { fontSize: 20, fontFamily: FONTS.secondary, flex: 1, textAlign: 'center', color: COLORS.white },
-  toTeamStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 30, marginBottom: 20 },
+  toHeaderText: { fontSize: 24, fontFamily: FONTS.secondary, flex: 1, textAlign: 'center', color: COLORS.white, textTransform: 'uppercase' },
+  toTeamStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 30, marginBottom: 20, zIndex: 1 },
   toStatBox: { alignItems: 'center' },
   toStatVal: { fontSize: 24, fontFamily: FONTS.primary, color: COLORS.white },
   toStatLabel: { fontSize: 10, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  toLogoBanner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 1,
+    paddingVertical: 10,
+  },
+  toLogoBannerImage: {
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
+  },
   toPlayerCard: { flexDirection: 'row', padding: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, alignItems: 'center' },
   toPlayerPos: { width: 40, fontFamily: FONTS.primary, color: COLORS.textSub, textTransform: 'uppercase' },
   toPlayerName: { flex: 1, fontSize: 16, color: COLORS.text, fontFamily: FONTS.secondary },

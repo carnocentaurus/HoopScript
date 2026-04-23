@@ -59,11 +59,12 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
         <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
           <Icon name="chevron-back" size={30} color={COLORS.primary} />
         </TouchableOpacity>
-        <View style={globalStyles.flexRowAlignCenter}>
-          {logo && <Image source={logo} style={globalStyles.tosLogoImage} />}
-          <Text style={globalStyles.toHeaderText}>{city}</Text>
-        </View>
         <View style={globalStyles.headerSpacer} />
+      </View>
+
+      <View style={globalStyles.toLogoBanner}>
+        {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
+        <Text style={globalStyles.toHeaderText}>{city}</Text>
       </View>
 
       <View style={globalStyles.toTeamStatsRow}>

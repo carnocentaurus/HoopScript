@@ -83,11 +83,12 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
         <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tosBackBtn}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
-        <View style={globalStyles.flexRowAlignCenter}>
-          {logo && <Image source={logo} style={globalStyles.tosLogoImage} />}
-          <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
-        </View>
         <View style={globalStyles.headerSpacer} />
+      </View>
+
+      <View style={globalStyles.toLogoBanner}>
+        {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
+        <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
       </View>
 
       <ScrollView style={globalStyles.tosContainer} showsVerticalScrollIndicator={false}>
