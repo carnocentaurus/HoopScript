@@ -79,19 +79,19 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
 
   return (
     <Screen>
-      <View style={globalStyles.tosHeader}>
-        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tosBackBtn}>
-          <Icon name="chevron-back" size={32} color="#B34726" />
-        </TouchableOpacity>
-        <View style={globalStyles.headerSpacer} />
-      </View>
-
-      <View style={globalStyles.toLogoBanner}>
-        {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
-        <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
-      </View>
-
       <ScrollView style={globalStyles.tosContainer} showsVerticalScrollIndicator={false}>
+        <View style={globalStyles.tosHeader}>
+          <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.tosBackBtn}>
+            <Icon name="chevron-back" size={32} color="#B34726" />
+          </TouchableOpacity>
+          <View style={globalStyles.headerSpacer} />
+        </View>
+
+        <View style={globalStyles.toLogoBanner}>
+          {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
+          <Text style={globalStyles.tosTitle}>{city.toUpperCase()}</Text>
+        </View>
+
         <View style={globalStyles.tosTrophySection}>
           <Icon name="trophy" size={32} color="#FFD700" />
           <Text style={globalStyles.tosTrophyCount}>{championships}</Text>

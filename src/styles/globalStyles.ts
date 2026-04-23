@@ -606,7 +606,7 @@ export const globalStyles = StyleSheet.create({
   // --- TEAM OVERVIEW SCREEN ---
   tosHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, paddingVertical: 15 },
   tosBackBtn: { width: 60 },
-  tosTitle: { color: COLORS.white, fontSize: 22, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
+  tosTitle: { color: COLORS.textSub, fontSize: 18, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase', textAlign: 'center' },
   tosLogoImage: { width: 40, height: 40, marginRight: 12, resizeMode: 'contain' },
   tosContainer: { flex: 1, paddingHorizontal: 15 },
   tosTrophySection: { alignItems: 'center', backgroundColor: COLORS.darkBg, padding: 20, borderRadius: 15, marginVertical: 15 },
@@ -635,7 +635,15 @@ export const globalStyles = StyleSheet.create({
   // --- TEAM OVERVIEW (PREVIEW) ---
   toHeaderRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginVertical: 15, zIndex: 1 },
   toBackBtn: { padding: 10, width: 60 },
-  toHeaderText: { fontSize: 24, fontFamily: FONTS.secondary, flex: 1, textAlign: 'center', color: COLORS.white, textTransform: 'uppercase' },
+  toHeaderText: { 
+    fontSize: 18, 
+    fontFamily: FONTS.primary, 
+    textAlign: 'center', 
+    color: COLORS.textSub, 
+    textTransform: 'uppercase',
+    marginTop: 10,
+    letterSpacing: 1,
+  },
   toTeamStatsRow: { flexDirection: 'row', justifyContent: 'center', gap: 30, marginBottom: 20, zIndex: 1 },
   toStatBox: { alignItems: 'center' },
   toStatVal: { fontSize: 24, fontFamily: FONTS.primary, color: COLORS.white },

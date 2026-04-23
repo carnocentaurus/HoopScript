@@ -55,24 +55,6 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
 
   return (
     <Screen>
-      <View style={globalStyles.toHeaderRow}>
-        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
-          <Icon name="chevron-back" size={30} color={COLORS.primary} />
-        </TouchableOpacity>
-        <View style={globalStyles.headerSpacer} />
-      </View>
-
-      <View style={globalStyles.toLogoBanner}>
-        {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
-        <Text style={globalStyles.toHeaderText}>{city}</Text>
-      </View>
-
-      <View style={globalStyles.toTeamStatsRow}>
-          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.offense}</Text><Text style={globalStyles.toStatLabel}>OFF</Text></View>
-          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.defense}</Text><Text style={globalStyles.toStatLabel}>DEF</Text></View>
-          <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.overall}</Text><Text style={globalStyles.toStatLabel}>OVR</Text></View>
-      </View>
-
       <FlatList
         data={[
           { type: 'header' as const, title: 'STARTERS' },
@@ -81,6 +63,32 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
           ...bench.map(p => ({ ...p, type: 'player' as const }))
         ]}
         keyExtractor={(item, index) => (item.type === 'header' ? `header-${item.title}` : (item.id || index.toString()))}
+        ListHeaderComponent={
+          <>
+            <View style={globalStyles.toHeaderRow}>
+              <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.toBackBtn}>
+                <Icon name="chevron-back" size={30} color={COLORS.primary} />
+              </TouchableOpacity>
+              <View style={globalStyles.headerSpacer} />
+            </View>
+
+            <View style={globalStyles.toLogoBanner}>
+              {logo && <Image source={logo} style={globalStyles.toLogoBannerImage} />}
+              <Text style={globalStyles.toHeaderText}>{city}</Text>
+            </View>
+
+            <View style={globalStyles.toTeamStatsRow}>
+                <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.offense}</Text><Text style={globalStyles.toStatLabel}>OFF</Text></View>
+                <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.defense}</Text><Text style={globalStyles.toStatLabel}>DEF</Text></View>
+                <View style={globalStyles.toStatBox}><Text style={globalStyles.toStatVal}>{ratings.overall}</Text><Text style={globalStyles.toStatLabel}>OVR</Text></View>
+            </View>
+          </>
+        }
+        ListFooterComponent={onConfirm ? (
+          <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={() => handlePress(onConfirm)}>
+            <Text style={[globalStyles.toConfirmBtnTextBlack, globalStyles.fw900]}>SELECT TEAM</Text>
+          </TouchableOpacity>
+        ) : null}
         renderItem={({ item }) => {
           if (item.type === 'header') {
             return (
@@ -101,12 +109,6 @@ const TeamOverview = ({ city, roster, onBack, onConfirm }: TeamOverviewProps) =>
           );
         }}
       />
-
-      {onConfirm && (
-        <TouchableOpacity style={globalStyles.toConfirmBtn} onPress={() => handlePress(onConfirm)}>
-          <Text style={[globalStyles.toConfirmBtnTextBlack, globalStyles.fw900]}>SELECT TEAM</Text>
-        </TouchableOpacity>
-      )}
     </Screen>
   );
 };
