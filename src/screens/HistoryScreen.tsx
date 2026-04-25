@@ -60,7 +60,7 @@ const HistoryItem = ({
         
         <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
           <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
-            <Icon name="trophy" size={20} color="#FFD700" style={globalStyles.mr8} />
+            <Image source={require('../../assets/images/trophy.png')} style={{ width: 20, height: 20, resizeMode: 'contain', marginRight: 8 }} />
             {logo && <Image source={logo} style={globalStyles.hiLogoImage} />}
             <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
           </View>

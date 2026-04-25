@@ -627,8 +627,10 @@ export const globalStyles = StyleSheet.create({
   tosRatingsRow: { flexDirection: 'row', gap: 15 },
   tosRatingItem: { alignItems: 'center' },
   tosRatingVal: { fontSize: 16, fontFamily: FONTS.primary, color: COLORS.text },
+  tosRatingValSmall: { fontSize: 13, fontFamily: FONTS.primary, color: COLORS.text },
   tosOvrVal: { color: COLORS.primary },
   tosRatingLabel: { fontSize: 8, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
+  tosRatingLabelSmall: { fontSize: 7, color: COLORS.textSub, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   tosRookieBadge: { backgroundColor: '#F6AD55', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginLeft: 8 },
   tosRookieBadgeText: { color: COLORS.white, fontSize: 8, fontFamily: FONTS.primary, letterSpacing: 0.5, textTransform: 'uppercase' },
 

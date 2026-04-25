@@ -109,7 +109,7 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
         
         {isFinalsOver && (
           <View style={globalStyles.pbChampContainer}>
-            <Icon name="trophy" size={120} color="#FFD700" style={globalStyles.mb30} />
+            <Image source={require('../../assets/images/trophy.png')} style={{ width: 120, height: 120, resizeMode: 'contain', marginBottom: 30 }} />
             <Text style={globalStyles.pbChampText}>
               CHAMPIONS: {(roundMatchups[0].highSeedWins === 4 ? roundMatchups[0].highSeed : roundMatchups[0].lowSeed).toUpperCase()}
             </Text>

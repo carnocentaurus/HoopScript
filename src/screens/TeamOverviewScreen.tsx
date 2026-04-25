@@ -62,20 +62,20 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
       
       <View style={globalStyles.tosRatingsRow}>
         <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingVal}>{player.age}</Text>
-          <Text style={globalStyles.tosRatingLabel}>AGE</Text>
+          <Text style={globalStyles.tosRatingValSmall}>{player.age}</Text>
+          <Text style={globalStyles.tosRatingLabelSmall}>AGE</Text>
         </View>
         <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingVal}>{player.offense}</Text>
-          <Text style={globalStyles.tosRatingLabel}>OFF</Text>
+          <Text style={globalStyles.tosRatingValSmall}>{player.offense}</Text>
+          <Text style={globalStyles.tosRatingLabelSmall}>OFF</Text>
         </View>
         <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingVal}>{player.defense}</Text>
-          <Text style={globalStyles.tosRatingLabel}>DEF</Text>
+          <Text style={globalStyles.tosRatingValSmall}>{player.defense}</Text>
+          <Text style={globalStyles.tosRatingLabelSmall}>DEF</Text>
         </View>
         <View style={globalStyles.tosRatingItem}>
-          <Text style={[globalStyles.tosRatingVal, globalStyles.tosOvrVal]}>{player.overall}</Text>
-          <Text style={globalStyles.tosRatingLabel}>OVR</Text>
+          <Text style={[globalStyles.tosRatingValSmall, globalStyles.tosOvrVal]}>{player.overall}</Text>
+          <Text style={globalStyles.tosRatingLabelSmall}>OVR</Text>
         </View>
       </View>
     </View>
@@ -89,7 +89,7 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
             <Icon name="chevron-back" size={32} color="#B34726" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handlePress(() => setShowChampionships(true))}>
-            <Icon name="trophy" size={32} color="#FFD700" />
+            <Icon name="trophy" size={32} color="#B34726" />
           </TouchableOpacity>
         </View>
 
