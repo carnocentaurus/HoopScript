@@ -34,26 +34,25 @@ const ChampionshipsScreen = ({ city, history, onBack }: ChampionshipsScreenProps
       </View>
 
       <ScrollView style={globalStyles.tosContainer} showsVerticalScrollIndicator={false}>
-        <View style={globalStyles.centerContent}>
-          {teamChampionships.length > 0 ? (
-            <Image source={require('../../assets/images/trophy.png')} style={{ width: 150, height: 150, resizeMode: 'contain', marginVertical: 30 }} />
-          ) : (
-            <Icon name="trophy" size={150} color={COLORS.grayLighter} style={{ marginVertical: 30 }} />
-          )}
-          <Text style={globalStyles.tosTrophyCount}>{teamChampionships.length} TITLES</Text>
-        </View>
+        <View style={globalStyles.vSpacer20} />
+
+        {teamChampionships.length > 0 ? (
+          <View style={globalStyles.flexRowWrapBetween}>
+            {teamChampionships.map((h, index) => (
+              <View key={index} style={[globalStyles.homeMatchupCard, { width: '48%', marginBottom: 15, paddingVertical: 20 }]}>
+                <Image source={require('../../assets/images/trophy.png')} style={{ width: 60, height: 60, resizeMode: 'contain', marginBottom: 10 }} />
+                <Text style={globalStyles.homeMatchupCity}>{h.year}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={[globalStyles.centerContent, { marginTop: 80 }]}>
+            <Icon name="trophy" size={150} color={COLORS.grayLighter} />
+            <Text style={[globalStyles.hiEmptyText, { marginTop: 20 }]}>No championships yet.</Text>
+          </View>
+        )}
 
         <View style={globalStyles.vSpacer40} />
-
-        {teamChampionships.length > 0 && teamChampionships.map((h, index) => (
-            <View key={index} style={[globalStyles.tosPlayerCard, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-              <View>
-                <Text style={globalStyles.tosPlayerMain}>{h.year} CHAMPIONS</Text>
-                <Text style={globalStyles.tosPlayerPos}>{h.championRecord}</Text>
-              </View>
-              <Icon name="star" size={24} color="#FFD700" />
-            </View>
-          ))}
       </ScrollView>
     </Screen>
   );

@@ -143,12 +143,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         {currentPick && (
           <View style={globalStyles.drOnClockCard}>
             <Text style={globalStyles.drOnClockLabel}>ON THE CLOCK</Text>
-            <View style={globalStyles.flexRowAlignCenter}>
-               {TEAM_LOGOS[currentPick.teamCity] && (
-                 <Image source={TEAM_LOGOS[currentPick.teamCity]} style={globalStyles.stLogoImage} />
-               )}
-               <Text style={globalStyles.drOnClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
-            </View>
+            <Text style={globalStyles.drOnClockTeam}>{currentPick.teamCity.toUpperCase()}</Text>
             <Text style={globalStyles.drPickNumber}>Round {currentPick.round} | Pick {currentPick.overall}</Text>
           </View>
         )}

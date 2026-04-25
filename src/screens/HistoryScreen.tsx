@@ -31,7 +31,10 @@ const HistoryItem = ({
     <View style={globalStyles.hiHistoryCard}>
       <View style={globalStyles.hiCardHeader}>
         <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
-          <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
+          <View style={globalStyles.flexRowAlignCenter}>
+            <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
+            <Image source={require('../../assets/images/trophy.png')} style={{ width: 20, height: 20, resizeMode: 'contain', marginLeft: 8 }} />
+          </View>
           <View style={globalStyles.flexRow}>
             <TouchableOpacity 
               style={{ marginLeft: 15 }} 
@@ -60,7 +63,6 @@ const HistoryItem = ({
         
         <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
           <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
-            <Image source={require('../../assets/images/trophy.png')} style={{ width: 20, height: 20, resizeMode: 'contain', marginRight: 8 }} />
             {logo && <Image source={logo} style={globalStyles.hiLogoImage} />}
             <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
           </View>
