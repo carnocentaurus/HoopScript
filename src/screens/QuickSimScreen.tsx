@@ -93,9 +93,6 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
   return (
     <Screen>
       <View style={globalStyles.qsHeaderRow}>
-        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.qsBackBtn}>
-          <Icon name="chevron-back" size={32} color="#B34726" />
-        </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={globalStyles.qsScrollContent} showsVerticalScrollIndicator={false}>
         {isFinished && result && result.otCount > 0 && (
