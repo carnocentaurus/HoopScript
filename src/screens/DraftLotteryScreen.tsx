@@ -30,7 +30,6 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
     let interval: any;
     if (phase === 'reveal' && revealedCount < 14) {
       interval = setInterval(() => {
-        playClickSound(); // Play sound on each reveal
         setRevealedCount(prev => {
           if (prev >= 13) {
             clearInterval(interval);
@@ -39,7 +38,7 @@ const DraftLotteryScreen = ({ results, onComplete }: DraftLotteryScreenProps) =>
           }
           return prev + 1;
         });
-      }, 1000);
+      }, 1500);
     }
     return () => clearInterval(interval);
   }, [phase, revealedCount]);

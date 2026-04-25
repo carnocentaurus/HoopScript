@@ -32,7 +32,6 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
     if (!isUserTurn && currentPickIndex < picks.length && !simulating && !isCompleted) {
       // Auto-pick for AI with a slight delay
       const timer = setTimeout(() => {
-        playClickSound(); // Sound for AI pick
         const bestPlayer = pool.sort((a, b) => b.overall - a.overall)[0];
         onPick(bestPlayer);
       }, 800);
@@ -52,7 +51,6 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         return;
       }
 
-      playClickSound(); // Sound for each simulated pick
       const bestPlayer = currentPool.sort((a, b) => b.overall - a.overall)[0];
       onPick(bestPlayer);
       currentPool = currentPool.filter(p => p.id !== bestPlayer.id);

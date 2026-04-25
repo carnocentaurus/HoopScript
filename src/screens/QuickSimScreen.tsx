@@ -35,14 +35,8 @@ const QuickSimScreen = ({ save, opponent, onFinish, onBack }: { save: GameSave, 
       count++;
       setMyScore(prev => Math.min(finalMy, prev + Math.floor(Math.random() * 8)));
       setOppScore(prev => Math.min(finalOpp, prev + Math.floor(Math.random() * 8)));
-      
-      // Play a subtle tap sound periodically during sim
-      if (count % 4 === 0) {
-        playClickSound();
-      }
 
-      if (count > 30) {
-        clearInterval(interval);
+      if (count > 30) {        clearInterval(interval);
         setMyScore(finalMy);
         setOppScore(finalOpp);
         setIsFinished(true);

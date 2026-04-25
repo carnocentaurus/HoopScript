@@ -1,7 +1,7 @@
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Platform } from 'react-native';
 
-const clickSoundSource = require('../../assets/sounds/mixkit-game-ball-tap-2073.wav');
+const clickSoundSource = require('../../assets/sounds/496760__malle99__click-tick-2.wav');
 
 export const useSound = () => {
   const player = useAudioPlayer(clickSoundSource);
