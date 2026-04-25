@@ -23,6 +23,7 @@ import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import DraftScreen from './src/screens/DraftScreen';
 import DraftLotteryScreen from './src/screens/DraftLotteryScreen';
+import CreditsScreen from './src/screens/CreditsScreen';
 import BackgroundMusic from './src/components/BackgroundMusic';
 
 SplashScreen.preventAutoHideAsync();
@@ -65,7 +66,8 @@ function MainApp() {
     <View style={globalStyles.mainView} onLayout={onLayoutRootView}>
       <BackgroundMusic />
       {view === 'loading' && <LoadingScreen />}
-      {view === 'saveSelection' && <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} />}
+      {view === 'saveSelection' && <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} onViewCredits={() => setView('credits')} />}
+      {view === 'credits' && <CreditsScreen onBack={() => setView('saveSelection')} />}
       {view === 'yearSelection' && <YearSelectionScreen onSelectYear={handleYearSelect} onBack={() => setView('saveSelection')} />}
       {view === 'teamSelection' && <TeamSelection onSelectTeam={handleTeamSelect} onBack={() => setView('yearSelection')} />}
 

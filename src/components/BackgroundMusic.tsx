@@ -10,12 +10,26 @@ const BackgroundMusic = () => {
   useEffect(() => {
     if (Platform.OS === 'web') return;
 
-    player.loop = true;
-    player.volume = 0.3;
-    player.play();
+    const startPlayback = async () => {
+      try {
+        player.loop = true;
+        player.volume = 0.3;
+        player.play();
+      } catch (e) {
+        console.log('BG Music Play Error:', e);
+      }
+    };
+
+    startPlayback();
 
     return () => {
-      player.pause();
+      try {
+        if (player && player.playing) {
+          player.pause();
+        }
+      } catch (e) {
+        // Ignore errors during unmount
+      }
     };
   }, [player]);
 

@@ -4,14 +4,17 @@ import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { useSound } from '../hooks/useSound';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { COLORS } from '../styles/theme';
 
 interface SelectSaveProps {
   saves: (GameSave | null)[];
   onSelectSlot: (slotId: number) => void;
   onDeleteSlot: (slotId: number) => void;
+  onViewCredits: () => void;
 }
 
-const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
+const SelectSave = ({ saves, onSelectSlot, onDeleteSlot, onViewCredits }: SelectSaveProps) => {
   const { playClickSound } = useSound();
 
   const handlePress = (action: () => void) => {
@@ -20,8 +23,17 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
   };
 
   return (
-    <Screen style={globalStyles.selectSaveContainer}>
-      {[1, 2, 3].map((slotId) => {
+    <Screen>
+      <View style={[globalStyles.homeSeasonHeader, { justifyContent: 'flex-end' }]}>
+        <TouchableOpacity 
+          onPress={() => handlePress(onViewCredits)}
+        >
+          <Icon name="information-outline" size={32} color={COLORS.primary} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={globalStyles.selectSaveContainer}>
+        {[1, 2, 3].map((slotId) => {
         const saveData = saves[slotId - 1];
         return (
           <View key={slotId} style={globalStyles.selectSaveSlotWrapper}>
@@ -56,6 +68,7 @@ const SelectSave = ({ saves, onSelectSlot, onDeleteSlot }: SelectSaveProps) => {
           </View>
         );
       })}
+      </View>
     </Screen>
   );
 };

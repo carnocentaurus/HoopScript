@@ -134,6 +134,7 @@ export const globalStyles = StyleSheet.create({
 
   // --- SELECT SAVE SCREEN ---
   selectSaveContainer: { 
+    flex: 1,
     justifyContent: 'center', 
     paddingHorizontal: 20 
   },
@@ -209,6 +210,13 @@ export const globalStyles = StyleSheet.create({
     fontSize: 9, 
     fontFamily: FONTS.primary,
     textTransform: 'uppercase',
+  },
+  creditsBtn: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    fontSize: 10
   },
 
   // --- HOME SCREEN ---
