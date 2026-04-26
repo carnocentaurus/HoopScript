@@ -356,8 +356,8 @@ export const globalStyles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   homeMatchupLogoImage: {
-    width: 60,
-    height: 60,
+    width: 90,
+    height: 90,
     marginBottom: 12,
     resizeMode: 'contain'
   },
@@ -541,7 +541,12 @@ export const globalStyles = StyleSheet.create({
   qsScoreBoard: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 20 },
   qsTeamSide: { alignItems: 'center', flex: 1 },
   qsLogoPlaceholder: { fontSize: 40, color: COLORS.white, fontFamily: FONTS.primary, textTransform: 'uppercase', backgroundColor: COLORS.grayLight, width: 80, height: 80, textAlign: 'center', lineHeight: 80, borderRadius: 40, marginBottom: 10 },
-  qsLogoImage: { width: 80, height: 80, marginBottom: 10, resizeMode: 'contain' },
+  qsLogoImage: { 
+    width: 90, 
+    height: 90, 
+    marginBottom: 10, 
+    resizeMode: 'contain' 
+  },
   qsCityName: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   qsScore: { color: COLORS.text, fontSize: 54, fontFamily: FONTS.primary, marginTop: 10 },
   qsVs: { color: COLORS.border, fontFamily: FONTS.primary, fontSize: 18, textTransform: 'uppercase' },
