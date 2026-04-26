@@ -25,6 +25,7 @@ import DraftScreen from './src/screens/DraftScreen';
 import DraftLotteryScreen from './src/screens/DraftLotteryScreen';
 import CreditsScreen from './src/screens/CreditsScreen';
 import BackgroundMusic from './src/components/BackgroundMusic';
+import { SoundProvider } from './src/context/SoundContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,7 +65,6 @@ function MainApp() {
 
   return (
     <View style={globalStyles.mainView} onLayout={onLayoutRootView}>
-      <BackgroundMusic />
       {view === 'loading' && <LoadingScreen />}
       {view === 'saveSelection' && <SelectSave saves={saves} onSelectSlot={handleSelectSlot} onDeleteSlot={handleDeleteSlot} onViewCredits={() => setView('credits')} />}
       {view === 'credits' && <CreditsScreen onBack={() => setView('saveSelection')} />}
@@ -129,5 +129,12 @@ function MainApp() {
 }
 
 export default function App() {
-  return <SafeAreaProvider><MainApp /></SafeAreaProvider>;
+  return (
+    <SafeAreaProvider>
+      <SoundProvider>
+        <BackgroundMusic />
+        <MainApp />
+      </SoundProvider>
+    </SafeAreaProvider>
+  );
 }

@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, SeriesMatchup } from '../types/save';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
+import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
 interface FullBracketProps {
@@ -47,33 +48,39 @@ const FullPlayoffBracketScreen = ({ save, onBack }: FullBracketProps) => {
     return (
       <View key={round} style={globalStyles.fpbRoundContainer}>
         <Text style={globalStyles.fpbRoundTitle}>{getRoundTitle(round)}</Text>
-        {roundMatchups.map((series) => (
-          <View key={series.id} style={globalStyles.pbSeriesCard}>
-            <View style={globalStyles.pbTeamRow}>
-              <View style={globalStyles.pbTeamInfo}>
-                <Text style={globalStyles.pbRankLabel}>{getRank(series.highSeed)}</Text>
-                <Text style={[globalStyles.pbTeamName, series.highSeedWins === 4 && globalStyles.textTerracotta]}>
-                  {series.highSeed}
+        {roundMatchups.map((series) => {
+          const highLogo = TEAM_LOGOS[series.highSeed];
+          const lowLogo = TEAM_LOGOS[series.lowSeed];
+          return (
+            <View key={series.id} style={globalStyles.pbSeriesCard}>
+              <View style={globalStyles.pbTeamRow}>
+                <View style={globalStyles.pbTeamInfo}>
+                  <Text style={globalStyles.pbRankLabel}>{getRank(series.highSeed)}</Text>
+                  {highLogo && <Image source={highLogo} style={globalStyles.pbLogoImage} />}
+                  <Text style={[globalStyles.pbTeamName, series.highSeedWins === 4 && globalStyles.textTerracotta]}>
+                    {series.highSeed}
+                  </Text>
+                </View>
+                <Text style={[globalStyles.pbScore, series.highSeedWins === 4 && globalStyles.textTerracotta]}>
+                  {series.highSeedWins}
                 </Text>
               </View>
-              <Text style={[globalStyles.pbScore, series.highSeedWins === 4 && globalStyles.textTerracotta]}>
-                {series.highSeedWins}
-              </Text>
-            </View>
 
-            <View style={globalStyles.pbTeamRow}>
-              <View style={globalStyles.pbTeamInfo}>
-                <Text style={globalStyles.pbRankLabel}>{getRank(series.lowSeed)}</Text>
-                <Text style={[globalStyles.pbTeamName, series.lowSeedWins === 4 && globalStyles.textTerracotta]}>
-                  {series.lowSeed}
+              <View style={globalStyles.pbTeamRow}>
+                <View style={globalStyles.pbTeamInfo}>
+                  <Text style={globalStyles.pbRankLabel}>{getRank(series.lowSeed)}</Text>
+                  {lowLogo && <Image source={lowLogo} style={globalStyles.pbLogoImage} />}
+                  <Text style={[globalStyles.pbTeamName, series.lowSeedWins === 4 && globalStyles.textTerracotta]}>
+                    {series.lowSeed}
+                  </Text>
+                </View>
+                <Text style={[globalStyles.pbScore, series.lowSeedWins === 4 && globalStyles.textTerracotta]}>
+                  {series.lowSeedWins}
                 </Text>
               </View>
-              <Text style={[globalStyles.pbScore, series.lowSeedWins === 4 && globalStyles.textTerracotta]}>
-                {series.lowSeedWins}
-              </Text>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     );
   };
