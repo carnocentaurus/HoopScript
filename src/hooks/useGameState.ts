@@ -90,8 +90,12 @@ export const useGameState = () => {
 
   const handleSelectSlot = (slotId: number) => {
     setActiveSlot(slotId);
-    if (saves[slotId - 1]) setView('home');
-    else setView('yearSelection');
+    const save = saves[slotId - 1];
+    if (save) {
+      setView((save.lastView as ViewState) || 'home');
+    } else {
+      setView('yearSelection');
+    }
   };
 
   const handleYearSelect = (year: number) => {
@@ -122,14 +126,13 @@ export const useGameState = () => {
       scheduleHomeStatus: homeStatuses,
       standings: initialStandings, 
       playoffs: null, playoffBracket: null, history: [],
-      startYear: selectedYear, currentYear: selectedYear, seasonCount: 1
+      startYear: selectedYear, currentYear: selectedYear, seasonCount: 1,
+      lastView: 'home'
     };
 
     const newSaves = [...saves];
     newSaves[activeSlot - 1] = newSave;
-    setSaves(newSaves);
-    persistSaves(newSaves);
-    setView('home');
+    saveAndSet(newSaves, 'home');
   };
 
   const handleGameFinish = (result: GameResult) => {
@@ -139,6 +142,7 @@ export const useGameState = () => {
     if (!currentSave) return;
 
     if (currentSave.playoffs) {
+      // ... playoff logic (unchanged internally)
       const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
         (s.highSeed === currentSave.city || s.lowSeed === currentSave.city) && s.round === currentSave.playoffs!.round
       )?.id;
@@ -168,6 +172,7 @@ export const useGameState = () => {
       }
       checkAndAdvancePlayoffRound(currentSave);
     } else {
+      // ... regular season logic (unchanged internally)
       const isWin = result.myScore > result.oppScore;
       const opponentCity = currentSave.schedule[currentSave.gamesPlayed];
       currentSave.wins += isWin ? 1 : 0;
@@ -219,11 +224,11 @@ export const useGameState = () => {
         };
       }
     }
-    saveAndSet(updatedSaves);
-    setView('home'); 
+    saveAndSet(updatedSaves, 'home'); 
   };
 
   const checkAndAdvancePlayoffRound = (currentSave: GameSave) => {
+    // ... checkAndAdvancePlayoffRound logic (unchanged internally)
     if (!currentSave.playoffs || !currentSave.playoffBracket) return;
     const currentRound = currentSave.playoffs.round;
     const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
@@ -276,7 +281,7 @@ export const useGameState = () => {
       return series;
     });
     checkAndAdvancePlayoffRound(currentSave);
-    saveAndSet(updatedSaves);
+    saveAndSet(updatedSaves, view);
   };
 
   const handleStartNewSeason = () => {
@@ -284,6 +289,12 @@ export const useGameState = () => {
     const updatedSaves = [...saves];
     const currentSave = updatedSaves[activeSlot - 1];
     if (!currentSave) return;
+
+    // Prevent double generation if user backgrounded right at this moment
+    if (currentSave.draftState) {
+      setView('lottery');
+      return;
+    }
 
     const finalRound = currentSave.playoffBracket?.find(s => s.round === 4);
     const champ = finalRound ? (finalRound.highSeedWins === 4 ? finalRound.highSeed : finalRound.lowSeed) : "N/A";
@@ -312,8 +323,7 @@ export const useGameState = () => {
       picks: fullOrder.map((city, idx) => ({ round: idx < 30 ? 1 : 2, overall: idx + 1, teamCity: city })),
       pool: generateDraftPool(75), isCompleted: false
     };
-    saveAndSet(updatedSaves);
-    setView('lottery');
+    saveAndSet(updatedSaves, 'lottery');
   };
 
   const handleDraftPick = (player: Player) => {
@@ -342,7 +352,7 @@ export const useGameState = () => {
     currentSave.draftState.pool = currentSave.draftState.pool.filter(p => p.id !== player.id);
     currentSave.draftState.currentPickIndex += 1;
     if (currentSave.draftState.currentPickIndex >= currentSave.draftState.picks.length) currentSave.draftState.isCompleted = true;
-    saveAndSet(updatedSaves);
+    saveAndSet(updatedSaves, 'draft');
   };
 
   const handleDraftComplete = () => {
@@ -377,13 +387,20 @@ export const useGameState = () => {
     currentSave.schedule = opponents; currentSave.scheduleHomeStatus = homeStatuses;
     currentSave.playoffs = null; currentSave.playoffBracket = null; currentSave.draftState = null;
 
-    saveAndSet(updatedSaves);
-    setView('home');
+    saveAndSet(updatedSaves, 'home');
   };
 
-  const saveAndSet = (newSaves: (GameSave | null)[]) => {
+  const saveAndSet = (newSaves: (GameSave | null)[], nextView?: ViewState) => {
+    const finalView = nextView || view;
+    
+    // Persist current view into the active save if it exists
+    if (activeSlot !== null && newSaves[activeSlot - 1]) {
+      newSaves[activeSlot - 1]!.lastView = finalView;
+    }
+
     setSaves(newSaves);
     persistSaves(newSaves);
+    if (nextView) setView(nextView);
   };
 
   return {

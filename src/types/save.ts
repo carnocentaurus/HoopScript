@@ -117,4 +117,5 @@ export interface GameSave {
   seasonCount: number;
   draftState?: DraftState | null;
   lotteryResults?: LotteryResult[] | null;
+  lastView?: string;
 }
