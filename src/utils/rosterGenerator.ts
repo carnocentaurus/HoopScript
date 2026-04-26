@@ -73,27 +73,13 @@ export const validateAndFixRoster = (roster: Player[]): Player[] => {
     }
   }
 
-  // 3. Update roster with starter flags and OVR minimums
+  // 3. Update roster with starter flags
   return roster.map(p => {
     const isStarter = starterIds.has(p.id);
     
-    let finalOff = p.offense;
-    let finalDef = p.defense;
-    let finalOvr = p.overall;
-
-    if (isStarter && finalOvr < 75) {
-      const diff = 75 - finalOvr;
-      finalOff += diff;
-      finalDef += diff;
-      finalOvr = Math.round((finalOff + finalDef) / 2);
-    }
-
     return {
       ...p,
       isStarter,
-      offense: finalOff,
-      defense: finalDef,
-      overall: finalOvr
     };
   });
 };

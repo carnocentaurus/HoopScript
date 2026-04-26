@@ -179,13 +179,13 @@ export const useGameState = () => {
       for (let i = 0; i < aiTeams.length; i += 2) {
         const teamA = aiTeams[i]; const teamB = aiTeams[i + 1];
         if (teamB) {
-          const teamAOvr = teamA.roster.slice(0, 8).reduce((sum, p) => sum + p.overall, 0) / 8;
-          const teamBOvr = teamB.roster.slice(0, 8).reduce((sum, p) => sum + p.overall, 0) / 8;
-          const aWon = Math.random() < (0.5 + (teamAOvr - teamBOvr) / 100);
+          const teamAStrength = getTeamStrength(teamA.city, currentSave.standings);
+          const teamBStrength = getTeamStrength(teamB.city, currentSave.standings);
+          const aWon = Math.random() < (0.5 + (teamAStrength - teamBStrength) / 100);
           todayResults[teamA.city] = aWon ? 'W' : 'L';
           todayResults[teamB.city] = aWon ? 'L' : 'W';
-          const aScore = Math.round(randomNormal(110 + (teamAOvr - teamBOvr), 10));
-          const bScore = Math.round(randomNormal(110 + (teamBOvr - teamAOvr), 10));
+          const aScore = Math.round(randomNormal(110 + (teamAStrength - teamBStrength), 10));
+          const bScore = Math.round(randomNormal(110 + (teamBStrength - teamAStrength), 10));
           teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore)));
           teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore)));
         }
@@ -321,7 +321,15 @@ export const useGameState = () => {
     pick.player = player;
     currentSave.standings = currentSave.standings.map(team => {
       if (team.city === pick.teamCity) {
-        return { ...team, roster: validateAndFixRoster([...team.roster, { ...player, isStarter: false, isRookie: true }]) };
+        // AI or User: Add player and refresh rotations
+        const newRoster = validateAndFixRoster([...team.roster, { ...player, isStarter: false, isRookie: true }]);
+        
+        // If it's the user's team, also update currentSave.roster
+        if (team.city === currentSave.city) {
+          currentSave.roster = newRoster;
+        }
+        
+        return { ...team, roster: newRoster };
       }
       return team;
     });
@@ -342,17 +350,23 @@ export const useGameState = () => {
     currentSave.currentYear += 1; currentSave.seasonCount += 1;
     
     // Process aging and then trim rosters to 15 players
-    const agedStandings = currentSave.standings.map(team => ({ 
-      ...team, 
-      wins: 0, 
-      losses: 0, 
-      roster: processAging(team.roster) 
-    }));
+    const agedStandings = currentSave.standings.map(team => {
+      // Process aging, which returns validateAndFixRoster(agedRoster)
+      const newRoster = processAging(team.roster);
+      return { 
+        ...team, 
+        wins: 0, 
+        losses: 0, 
+        roster: newRoster
+      };
+    });
     
     currentSave.standings = trimRosters(agedStandings);
 
     const myTeam = currentSave.standings.find(t => t.city === currentSave.city);
-    if (myTeam) currentSave.roster = myTeam.roster;
+    if (myTeam) {
+      currentSave.roster = myTeam.roster;
+    }
 
     const { opponents, homeStatuses } = generateSchedule(currentSave.city);
     currentSave.schedule = opponents; currentSave.scheduleHomeStatus = homeStatuses;

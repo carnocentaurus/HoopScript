@@ -233,13 +233,8 @@ export const getTeamStrength = (city: string, standings: any[]) => {
   const teamData = standings.find(t => t.city === city);
   if (!teamData || !teamData.roster || teamData.roster.length === 0) return 75;
 
-  const starters = teamData.roster.filter((p: any) => p.isStarter);
-  const relevantPlayers = starters.length > 0 ? starters : teamData.roster.slice(0, 5);
-
-  const off = relevantPlayers.reduce((sum: number, p: any) => sum + (p.offense ?? 75), 0) / relevantPlayers.length;
-  const def = relevantPlayers.reduce((sum: number, p: any) => sum + (p.defense ?? 75), 0) / relevantPlayers.length;
-  
-  return (off + def) / 2;
+  const ratings = calculateTeamRatings(teamData.roster);
+  return ratings.overall;
 };
 
 export const getHighSeedWinProb = (highSeed: string, lowSeed: string, standings: any[]) => {
