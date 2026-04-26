@@ -74,7 +74,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
           onPress={() => handlePress(() => {
             Alert.alert("Draft Player", `Are you sure you want to draft ${item.lastName}?`, [
               { text: "Cancel", style: "cancel" },
-              { text: "Draft", onPress: () => onPick(item) }
+              { text: "Draft", onPress: () => { playClickSound(); onPick(item); } }
             ]);
           })}
         >

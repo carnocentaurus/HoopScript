@@ -19,6 +19,8 @@ import {
   trimRosters
 } from '../utils/leagueEngine';
 
+import { useSound } from './useSound';
+
 const STORAGE_KEY = '@hoopscript_saves';
 
 export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'fullBracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft' | 'credits';
@@ -32,6 +34,7 @@ export const useGameState = () => {
   const [selectedYear, setSelectedYear] = useState<number>(2024);
   const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [isTimerDone, setIsTimerDone] = useState(false);
+  const { playClickSound } = useSound();
 
   useEffect(() => {
     const loadSaves = async () => {
@@ -75,6 +78,7 @@ export const useGameState = () => {
           text: "Reset", 
           style: "destructive",
           onPress: () => {
+            playClickSound();
             updatedSaves[slotId - 1] = null;
             setSaves(updatedSaves);
             persistSaves(updatedSaves);
