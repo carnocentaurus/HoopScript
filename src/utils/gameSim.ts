@@ -1,5 +1,11 @@
-import { Player, GameSave } from '../types/save';
+import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import { calculateTeamRatings } from './leagueEngine';
+
+export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
+  [OffensiveFocus.ATTACK_PAINT]: DefensiveFocus.PROTECT_RIM,
+  [OffensiveFocus.PACE_SPACE]: DefensiveFocus.PERIMETER_LOCK,
+  [OffensiveFocus.ISO_STAR]: DefensiveFocus.DOUBLE_TEAM,
+};
 
 export interface GameResult {
   myScore: number;
@@ -9,6 +15,7 @@ export interface GameResult {
   oppBestPlayer: PlayerStat;
   myTeamStats: PlayerStat[];
   oppTeamStats: PlayerStat[];
+  quarterScores: { my: number, opp: number }[];
 }
 
 export interface PlayerStat {
@@ -16,6 +23,7 @@ export interface PlayerStat {
   lastName: string;
   number: number;
   position: string;
+  overall: number;
   min: number;
   pts: number;
   reb: number;
@@ -29,65 +37,78 @@ export interface PlayerStat {
   plusMinus: number;
   fgm: number;
   fga: number;
-  overall: number;
 }
 
 export const randomNormal = (mean: number, stdDev: number): number => {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
-  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-  return num * stdDev + mean;
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v) * stdDev + mean;
 };
 
-export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
+export const simulateGame = (
+  myTeam: GameSave, 
+  opponent: any, 
+  myStrategy: Strategy, 
+  oppStrategy: Strategy
+): GameResult => {
   const myRatings = calculateTeamRatings(myTeam.roster);
-  const myOvr = myRatings.overall;
-
   const oppRoster = opponent.roster || [];
   const oppRatings = calculateTeamRatings(oppRoster);
-  const oppOvr = oppRatings.overall;
+
+  // Apply Counter Modifiers
+  let myMod = 1.0;
+  let oppMod = 1.0;
+
+  if (COUNTER_MATRIX[myStrategy.offense] === oppStrategy.defense) {
+    myMod -= 0.15; // 15% penalty if countered
+  }
+  if (COUNTER_MATRIX[oppStrategy.offense] === myStrategy.defense) {
+    oppMod -= 0.15;
+  }
+
+  const myOvr = myRatings.overall * myMod;
+  const oppOvr = oppRatings.overall * oppMod;
 
   const ratingDiff = (myOvr - oppOvr) * 0.6;
   const myBase = 102 + ratingDiff;
   const oppBase = 102 - ratingDiff;
 
-  let myScore = Math.round(randomNormal(myBase, 7));
-  let oppScore = Math.round(randomNormal(oppBase, 7));
+  // Simulate by Quarters for Quarterly Adjustments logic
+  const quarterScores: { my: number, opp: number }[] = [];
+  let myTotal = 0;
+  let oppTotal = 0;
 
-  myScore = Math.max(80, Math.min(125, myScore));
-  oppScore = Math.max(80, Math.min(125, oppScore));
+  for (let q = 0; q < 4; q++) {
+    const myQ = Math.round(randomNormal(myBase / 4, 4));
+    const oppQ = Math.round(randomNormal(oppBase / 4, 4));
+    myTotal += myQ;
+    oppTotal += oppQ;
+    quarterScores.push({ my: myQ, opp: oppQ });
+  }
+
+  let myScore = Math.max(80, Math.min(135, myTotal));
+  let oppScore = Math.max(80, Math.min(135, oppTotal));
 
   let otCount = 0;
   while (myScore === oppScore) {
     otCount++;
-    myScore += Math.round(randomNormal(7, 2));
-    oppScore += Math.round(randomNormal(7, 2));
+    const myOT = Math.round(randomNormal(7, 2));
+    const oppOT = Math.round(randomNormal(7, 2));
+    myScore += myOT;
+    oppScore += oppOT;
   }
 
   const teamMargin = myScore - oppScore;
-
+  // ... (rest of stats generation remains same, but use updated scores)
   const myStarters = myTeam.roster.filter(p => p.isStarter);
   const myRelevant = myStarters.length > 0 ? myStarters : myTeam.roster.slice(0, 5);
 
   const oppStarters = oppRoster.filter((p: any) => p.isStarter);
   const oppRelevant = oppStarters.length > 0 ? oppStarters : (oppRoster.length > 0 ? oppRoster.slice(0, 5) : []);
 
-  const myTeamStats = myRelevant.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin));
-  const oppTeamStats = oppRelevant.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin));
-
-  // Also include bench players in stats generation for a full box score
-  const myBench = myTeam.roster.filter(p => !myRelevant.includes(p));
-  const oppBench = oppRoster.filter((p: any) => !oppRelevant.includes(p));
-
-  const myFullStats = [
-    ...myTeamStats,
-    ...myBench.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin))
-  ];
-  const oppFullStats = [
-    ...oppTeamStats,
-    ...oppBench.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin))
-  ];
+  const myFullStats = myTeam.roster.map((p: Player) => generatePlayerStats(p, myScore > oppScore, otCount, myScore, teamMargin, myStrategy, oppStrategy, true));
+  const oppFullStats = oppRoster.map((p: Player) => generatePlayerStats(p, oppScore > myScore, otCount, oppScore, -teamMargin, oppStrategy, myStrategy, false));
 
   myFullStats.sort((a, b) => b.pts - a.pts);
   oppFullStats.sort((a, b) => b.pts - a.pts);
@@ -99,7 +120,8 @@ export const simulateGame = (myTeam: GameSave, opponent: any): GameResult => {
     myBestPlayer: myFullStats[0],
     oppBestPlayer: oppFullStats[0],
     myTeamStats: myFullStats,
-    oppTeamStats: oppFullStats
+    oppTeamStats: oppFullStats,
+    quarterScores
   };
 };
 
@@ -108,12 +130,30 @@ export const generatePlayerStats = (
   isWinner: boolean, 
   otCount: number, 
   teamScore: number = 100,
-  teamMargin: number = 0
+  teamMargin: number = 0,
+  ownStrategy: Strategy,
+  oppStrategy: Strategy,
+  isUser: boolean
 ): PlayerStat => {
+  // ... (base values)
   const hFactor = player.heightFactor ?? 50;
   const sFactor = player.speedFactor ?? 50;
   const offRating = player.offense ?? 75;
   const defRating = player.defense ?? 75;
+
+  // Strategic Modifiers on individual performance
+  let efficiencyMod = 1.0;
+  if (COUNTER_MATRIX[ownStrategy.offense] === oppStrategy.defense) {
+    efficiencyMod -= 0.1;
+  }
+
+  // Focus specific boosts
+  if (ownStrategy.offense === OffensiveFocus.ATTACK_PAINT && (player.position === 'C' || player.position === 'PF')) {
+    efficiencyMod += 0.05;
+  }
+  if (ownStrategy.offense === OffensiveFocus.PACE_SPACE && (player.position.includes('G'))) {
+    efficiencyMod += 0.05;
+  }
 
   const isStarter = player.isStarter;
   const minutesBudget = isStarter 
@@ -128,7 +168,7 @@ export const generatePlayerStats = (
   if (player.position === 'PF') baseFG = 0.48;
   
   const fgVariance = (Math.random() * 0.2) - 0.1; 
-  const actualFG = baseFG + (offRating / 2000) + fgVariance;
+  const actualFG = (baseFG + (offRating / 2000) + fgVariance) * efficiencyMod;
 
   const scoreShare = (player.overall / 85) * timeScale * (isStarter ? 1.1 : 0.9);
   let pts = Math.floor(teamScore * (scoreShare / 5)) + Math.floor(Math.random() * 3);
@@ -137,7 +177,7 @@ export const generatePlayerStats = (
   const remainingPts = pts - ftm;
   
   const threePointFreq = (player.position && player.position.includes('G')) ? 0.4 : 0.05;
-  const threePM = Math.floor((remainingPts / 2.5) * threePointFreq);
+  const threePM = Math.floor((remainingPts / 2.5) * threePointFreq * (ownStrategy.offense === OffensiveFocus.PACE_SPACE ? 1.2 : 1.0));
   const estTwoPM = Math.floor((remainingPts - (threePM * 3)) / 2);
   
   const fgm = estTwoPM + threePM;
@@ -151,25 +191,19 @@ export const generatePlayerStats = (
   const astRate = (Math.sqrt(sFactor) / 45) + ((player.position === 'PG') ? 0.12 : 0.01);
   const ast = Math.floor(min * astRate + (Math.random() * 2));
 
-  // --- NEW STATS: STL, BLK, TOV ---
-  // Steals: Speed and Defense driven. Guards get more.
   const posStlMod = (player.position && player.position.includes('G')) ? 0.045 : 0.025;
   const stlRate = posStlMod * (sFactor / 100) * (defRating / 75);
   const stl = Math.floor(min * stlRate + (Math.random() * 1.5));
 
-  // Blocks: Height and Defense driven. Bigs get more.
   const posBlkMod = (player.position === 'C' || player.position === 'PF') ? 0.06 : 0.015;
   const blkRate = posBlkMod * (hFactor / 100) * (defRating / 75);
   const blk = Math.floor(min * blkRate + (Math.random() * 1.5));
 
-  // Turnovers: Speed and Offense driven (high usage = more TOs). 
-  // Ball handlers (PG) have higher base TO rate.
   const posTovMod = (player.position === 'PG') ? 0.08 : 0.05;
-  const usageMod = (offRating / 75) * (pts / 20); // More points/usage usually means more TOs
-  const tovRate = posTovMod * (1.5 - (offRating / 100)); // Better players have slightly lower TO rate per usage
+  const usageMod = (offRating / 75) * (pts / 20);
+  const tovRate = posTovMod * (1.5 - (offRating / 100));
   const tov = Math.max(0, Math.floor(min * tovRate * (1 + usageMod) + (Math.random() * 1.2)));
 
-  // Plus Minus: Simplified based on team margin and player minutes
   const plusMinus = Math.round(teamMargin * (min / (48 + otCount * 5)) + (Math.random() * 4 - 2));
 
   return {
@@ -178,18 +212,7 @@ export const generatePlayerStats = (
     number: player.number ?? 0,
     position: player.position,
     overall: player.overall ?? 75,
-    min,
-    pts: (estTwoPM * 2) + (threePM * 3) + ftm,
-    reb,
-    ast,
-    stl,
-    blk,
-    tov,
-    threePM,
-    oreb,
-    dreb,
-    plusMinus,
-    fgm,
-    fga,
+    min, pts: (estTwoPM * 2) + (threePM * 3) + ftm,
+    reb, ast, stl, blk, tov, threePM, oreb, dreb, plusMinus, fgm, fga,
   };
 };

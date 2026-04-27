@@ -94,6 +94,29 @@ export interface DraftState {
   isCompleted: boolean;
 }
 
+export enum OffensiveFocus {
+  ATTACK_PAINT = 'Attack Paint',
+  PACE_SPACE = 'Pace & Space',
+  ISO_STAR = 'Iso-Star'
+}
+
+export enum DefensiveFocus {
+  PROTECT_RIM = 'Protect Rim',
+  PERIMETER_LOCK = 'Perimeter Lock',
+  DOUBLE_TEAM = 'Double Team'
+}
+
+export interface Strategy {
+  offense: OffensiveFocus;
+  defense: DefensiveFocus;
+}
+
+export interface ScoutReport {
+  city: string;
+  predictedOffense: OffensiveFocus;
+  predictedDefense: DefensiveFocus;
+}
+
 export interface GameSave {
   id: string;
   name: string;
@@ -118,4 +141,7 @@ export interface GameSave {
   draftState?: DraftState | null;
   lotteryResults?: LotteryResult[] | null;
   lastView?: string;
+  coachingIQ: number;
+  currentStrategy: Strategy;
+  lastScoutReport?: ScoutReport | null;
 }

@@ -1,4 +1,38 @@
-import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult } from '../types/save';
+import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult, OffensiveFocus, DefensiveFocus, ScoutReport } from '../types/save';
+
+
+
+export const selectCPUStrategy = () => {
+  const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+  const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+  
+  return {
+    offense: offenses[Math.floor(Math.random() * offenses.length)],
+    defense: defenses[Math.floor(Math.random() * defenses.length)]
+  };
+};
+
+export const generateScoutReport = (cpuStrategy: { offense: OffensiveFocus, defense: DefensiveFocus }, coachingIQ: number): ScoutReport => {
+  const roll = Math.random() * 100;
+  const isAccurate = roll < (coachingIQ * 0.8 + 20); // 20% base + up to 80% from IQ
+
+  if (isAccurate) {
+    return {
+      city: "Opponent",
+      predictedOffense: cpuStrategy.offense,
+      predictedDefense: cpuStrategy.defense
+    };
+  } else {
+    const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+    const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+    
+    return {
+      city: "Opponent",
+      predictedOffense: offenses[Math.floor(Math.random() * offenses.length)],
+      predictedDefense: defenses[Math.floor(Math.random() * defenses.length)]
+    };
+  }
+};
 import { generateRoster, generateRookie, validateAndFixRoster } from './rosterGenerator';
 import { PlayerStat } from './gameSim';
 

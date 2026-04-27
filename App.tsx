@@ -34,7 +34,8 @@ function MainApp() {
   const {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
-    handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete
+    handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
+    handleScout, handleUpdateStrategy
   } = useGameState();
 
   useEffect(() => {
@@ -105,6 +106,7 @@ function MainApp() {
                 save={save} onQuickSim={() => setView('quickSim')} onSimDay={handleSimulateLeagueDay}
                 onViewStandings={() => setView('standings')} onViewBracket={() => setView('bracket')}
                 onViewHistory={() => setView('history')} onBackToSaves={() => setView('saveSelection')}
+                onScout={handleScout} onUpdateStrategy={handleUpdateStrategy}
                 userTeam={{ city: save.city, record: save.playoffs ? `${save.playoffs.myWins} WINS` : `${save.wins}-${save.losses}`, rank: calculateRank(save.city, save.standings), isHome, isUser: true, roster: save.roster }}
                 opponent={{ city: oppCity, record: save.playoffs ? `${save.playoffs.oppWins} WINS` : (opp ? `${opp.wins}-${opp.losses}` : "0-0"), ...common, isHome: !isHome, isUser: false }}
                 onViewTeam={() => { setSelectedTeamCity(save.city); setView('myTeamOverview'); }}

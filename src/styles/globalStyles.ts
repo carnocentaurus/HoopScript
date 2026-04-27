@@ -58,6 +58,7 @@ export const globalStyles = StyleSheet.create({
   flexRow: { flexDirection: 'row' },
   flexRowAlignCenter: { flexDirection: 'row', alignItems: 'center' },
   justifyStart: { justifyContent: 'flex-start' },
+  justifyBetween: { justifyContent: 'space-between' },
   flexRowWrapBetween: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   centerContent: { justifyContent: 'center', alignItems: 'center' },
   headerSpacer: { width: 60 },
@@ -217,6 +218,185 @@ export const globalStyles = StyleSheet.create({
     right: 20,
     zIndex: 10,
     fontSize: 10
+  },
+
+  // --- STRATEGY & SCOUTING ---
+  strategyBoardContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    marginTop: 10,
+    marginBottom: 10
+  },
+  strategyTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.primary,
+    color: COLORS.white,
+    textTransform: 'uppercase',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  strategyRow: {
+    marginBottom: 15
+  },
+  strategyLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.secondary,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+    textTransform: 'uppercase'
+  },
+  strategyOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  strategyOption: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.secondary,
+    alignItems: 'center',
+    marginHorizontal: 4
+  },
+  strategyOptionActive: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.secondary
+  },
+  strategyOptionText: {
+    fontSize: 10,
+    fontFamily: FONTS.primary,
+    color: COLORS.textSub,
+    textAlign: 'center'
+  },
+  strategyOptionTextActive: {
+    color: COLORS.primary
+  },
+  scoutBtn: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 5
+  },
+  scoutReportCard: {
+    backgroundColor: COLORS.secondary,
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary
+  },
+  scoutReportText: {
+    fontSize: 12,
+    color: COLORS.white,
+    fontFamily: FONTS.secondary,
+    fontStyle: 'italic'
+  },
+  scoutReportValue: {
+    color: COLORS.primary,
+    fontWeight: 'bold'
+  },
+
+  // --- MODALS ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  scoutModalContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    width: '100%',
+    maxWidth: 400,
+    padding: 24,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    elevation: 10,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+  },
+  scoutModalTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.primary,
+    color: COLORS.primary,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    textAlign: 'center'
+  },
+  scoutModalContent: {
+    marginVertical: 20,
+  },
+  scoutModalCity: {
+    fontSize: 28,
+    fontFamily: FONTS.primary,
+    color: COLORS.white,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginBottom: 10
+  },
+  scoutModalReport: {
+    marginTop: 10,
+  },
+  scoutModalText: {
+    fontSize: 14,
+    color: COLORS.textSub,
+    fontFamily: FONTS.secondary,
+    lineHeight: 20,
+    textAlign: 'center'
+  },
+  scoutModalFocusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 25,
+    gap: 15
+  },
+  scoutModalFocusItem: {
+    flex: 1,
+    backgroundColor: COLORS.secondary,
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border
+  },
+  scoutModalFocusLabel: {
+    fontSize: 9,
+    fontFamily: FONTS.primary,
+    color: COLORS.textMuted,
+    letterSpacing: 1,
+    marginBottom: 5,
+    textTransform: 'uppercase'
+  },
+  scoutModalFocusValue: {
+    fontSize: 13,
+    fontFamily: FONTS.primary,
+    color: COLORS.white,
+    textAlign: 'center',
+    textTransform: 'uppercase'
+  },
+  scoutModalCloseBtn: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10
+  },
+  scoutModalCloseBtnText: {
+    fontSize: 14,
+    fontFamily: FONTS.primary,
+    color: COLORS.black,
+    letterSpacing: 1,
+    textTransform: 'uppercase'
   },
 
   // --- HOME SCREEN ---

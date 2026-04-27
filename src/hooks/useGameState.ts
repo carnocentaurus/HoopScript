@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameSave, SeriesMatchup, Player } from '../types/save';
 import { validateAndFixRoster } from '../utils/rosterGenerator';
-import { GameResult, generatePlayerStats, randomNormal } from '../utils/gameSim';
+import { GameResult, generatePlayerStats, randomNormal, COUNTER_MATRIX } from '../utils/gameSim';
 import { 
   ALL_CITIES, 
   generateSchedule, 
@@ -16,10 +16,13 @@ import {
   calculateRank,
   getHighSeedWinProb,
   getTeamStrength,
-  trimRosters
+  trimRosters,
+  selectCPUStrategy,
+  generateScoutReport
 } from '../utils/leagueEngine';
 
 import { useSound } from './useSound';
+import { OffensiveFocus, DefensiveFocus, Strategy, ScoutReport } from '../types/save';
 
 const STORAGE_KEY = '@hoopscript_saves';
 
@@ -40,7 +43,21 @@ export const useGameState = () => {
     const loadSaves = async () => {
       try {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedSaves) setSaves(JSON.parse(storedSaves));
+        if (storedSaves) {
+          const parsed = JSON.parse(storedSaves);
+          const migrated = parsed.map((s: any) => {
+            if (!s) return null;
+            return {
+              ...s,
+              coachingIQ: s.coachingIQ ?? 60,
+              currentStrategy: s.currentStrategy ?? {
+                offense: OffensiveFocus.ATTACK_PAINT,
+                defense: DefensiveFocus.PROTECT_RIM
+              }
+            };
+          });
+          setSaves(migrated);
+        }
       } catch (e) {
         console.error("Failed to load saves", e);
       } finally {
@@ -127,12 +144,51 @@ export const useGameState = () => {
       standings: initialStandings, 
       playoffs: null, playoffBracket: null, history: [],
       startYear: selectedYear, currentYear: selectedYear, seasonCount: 1,
-      lastView: 'home'
+      lastView: 'home',
+      coachingIQ: 60,
+      currentStrategy: {
+        offense: OffensiveFocus.ATTACK_PAINT,
+        defense: DefensiveFocus.PROTECT_RIM
+      },
+      lastScoutReport: null
     };
 
     const newSaves = [...saves];
     newSaves[activeSlot - 1] = newSave;
     saveAndSet(newSaves, 'home');
+  };
+
+  const handleScout = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave) return;
+
+    const oppCity = currentSave.playoffs 
+      ? currentSave.playoffs.opponentCity 
+      : currentSave.schedule[currentSave.gamesPlayed];
+    
+    // Only generate a new report if we don't already have one for this specific opponent
+    if (currentSave.lastScoutReport && currentSave.lastScoutReport.city === oppCity) {
+      return;
+    }
+
+    const oppStrategy = selectCPUStrategy(); 
+    const report = generateScoutReport(oppStrategy, currentSave.coachingIQ);
+    report.city = oppCity;
+
+    currentSave.lastScoutReport = report;
+    saveAndSet(updatedSaves, view);
+  };
+
+  const handleUpdateStrategy = (strategy: Strategy) => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave) return;
+
+    currentSave.currentStrategy = strategy;
+    saveAndSet(updatedSaves, view);
   };
 
   const handleGameFinish = (result: GameResult) => {
@@ -189,15 +245,29 @@ export const useGameState = () => {
       for (let i = 0; i < aiTeams.length; i += 2) {
         const teamA = aiTeams[i]; const teamB = aiTeams[i + 1];
         if (teamB) {
+          const strategyA = selectCPUStrategy();
+          const strategyB = selectCPUStrategy();
+          
           const teamAStrength = getTeamStrength(teamA.city, currentSave.standings);
           const teamBStrength = getTeamStrength(teamB.city, currentSave.standings);
-          const aWon = Math.random() < (0.5 + (teamAStrength - teamBStrength) / 100);
+          
+          // Basic OVR modifier for simulation probabilities
+          let modA = 1.0;
+          let modB = 1.0;
+          if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) modA -= 0.1;
+          if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) modB -= 0.1;
+
+          const finalA = teamAStrength * modA;
+          const finalB = teamBStrength * modB;
+
+          const aWon = Math.random() < (0.5 + (finalA - finalB) / 100);
           todayResults[teamA.city] = aWon ? 'W' : 'L';
           todayResults[teamB.city] = aWon ? 'L' : 'W';
-          const aScore = Math.round(randomNormal(110 + (teamAStrength - teamBStrength), 10));
-          const bScore = Math.round(randomNormal(110 + (teamBStrength - teamAStrength), 10));
-          teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore)));
-          teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore)));
+          const aScore = Math.round(randomNormal(110 + (finalA - finalB), 10));
+          const bScore = Math.round(randomNormal(110 + (finalB - finalA), 10));
+          
+          teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore, aScore - bScore, strategyA, strategyB, false)));
+          teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore, bScore - aScore, strategyB, strategyA, false)));
         }
       }
 
@@ -406,6 +476,7 @@ export const useGameState = () => {
   return {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
-    handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete
+    handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
+    handleScout, handleUpdateStrategy
   };
 };

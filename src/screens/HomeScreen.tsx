@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { GameSave } from '../types/save';
+import { GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
@@ -9,12 +9,22 @@ import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
-const TeamMatchupCard = ({ team }: { team: any }) => {
+const TeamMatchupCard = ({ team, onScout, onStrategy, playClickSound }: { team: any, onScout?: () => void, onStrategy?: () => void, playClickSound: () => void }) => {
   const ratings = calculateTeamRatings(team.roster);
   const logo = TEAM_LOGOS[team.city];
 
   return (
     <View style={[globalStyles.homeMatchupCard, team.isUser && globalStyles.homeUserCard]}>
+      {!team.isUser && onScout && (
+        <TouchableOpacity style={globalStyles.scoutBtn} onPress={() => { playClickSound(); onScout(); }}>
+          <Icon name="eye-outline" size={20} color={COLORS.primary} />
+        </TouchableOpacity>
+      )}
+      {team.isUser && onStrategy && (
+        <TouchableOpacity style={globalStyles.scoutBtn} onPress={() => { playClickSound(); onStrategy(); }}>
+          <Icon name="construct-outline" size={20} color={COLORS.primary} />
+        </TouchableOpacity>
+      )}
       {logo ? (
         <Image source={logo} style={globalStyles.homeMatchupLogoImage} />
       ) : (
@@ -34,6 +44,54 @@ const TeamMatchupCard = ({ team }: { team: any }) => {
   );
 };
 
+const StrategyBoard = ({ current, onUpdate }: { current: Strategy, onUpdate: (s: Strategy) => void }) => {
+  const { playClickSound } = useSound();
+  
+  const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+  const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+
+  const handleSelect = (type: 'offense' | 'defense', value: any) => {
+    playClickSound();
+    onUpdate({ ...current, [type]: value });
+  };
+
+  return (
+    <View style={[globalStyles.strategyBoardContainer, { borderWidth: 0 }]}>
+      <Text style={globalStyles.strategyTitle}>Strategy Board</Text>
+      
+      <View style={globalStyles.strategyRow}>
+        <Text style={globalStyles.strategyLabel}>Offensive Focus</Text>
+        <View style={globalStyles.strategyOptions}>
+          {offenses.map(opt => (
+            <TouchableOpacity 
+              key={opt} 
+              style={[globalStyles.strategyOption, current.offense === opt && globalStyles.strategyOptionActive]}
+              onPress={() => handleSelect('offense', opt)}
+            >
+              <Text style={[globalStyles.strategyOptionText, current.offense === opt && globalStyles.strategyOptionTextActive]}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={globalStyles.strategyRow}>
+        <Text style={globalStyles.strategyLabel}>Defensive Focus</Text>
+        <View style={globalStyles.strategyOptions}>
+          {defenses.map(opt => (
+            <TouchableOpacity 
+              key={opt} 
+              style={[globalStyles.strategyOption, current.defense === opt && globalStyles.strategyOptionActive]}
+              onPress={() => handleSelect('defense', opt)}
+            >
+              <Text style={[globalStyles.strategyOptionText, current.defense === opt && globalStyles.strategyOptionTextActive]}>{opt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const HomeScreen = ({ 
   save, 
   userTeam, 
@@ -44,7 +102,9 @@ const HomeScreen = ({
   onViewBracket,
   onViewHistory,
   onViewTeam,
-  onBackToSaves
+  onBackToSaves,
+  onScout,
+  onUpdateStrategy
 }: { 
   save: GameSave, 
   userTeam: any, 
@@ -55,11 +115,15 @@ const HomeScreen = ({
   onViewBracket: () => void,
   onViewHistory: () => void,
   onViewTeam: () => void,
-  onBackToSaves: () => void
+  onBackToSaves: () => void,
+  onScout: (city: string) => void,
+  onUpdateStrategy: (s: Strategy) => void
 }) => {
   const { playClickSound } = useSound();
+  const [showScoutModal, setShowScoutModal] = useState(false);
+  const [showStrategyModal, setShowStrategyModal] = useState(false);
 
-  const isEndOfSeason = save.gamesPlayed === 82; // Adjust field name to match your state if needed
+  const isEndOfSeason = save.gamesPlayed === 82; 
   const isEliminated = save.playoffs?.isEliminated;
   const isChampion = save.playoffs?.isChampion;
   const isSeriesCompleted = save.playoffs && (save.playoffs.myWins === 4 || save.playoffs.oppWins === 4);
@@ -80,6 +144,14 @@ const HomeScreen = ({
   const handlePress = (action: () => void) => {
     playClickSound();
     action();
+  };
+
+  const handleScoutPress = () => {
+    playClickSound();
+    if (!save.lastScoutReport || save.lastScoutReport.city !== opponent.city) {
+      onScout(opponent.city);
+    }
+    setShowScoutModal(true);
   };
 
   return (
@@ -122,8 +194,16 @@ const HomeScreen = ({
             </Text>
           </View>
         ) : (
-          <>
-            <Text style={globalStyles.homeSectionLabelCenter}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false} 
+            contentContainerStyle={{ 
+              flexGrow: 1, 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              paddingVertical: 40 
+            }}
+          >
+            <Text style={[globalStyles.homeSectionLabelCenter, { width: '100%' }]}>
               {save.playoffs 
                 ? `${getPlayoffRoundTitle(save.playoffs.round)} - BEST OF 7` 
                 : save.gamesPlayed === 81 
@@ -131,14 +211,25 @@ const HomeScreen = ({
                   : "UPCOMING MATCHUP"}
             </Text>
             
-            <View style={globalStyles.homeMatchupWrapper}>
-              <TeamMatchupCard team={LeftTeam} />
+            <View style={[globalStyles.homeMatchupWrapper, { justifyContent: 'center', width: '100%', marginBottom: 40 }]}>
+              <TeamMatchupCard 
+                team={LeftTeam} 
+                onScout={!LeftTeam.isUser ? handleScoutPress : undefined} 
+                onStrategy={LeftTeam.isUser ? () => setShowStrategyModal(true) : undefined}
+                playClickSound={playClickSound}
+              />
               <View style={globalStyles.homeVsContainer}>
                 <Text style={[globalStyles.homeVsText, globalStyles.fs12]}>AT</Text>
               </View>
-              <TeamMatchupCard team={RightTeam} />
+              <TeamMatchupCard 
+                team={RightTeam} 
+                onScout={!RightTeam.isUser ? handleScoutPress : undefined} 
+                onStrategy={RightTeam.isUser ? () => setShowStrategyModal(true) : undefined}
+                playClickSound={playClickSound}
+              />
             </View>
-            <View style={globalStyles.homeProgressSection}>
+
+            <View style={[globalStyles.homeProgressSection, { alignItems: 'center', width: '100%' }]}>
               {save.playoffs ? (
                 <View style={globalStyles.homeSeriesScoreContainer}>
                   <Text style={globalStyles.homeSeriesLabel}>
@@ -152,7 +243,7 @@ const HomeScreen = ({
                   </Text>
                 </View>
               ) : (
-                <>
+                <View style={{ width: '100%', maxWidth: 300 }}>
                   <View style={globalStyles.homeProgressInfo}>
                     <Text style={globalStyles.homeProgressLabel}>SEASON PROGRESS</Text>
                     <Text style={globalStyles.homeStatsText}>{save.gamesPlayed} / {save.totalGames}</Text>
@@ -165,22 +256,20 @@ const HomeScreen = ({
                       ]} 
                     />
                   </View>
-                </>
+                </View>
               )}
             </View>
-          </>
+          </ScrollView>
         )}
       </View>
 
       <View style={globalStyles.homeBottomButtonsContainer}>
-        {/* Show Playoff Bracket button if season is over and team missed playoffs or is finished */}
         {(missedPlayoffs || isEliminated || isChampion) && (
           <TouchableOpacity style={globalStyles.homeBracketButton} onPress={() => handlePress(onViewBracket)}>
             <Text style={globalStyles.homeBracketButtonText}>PLAYOFF BRACKET</Text>
           </TouchableOpacity>
         )}
 
-        {/* Show Sim button if regular season is active OR active in playoffs */}
         {((save.gamesPlayed < 82) || (save.playoffs && !isEliminated && !isChampion)) && (
           <TouchableOpacity 
             style={globalStyles.homeSimButton} 
@@ -189,11 +278,70 @@ const HomeScreen = ({
             <Text style={globalStyles.homeSimButtonText}>
               {save.playoffs 
                 ? (isSeriesCompleted ? "SIMULATE ROUND DAY" : "SIMULATE PLAYOFF GAME") 
-                : "QUICK SIM"}
+                : "SIMULATE GAME"}
             </Text>
           </TouchableOpacity>
         )}
       </View>
+
+      {/* STRATEGY MODAL */}
+      <Modal visible={showStrategyModal} transparent animationType="slide">
+        <View style={globalStyles.modalOverlay}>
+          <View style={globalStyles.scoutModalContainer}>
+            <StrategyBoard current={save.currentStrategy} onUpdate={onUpdateStrategy} />
+            <TouchableOpacity 
+              style={globalStyles.scoutModalCloseBtn}
+              onPress={() => handlePress(() => setShowStrategyModal(false))}
+            >
+              <Text style={globalStyles.scoutModalCloseBtnText}>SAVE</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* SCOUT REPORT MODAL */}
+      <Modal visible={showScoutModal} transparent animationType="fade">
+        <View style={globalStyles.modalOverlay}>
+          <View style={globalStyles.scoutModalContainer}>
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={globalStyles.scoutModalTitle}>SCOUTING REPORT</Text>
+            </View>
+            
+            <View style={globalStyles.scoutModalContent}>
+              <Text style={globalStyles.scoutModalCity}>{opponent.city}</Text>
+              {save.lastScoutReport && save.lastScoutReport.city === opponent.city ? (
+                <View style={globalStyles.scoutModalReport}>
+                  <Text style={globalStyles.scoutModalText}>
+                    Based on recent tendencies, our scouts expect the opponent to focus on:
+                  </Text>
+                  <View style={globalStyles.scoutModalFocusRow}>
+                    <View style={globalStyles.scoutModalFocusItem}>
+                      <Text style={globalStyles.scoutModalFocusLabel}>OFFENSE</Text>
+                      <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedOffense}</Text>
+                    </View>
+                    <View style={globalStyles.scoutModalFocusItem}>
+                      <Text style={globalStyles.scoutModalFocusLabel}>DEFENSE</Text>
+                      <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedDefense}</Text>
+                    </View>
+                  </View>
+                  <Text style={[globalStyles.scoutModalText, { fontSize: 10, marginTop: 15, opacity: 0.6 }]}>
+                    Confidence based on Coaching IQ ({save.coachingIQ})
+                  </Text>
+                </View>
+              ) : (
+                <Text style={globalStyles.scoutModalText}>No scouting data available for this game.</Text>
+              )}
+            </View>
+
+            <TouchableOpacity 
+              style={globalStyles.scoutModalCloseBtn}
+              onPress={() => handlePress(() => setShowScoutModal(false))}
+            >
+              <Text style={globalStyles.scoutModalCloseBtnText}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 };
