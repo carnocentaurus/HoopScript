@@ -325,7 +325,7 @@ const HomeScreen = ({
                     </View>
                   </View>
                   <Text style={[globalStyles.scoutModalText, { fontSize: 10, marginTop: 15, opacity: 0.6 }]}>
-                    Confidence based on Coaching IQ ({save.coachingIQ})
+                    Confidence: {Math.round(save.coachingIQ * 0.8 + 20)}% (Coaching IQ {save.coachingIQ})
                   </Text>
                 </View>
               ) : (
