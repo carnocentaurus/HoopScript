@@ -51,13 +51,19 @@ export const simulateGame = (
   myTeam: GameSave, 
   opponent: any, 
   myStrategy: Strategy, 
-  oppStrategy: Strategy
+  oppStrategy: Strategy,
+  myIQ: number = 60,
+  oppIQ: number = 60
 ): GameResult => {
   const myRatings = calculateTeamRatings(myTeam.roster);
   const oppRoster = opponent.roster || [];
   const oppRatings = calculateTeamRatings(oppRoster);
 
-  // Apply Counter Modifiers
+  // Apply Counter Modifiers with Tactical Resilience
+  // Base penalty is 15%. Each point of IQ reduces it slightly.
+  // IQ 100 reduces penalty by 10% (from 15% down to 5%).
+  const getPenalty = (iq: number) => 0.15 - ((iq / 100) * 0.10);
+  
   let myMod = 1.0;
   let oppMod = 1.0;
   const counterResults: string[] = [];
@@ -66,15 +72,17 @@ export const simulateGame = (
   const oppCountered = COUNTER_MATRIX[oppStrategy.offense] === myStrategy.defense;
 
   if (myCountered) {
-    myMod -= 0.15; // 15% penalty if countered
-    counterResults.push(`Opponent countered your ${myStrategy.offense} with ${oppStrategy.defense}.`);
+    const penalty = getPenalty(myIQ);
+    myMod -= penalty;
+    counterResults.push(`Opponent countered your ${myStrategy.offense} with ${oppStrategy.defense}. (Tactical hit: -${Math.round(penalty * 100)}%)`);
   } else {
     counterResults.push(`Your ${myStrategy.offense} found openings against their ${oppStrategy.defense}.`);
   }
 
   if (oppCountered) {
-    oppMod -= 0.15;
-    counterResults.push(`You successfully countered their ${oppStrategy.offense} with your ${myStrategy.defense}!`);
+    const penalty = getPenalty(oppIQ);
+    oppMod -= penalty;
+    counterResults.push(`You successfully countered their ${oppStrategy.offense} with your ${myStrategy.defense}! (Impact: -${Math.round(penalty * 100)}%)`);
   } else {
     counterResults.push(`Opponent's ${oppStrategy.offense} challenged your ${myStrategy.defense}.`);
   }

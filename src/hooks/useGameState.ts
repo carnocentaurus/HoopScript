@@ -53,7 +53,11 @@ export const useGameState = () => {
               currentStrategy: s.currentStrategy ?? {
                 offense: OffensiveFocus.ATTACK_PAINT,
                 defense: DefensiveFocus.PROTECT_RIM
-              }
+              },
+              standings: s.standings?.map((t: any) => ({
+                ...t,
+                coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40)
+              }))
             };
           });
           setSaves(migrated);
@@ -252,11 +256,18 @@ export const useGameState = () => {
           const teamAStrength = getTeamStrength(teamA.city, currentSave.standings);
           const teamBStrength = getTeamStrength(teamB.city, currentSave.standings);
           
-          // Basic OVR modifier for simulation probabilities
+          // OVR modifier for simulation probabilities with Tactical Resilience
           let modA = 1.0;
           let modB = 1.0;
-          if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) modA -= 0.1;
-          if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) modB -= 0.1;
+
+          const getAIPenalty = (iq: number) => 0.12 - ((iq / 100) * 0.08); // Max reduction from 12% to 4%
+
+          if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) {
+            modA -= getAIPenalty(teamA.coachingIQ);
+          }
+          if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) {
+            modB -= getAIPenalty(teamB.coachingIQ);
+          }
 
           const finalA = teamAStrength * modA;
           const finalB = teamBStrength * modB;

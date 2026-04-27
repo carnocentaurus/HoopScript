@@ -110,6 +110,7 @@ export const generateInitialStandings = (): TeamStanding[] => {
       wins: 0,
       losses: 0,
       roster,
+      coachingIQ: Math.floor(Math.random() * 51) + 40 // 40 to 90
     };
   });
 };

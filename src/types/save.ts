@@ -38,6 +38,7 @@ export interface TeamStanding {
   losses: number;
   conf: 'East' | 'West';
   roster: Player[];
+  coachingIQ: number;
 }
 
 export interface PlayoffSeries {

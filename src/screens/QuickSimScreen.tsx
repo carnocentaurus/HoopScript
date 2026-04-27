@@ -43,7 +43,19 @@ const QuickSimScreen = ({
 
   // Full simulation happens once to get the "script"
   useEffect(() => {
-    const gameResult = simulateGame(save, opponent, save.currentStrategy, cpuStrategy);
+    const userStrategy = save.currentStrategy || {
+      offense: OffensiveFocus.ATTACK_PAINT,
+      defense: DefensiveFocus.PROTECT_RIM
+    };
+
+    const gameResult = simulateGame(
+      save, 
+      opponent, 
+      userStrategy, 
+      cpuStrategy,
+      save.coachingIQ,
+      opponent.coachingIQ ?? 60
+    );
     setResult(gameResult);
     startQuarterSim(0, gameResult);
   }, []);
