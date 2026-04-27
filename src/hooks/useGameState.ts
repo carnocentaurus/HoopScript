@@ -176,6 +176,7 @@ export const useGameState = () => {
     const oppStrategy = selectCPUStrategy(); 
     const report = generateScoutReport(oppStrategy, currentSave.coachingIQ);
     report.city = oppCity;
+    report.actualStrategy = oppStrategy;
 
     currentSave.lastScoutReport = report;
     saveAndSet(updatedSaves, view);

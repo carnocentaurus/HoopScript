@@ -16,6 +16,7 @@ export interface GameResult {
   myTeamStats: PlayerStat[];
   oppTeamStats: PlayerStat[];
   quarterScores: { my: number, opp: number }[];
+  counterResults: string[];
 }
 
 export interface PlayerStat {
@@ -59,12 +60,38 @@ export const simulateGame = (
   // Apply Counter Modifiers
   let myMod = 1.0;
   let oppMod = 1.0;
+  const counterResults: string[] = [];
 
-  if (COUNTER_MATRIX[myStrategy.offense] === oppStrategy.defense) {
+  const myCountered = COUNTER_MATRIX[myStrategy.offense] === oppStrategy.defense;
+  const oppCountered = COUNTER_MATRIX[oppStrategy.offense] === myStrategy.defense;
+
+  if (myCountered) {
     myMod -= 0.15; // 15% penalty if countered
+    counterResults.push(`Opponent countered your ${myStrategy.offense} with ${oppStrategy.defense}.`);
+  } else {
+    counterResults.push(`Your ${myStrategy.offense} found openings against their ${oppStrategy.defense}.`);
   }
-  if (COUNTER_MATRIX[oppStrategy.offense] === myStrategy.defense) {
+
+  if (oppCountered) {
     oppMod -= 0.15;
+    counterResults.push(`You successfully countered their ${oppStrategy.offense} with your ${myStrategy.defense}!`);
+  } else {
+    counterResults.push(`Opponent's ${oppStrategy.offense} challenged your ${myStrategy.defense}.`);
+  }
+
+  // Scouting Accuracy check if report exists
+  if (myTeam.lastScoutReport && myTeam.lastScoutReport.city === opponent.city) {
+    const s = myTeam.lastScoutReport;
+    const accurateOff = s.predictedOffense === oppStrategy.offense;
+    const accurateDef = s.predictedDefense === oppStrategy.defense;
+    
+    if (accurateOff && accurateDef) {
+      counterResults.push("Your scouting report was 100% accurate.");
+    } else if (accurateOff || accurateDef) {
+      counterResults.push("Your scouting report was partially accurate.");
+    } else {
+      counterResults.push("The opponent coach completely changed their gameplan from our scouting report.");
+    }
   }
 
   const myOvr = myRatings.overall * myMod;
@@ -121,7 +148,8 @@ export const simulateGame = (
     oppBestPlayer: oppFullStats[0],
     myTeamStats: myFullStats,
     oppTeamStats: oppFullStats,
-    quarterScores
+    quarterScores,
+    counterResults
   };
 };
 

@@ -115,6 +115,7 @@ export interface ScoutReport {
   city: string;
   predictedOffense: OffensiveFocus;
   predictedDefense: DefensiveFocus;
+  actualStrategy: Strategy;
 }
 
 export interface GameSave {

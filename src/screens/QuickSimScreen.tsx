@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameResult, simulateGame } from '../utils/gameSim';
 import { GameSave, Strategy } from '../types/save';
@@ -26,7 +26,15 @@ const QuickSimScreen = ({
   const [oppScore, setOppScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<GameResult | null>(null);
-  const [cpuStrategy] = useState<Strategy>(selectCPUStrategy());
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  
+  // Use actualStrategy from scouting report if it exists and matches opponent
+  const [cpuStrategy] = useState<Strategy>(() => {
+    if (save.lastScoutReport && save.lastScoutReport.city === opponent.city && save.lastScoutReport.actualStrategy) {
+      return save.lastScoutReport.actualStrategy;
+    }
+    return selectCPUStrategy();
+  });
 
   const handlePress = (action: () => void) => {
     playClickSound();
@@ -136,12 +144,48 @@ const QuickSimScreen = ({
 
         {isFinished && result && (
           <View style={globalStyles.qsPostGame}>
+            <TouchableOpacity 
+              style={[globalStyles.qsContinueButtonTerracotta, { marginBottom: 15 }]} 
+              onPress={() => handlePress(() => setShowAnalysisModal(true))}
+            >
+              <Text style={globalStyles.qsContinueTextBlack}>ANALYSIS</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={globalStyles.qsContinueButtonTerracotta} onPress={() => handlePress(() => onFinish(result))}>
               <Text style={globalStyles.qsContinueTextBlack}>CONTINUE</Text>
             </TouchableOpacity>
           </View>
         )}
       </ScrollView>
+
+      {/* TACTICAL ANALYSIS MODAL */}
+      <Modal visible={showAnalysisModal} transparent animationType="fade">
+        <View style={globalStyles.modalOverlay}>
+          <View style={globalStyles.scoutModalContainer}>
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={globalStyles.scoutModalTitle}>TACTICAL ANALYSIS</Text>
+            </View>
+            
+            <View style={globalStyles.scoutModalContent}>
+              <Text style={globalStyles.scoutModalCity}>Game Summary</Text>
+              <View style={globalStyles.scoutModalReport}>
+                {result?.counterResults.map((msg, i) => (
+                  <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10 }]}>
+                    • {msg}
+                  </Text>
+                ))}
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={globalStyles.scoutModalCloseBtn}
+              onPress={() => handlePress(() => setShowAnalysisModal(false))}
+            >
+              <Text style={globalStyles.scoutModalCloseBtnText}>DISMISS</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   );
 };
