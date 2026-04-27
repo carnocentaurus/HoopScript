@@ -56,7 +56,8 @@ export const useGameState = () => {
               },
               standings: s.standings?.map((t: any) => ({
                 ...t,
-                coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40)
+                coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40),
+                streak: t.streak ?? 0
               }))
             };
           });
@@ -291,7 +292,21 @@ export const useGameState = () => {
 
       currentSave.standings = currentSave.standings.map(team => {
         const res = todayResults[team.city];
-        return { ...team, wins: team.wins + (res === 'W' ? 1 : 0), losses: team.losses + (res === 'L' ? 1 : 0) };
+        const isWin = res === 'W';
+        
+        let newStreak = team.streak || 0;
+        if (isWin) {
+          newStreak = newStreak > 0 ? newStreak + 1 : 1;
+        } else {
+          newStreak = newStreak < 0 ? newStreak - 1 : -1;
+        }
+
+        return { 
+          ...team, 
+          wins: team.wins + (isWin ? 1 : 0), 
+          losses: team.losses + (!isWin ? 1 : 0),
+          streak: newStreak
+        };
       });
 
       currentSave.gamesPlayed += 1;
@@ -454,6 +469,7 @@ export const useGameState = () => {
         ...team, 
         wins: 0, 
         losses: 0, 
+        streak: 0,
         roster: newRoster
       };
     });

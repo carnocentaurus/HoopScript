@@ -109,6 +109,7 @@ export const generateInitialStandings = (): TeamStanding[] => {
       conf: (index < 15 ? 'East' : 'West') as 'East' | 'West', 
       wins: 0,
       losses: 0,
+      streak: 0,
       roster,
       coachingIQ: Math.floor(Math.random() * 51) + 40 // 40 to 90
     };

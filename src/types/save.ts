@@ -36,6 +36,7 @@ export interface TeamStanding {
   city: string;
   wins: number;
   losses: number;
+  streak: number; // Positive for wins, negative for losses
   conf: 'East' | 'West';
   roster: Player[];
   coachingIQ: number;

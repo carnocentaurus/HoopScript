@@ -29,6 +29,8 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
 
   const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => {
     const logo = TEAM_LOGOS[item.city];
+    const streakText = item.streak > 0 ? `+${item.streak}` : `${item.streak}`;
+    const streakStyle = item.streak > 0 ? globalStyles.stStreakWin : globalStyles.stStreakLoss;
     
     return (
       <TouchableOpacity 
@@ -41,6 +43,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
         <View style={globalStyles.stRecordCols}>
           <Text style={globalStyles.stRecordText}>{item.wins}</Text>
           <Text style={globalStyles.stRecordText}>{item.losses}</Text>
+          <Text style={[globalStyles.stStreakText, streakStyle]}>{item.streak !== 0 ? streakText : '-'}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -76,6 +79,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
         <View style={globalStyles.stRecordColsHeader}>
           <Text style={globalStyles.stHeaderStat}>W</Text>
           <Text style={globalStyles.stHeaderStat}>L</Text>
+          <Text style={globalStyles.stHeaderStreak}>STRK</Text>
         </View>
       </View>
 
