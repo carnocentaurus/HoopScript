@@ -12,26 +12,44 @@ export const selectCPUStrategy = (): Strategy => {
   };
 };
 
-export const generateScoutReport = (cpuStrategy: Strategy, coachingIQ: number): ScoutReport => {
+export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, opponentPredictability: number): ScoutReport => {
+  const accuracyThreshold = (80 - (opponentIQ / 2)); 
   const roll = Math.random() * 100;
-  const isAccurate = roll < (coachingIQ * 0.8 + 20); // 20% base + up to 80% from IQ
+  const isAccurate = roll < accuracyThreshold;
+
+  const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+  const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
 
   if (isAccurate) {
     return {
       city: "Opponent",
       predictedOffense: cpuStrategy.offense,
       predictedDefense: cpuStrategy.defense,
-      actualStrategy: cpuStrategy
+      actualStrategy: cpuStrategy,
+      coachingIQ: opponentIQ,
+      predictability: opponentPredictability,
+      uncertaintyHigh: false
     };
   } else {
-    const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
-    const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+    // If opponent is high IQ, scouting might yield multiple possibilities (Uncertainty)
+    const uncertaintyHigh = opponentIQ > 70;
     
+    const randomStrategy = (): Strategy => ({
+      offense: offenses[Math.floor(Math.random() * offenses.length)],
+      defense: defenses[Math.floor(Math.random() * defenses.length)]
+    });
+
+    const predicted = randomStrategy();
+
     return {
       city: "Opponent",
-      predictedOffense: offenses[Math.floor(Math.random() * offenses.length)],
-      predictedDefense: defenses[Math.floor(Math.random() * defenses.length)],
-      actualStrategy: cpuStrategy
+      predictedOffense: predicted.offense,
+      predictedDefense: predicted.defense,
+      actualStrategy: cpuStrategy,
+      coachingIQ: opponentIQ,
+      predictability: opponentPredictability,
+      uncertaintyHigh: uncertaintyHigh,
+      possibleStrategies: uncertaintyHigh ? [cpuStrategy, randomStrategy()] : undefined
     };
   }
 };
@@ -134,6 +152,7 @@ export const generateInitialStandings = (): TeamStanding[] => {
       streak: 0,
       roster,
       coachingIQ: Math.floor(Math.random() * 51) + 40, // 40 to 90
+      predictability: Math.floor(Math.random() * 51) + 40, // 40 to 90
       pace: Math.floor(Math.random() * 10) + 95 // 95 to 105
     };
   });

@@ -74,6 +74,7 @@ export interface TeamStanding {
   conf: 'East' | 'West';
   roster: Player[];
   coachingIQ: number;
+  predictability: number;
   pace: number; // Team possessions per game
 }
 
@@ -153,6 +154,10 @@ export interface ScoutReport {
   predictedOffense: OffensiveFocus;
   predictedDefense: DefensiveFocus;
   actualStrategy: Strategy;
+  coachingIQ: number;
+  predictability: number;
+  uncertaintyHigh: boolean;
+  possibleStrategies?: Strategy[];
 }
 
 export interface GameSave {
@@ -180,6 +185,7 @@ export interface GameSave {
   lotteryResults?: LotteryResult[] | null;
   lastView?: string;
   coachingIQ: number;
+  predictability: number;
   currentStrategy: Strategy;
   lastScoutReport?: ScoutReport | null;
 }

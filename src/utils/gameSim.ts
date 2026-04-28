@@ -21,6 +21,11 @@ export interface GameResult {
   oppPOTGId: string;
   quarterScores: { my: number, opp: number }[];
   counterResults: string[];
+  finalUserStrategy: Strategy;
+  finalOppStrategy: Strategy;
+  efficiencyDelta: number;
+  wasUserCountered: boolean;
+  wasOppCountered: boolean;
 }
 
 export interface PlayerStat {
@@ -187,8 +192,8 @@ const BASE_PACE = 102;
 export const simulateGame = (
   myTeam: GameSave, 
   opponent: any, 
-  myStrategy: Strategy, 
-  oppStrategy: Strategy,
+  userStrategy: Strategy, 
+  cpuStrategy: Strategy,
   myIQ: number = 60,
   oppIQ: number = 60
 ): GameResult => {
@@ -228,12 +233,32 @@ export const simulateGame = (
   let myFocusFactor = 1.0;
   let oppFocusFactor = 1.0;
 
+  let currentMyStrategy = { ...userStrategy };
+  let currentOppStrategy = { ...cpuStrategy };
+
+  let totalCounterBonus = 0;
+  let counteringPossessions = 0;
+
   for (let i = 0; i < totalPossessions; i++) {
+    // MID-GAME ADJUSTMENT (Start of 3rd Quarter, approx possession 51)
+    if (i === 51) {
+      // User Coach Adjustment
+      const myMargin = myScore.val - oppScore.val;
+      if (myMargin <= -10 && (Math.random() * 100 < myIQ)) {
+        currentMyStrategy.defense = COUNTER_MATRIX[currentOppStrategy.offense];
+      }
+      // Opponent Coach Adjustment
+      const oppMargin = oppScore.val - myScore.val;
+      if (oppMargin <= -10 && (Math.random() * 100 < oppIQ)) {
+        currentOppStrategy.defense = COUNTER_MATRIX[currentMyStrategy.offense];
+      }
+    }
+
     // Participation Gate: Get active lineups for this possession
     const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
     const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
 
-    // Scoring Floor Logic (Trending < 90 ORtg)
+    // Scoring Floor Logic
     if (i > 0 && i % 10 === 0) {
       const myProjected = (myScore.val / i) * totalPossessions;
       const oppProjected = (oppScore.val / i) * totalPossessions;
@@ -243,13 +268,26 @@ export const simulateGame = (
 
     const isClutch = i >= totalPossessions - 10;
 
-    simulatePossession(myLineup, oppLineup, myStrategy, oppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
-    simulatePossession(oppLineup, myLineup, oppStrategy, myStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
+    // Track strategy efficiency for delta
+    if (COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
+      totalCounterBonus -= 0.10;
+    } else {
+      totalCounterBonus += 0.05; // Small bonus for exploiting
+    }
+    counteringPossessions++;
+
+    simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
+    simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
   }
 
+  const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
+
+  const wasUserCountered = COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
+  const wasOppCountered = COUNTER_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
+
   const counterResults = [
-    COUNTER_MATRIX[myStrategy.offense] === oppStrategy.defense ? `DEFENSIVE LOCK: Opponent's ${oppStrategy.defense} slowed your ${myStrategy.offense}.` : `OPEN LOOKS: Your ${myStrategy.offense} exploited their ${oppStrategy.defense}.`,
-    COUNTER_MATRIX[oppStrategy.offense] === myStrategy.defense ? `STRATEGY WIN: You neutralized their ${oppStrategy.offense} with ${myStrategy.defense}!` : `CHALLENGE: Their ${oppStrategy.offense} broke through your ${myStrategy.defense}.`
+    wasUserCountered ? `TACTICAL LOSS: Opponent's ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense}.` : `TACTICAL WIN: Your ${currentMyStrategy.offense} exploited their ${currentOppStrategy.defense}.`,
+    wasOppCountered ? `DEFENSIVE LOCK: You neutralized their ${currentOppStrategy.offense} with ${currentMyStrategy.defense}!` : `DEFENSIVE HOLE: Their ${currentOppStrategy.offense} broke through your ${currentMyStrategy.defense}.`
   ];
 
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
@@ -266,7 +304,12 @@ export const simulateGame = (
     myPOTGId: identifyPOTG(myStats),
     oppPOTGId: identifyPOTG(oppStats),
     quarterScores: [],
-    counterResults
+    counterResults,
+    finalUserStrategy: currentMyStrategy,
+    finalOppStrategy: currentOppStrategy,
+    efficiencyDelta,
+    wasUserCountered,
+    wasOppCountered
   };
 };
 

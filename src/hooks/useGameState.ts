@@ -66,6 +66,7 @@ export const useGameState = () => {
             return {
               ...s,
               coachingIQ: s.coachingIQ ?? 60,
+              predictability: s.predictability ?? 60,
               currentStrategy: s.currentStrategy ?? {
                 offense: OffensiveFocus.ATTACK_PAINT,
                 defense: DefensiveFocus.PROTECT_RIM
@@ -74,6 +75,7 @@ export const useGameState = () => {
               standings: s.standings?.map((t: any) => ({
                 ...t,
                 coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40),
+                predictability: t.predictability ?? (Math.floor(Math.random() * 51) + 40),
                 streak: t.streak ?? 0,
                 pace: t.pace ?? 100,
                 roster: migrateRoster(t.roster || [])
@@ -170,6 +172,7 @@ export const useGameState = () => {
       startYear: selectedYear, currentYear: selectedYear, seasonCount: 1,
       lastView: 'home',
       coachingIQ: 60,
+      predictability: 60,
       currentStrategy: {
         offense: OffensiveFocus.ATTACK_PAINT,
         defense: DefensiveFocus.PROTECT_RIM
@@ -197,8 +200,9 @@ export const useGameState = () => {
       return;
     }
 
+    const oppTeam = currentSave.standings.find(t => t.city === oppCity);
     const oppStrategy = selectCPUStrategy(); 
-    const report = generateScoutReport(oppStrategy, currentSave.coachingIQ);
+    const report = generateScoutReport(oppStrategy, oppTeam?.coachingIQ ?? 60, oppTeam?.predictability ?? 60);
     report.city = oppCity;
     report.actualStrategy = oppStrategy;
 

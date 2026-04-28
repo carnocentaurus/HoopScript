@@ -251,10 +251,34 @@ const QuickSimScreen = ({
                 </View>
               ) : (
                 <View style={globalStyles.scoutModalContent}>
-                  <Text style={globalStyles.scoutModalCity}>Game Summary</Text>
+                  <Text style={globalStyles.scoutModalCity}>Tactical Analysis</Text>
                   <View style={globalStyles.scoutModalReport}>
+                    <View style={{ marginBottom: 20 }}>
+                       <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 5 }}>EXPECTED STRATEGY</Text>
+                       <Text style={{ color: COLORS.white, fontSize: 14, fontFamily: 'Oswald' }}>
+                          {save.lastScoutReport?.predictedOffense} / {save.lastScoutReport?.predictedDefense}
+                       </Text>
+                    </View>
+
+                    <View style={{ marginBottom: 20 }}>
+                       <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 5 }}>ACTUAL STRATEGY</Text>
+                       <Text style={{ color: result?.wasUserCountered ? '#B34726' : COLORS.white, fontSize: 14, fontFamily: 'Oswald' }}>
+                          {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
+                       </Text>
+                       {result?.wasUserCountered && (
+                         <Text style={{ color: '#B34726', fontSize: 10, marginTop: 4 }}>⚠️ CRITICAL TACTICAL FAILURE: YOUR OFFENSE WAS COUNTERED</Text>
+                       )}
+                    </View>
+
+                    <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
+
+                    <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 10 }]}>Performance Impact</Text>
+                    <Text style={[globalStyles.scoutModalText, { textAlign: 'left', marginBottom: 15 }]}>
+                       Your tactical decisions resulted in an <Text style={{ color: (result?.efficiencyDelta || 0) > 0 ? '#4caf50' : '#B34726', fontWeight: 'bold' }}>Efficiency Delta of {(result?.efficiencyDelta || 0).toFixed(1)}%</Text>.
+                    </Text>
+
                     {result?.counterResults.map((msg, i) => (
-                      <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10, textAlign: 'left' }]}>
+                      <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10, textAlign: 'left', color: msg.includes('LOSS') || msg.includes('HOLE') ? '#B34726' : COLORS.white }]}>
                         • {msg}
                       </Text>
                     ))}

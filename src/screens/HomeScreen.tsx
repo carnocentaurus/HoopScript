@@ -311,21 +311,54 @@ const HomeScreen = ({
               <Text style={globalStyles.scoutModalCity}>{opponent.city}</Text>
               {save.lastScoutReport && save.lastScoutReport.city === opponent.city ? (
                 <View style={globalStyles.scoutModalReport}>
-                  <Text style={globalStyles.scoutModalText}>
-                    Based on recent tendencies, our scouts expect the opponent to focus on:
-                  </Text>
-                  <View style={globalStyles.scoutModalFocusRow}>
-                    <View style={globalStyles.scoutModalFocusItem}>
-                      <Text style={globalStyles.scoutModalFocusLabel}>OFFENSE</Text>
-                      <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedOffense}</Text>
-                    </View>
-                    <View style={globalStyles.scoutModalFocusItem}>
-                      <Text style={globalStyles.scoutModalFocusLabel}>DEFENSE</Text>
-                      <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedDefense}</Text>
-                    </View>
+                  <View style={[globalStyles.flexRow, { justifyContent: 'space-around', marginBottom: 20, backgroundColor: COLORS.secondary, padding: 10, borderRadius: 8 }]}>
+                     <View style={{ alignItems: 'center' }}>
+                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>COACH IQ</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.coachingIQ}</Text>
+                     </View>
+                     <View style={{ alignItems: 'center' }}>
+                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>PREDICTABILITY</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.predictability}%</Text>
+                     </View>
                   </View>
+
+                  {save.lastScoutReport.uncertaintyHigh && (
+                    <View style={{ backgroundColor: '#B34726', padding: 10, borderRadius: 4, marginBottom: 15 }}>
+                      <Text style={{ color: COLORS.white, fontFamily: 'Oswald', fontSize: 12, textAlign: 'center' }}>⚠️ SCOUTING UNCERTAINTY HIGH</Text>
+                      <Text style={{ color: COLORS.white, fontSize: 10, textAlign: 'center', marginTop: 2 }}>Opponent coach is high IQ and hiding tendencies.</Text>
+                    </View>
+                  )}
+
+                  <Text style={globalStyles.scoutModalText}>
+                    {save.lastScoutReport.uncertaintyHigh 
+                      ? "Our scouts have identified two possible strategies they might employ:" 
+                      : "Based on recent tendencies, our scouts expect the opponent to focus on:"}
+                  </Text>
+
+                  {save.lastScoutReport.uncertaintyHigh && save.lastScoutReport.possibleStrategies ? (
+                    <View style={{ marginTop: 10 }}>
+                      {save.lastScoutReport.possibleStrategies.map((strat, idx) => (
+                        <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 10, borderRadius: 6, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+                           <Text style={{ color: COLORS.textSub, fontSize: 11 }}>PROBABILITY {idx === 0 ? 'A' : 'B'}</Text>
+                           <Text style={{ color: COLORS.white, fontSize: 11, fontFamily: 'Oswald' }}>{strat.offense} / {strat.defense}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View style={globalStyles.scoutModalFocusRow}>
+                      <View style={globalStyles.scoutModalFocusItem}>
+                        <Text style={globalStyles.scoutModalFocusLabel}>OFFENSE</Text>
+                        <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedOffense}</Text>
+                      </View>
+                      <View style={globalStyles.scoutModalFocusItem}>
+                        <Text style={globalStyles.scoutModalFocusLabel}>DEFENSE</Text>
+                        <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedDefense}</Text>
+                      </View>
+                    </View>
+                  )}
+                  
                   <Text style={[globalStyles.scoutModalText, { fontSize: 10, marginTop: 15, opacity: 0.6 }]}>
-                    Confidence: {Math.round(save.coachingIQ * 0.8 + 20)}% (Coaching IQ {save.coachingIQ})
+                    Confidence based on your staff's analysis of their {save.lastScoutReport.predictability}% predictability.
                   </Text>
                 </View>
               ) : (
