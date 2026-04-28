@@ -99,6 +99,30 @@ export const weightedPlayerSelector = (players: Player[], playerMinutes: Record<
 };
 
 /**
+ * Calculates the success probability for a shot.
+ * Applies distance penalty and realism clamps for 3-pointers.
+ */
+export const calculateShotSuccessRate = (
+  playerOffense: number,
+  isThree: boolean,
+  oppTeamDef: number
+): number => {
+  let baseProb = 0.45;
+  if (isThree) {
+    baseProb -= 0.18; // 18% Distance Penalty
+  }
+
+  let probability = baseProb + (playerOffense * 0.002) - (oppTeamDef * 0.0015);
+
+  if (isThree) {
+    // Realism Clamp: 22% min, 42% max for 3PT
+    probability = Math.max(0.22, Math.min(0.42, probability));
+  }
+
+  return probability;
+};
+
+/**
  * Calculates the Hollinger Game Score for a player based on their game stats.
  * Formula: PTS + (0.4 * FG) - (0.7 * FGA) + (0.5 * REB) + (0.7 * AST) + STL + (0.7 * BLK) - TOV.
  */

@@ -1,6 +1,6 @@
 import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import { calculateTeamRatings } from './leagueEngine';
-import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG } from './statsMath';
+import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
 
 export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
@@ -108,9 +108,15 @@ const simulatePossession = (
     return;
   }
 
-  // 3. Shot check
+  // 3. Determine Shot Type (2PT vs 3PT)
+  const threeFreq = (POSITIONAL_PROFILES.THREE_PA[offPlayer.position] || 1.0) / 10;
+  const isThreePointer = Math.random() < threeFreq;
+
   stats[offPlayer.id].fga++;
-  
+  if (isThreePointer) {
+    stats[offPlayer.id].threePA++;
+  }
+
   // Strategy & Positional Modifiers
   let tsMod = 1.0 * pityMod * focusFactor;
   let blkMod = 1.0;
@@ -134,8 +140,8 @@ const simulatePossession = (
     return;
   }
 
-  // Success Check - Rating-Driven Formula
-  let successProb = 0.45 + (offPlayer.offense * 0.002) - (oppTeamDefRating * 0.0015);
+  // Success Check - Rating-Driven Formula with Realism Logic
+  let successProb = calculateShotSuccessRate(offPlayer.offense, isThreePointer, oppTeamDefRating);
   successProb *= tsMod;
 
   // Clutch Factor: 5% boost for 85+ OVR in final minutes
@@ -144,16 +150,12 @@ const simulatePossession = (
   }
 
   if (shotSuccessCheck(successProb, 1.0)) {
-    // 3PA Frequency based on position
-    const threeFreq = (POSITIONAL_PROFILES.THREE_PA[offPlayer.position] || 1.0) / 10;
-    const isThree = Math.random() < threeFreq;
-    const points = isThree ? 3 : 2;
+    const points = isThreePointer ? 3 : 2;
     
     stats[offPlayer.id].pts += points;
     stats[offPlayer.id].fgm++;
-    if (isThree) {
+    if (isThreePointer) {
       stats[offPlayer.id].threePM++;
-      stats[offPlayer.id].threePA++;
     }
     teamScore.val += points;
 
