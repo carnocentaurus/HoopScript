@@ -82,30 +82,45 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
         </View>
 
         {/* Season Averages */}
-        <View style={[globalStyles.tosRatingsRow, { marginTop: 10, borderTopWidth: 0.5, borderColor: COLORS.border, paddingTop: 10 }]}>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={[globalStyles.tosRatingValSmall, { color: COLORS.primary }]}>{avgs.pts}</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>PPG</Text>
+        <View style={{ marginTop: 10, borderTopWidth: 0.5, borderColor: COLORS.border, paddingTop: 10 }}>
+          {/* Row 1: Volume Stats */}
+          <View style={[globalStyles.tosRatingsRow, { marginBottom: 10 }]}>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.pts}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>PPG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.reb}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>RPG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.ast}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>APG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.stl}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>SPG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.blk}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>BPG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.tov}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>TOPG</Text>
+            </View>
           </View>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={globalStyles.tosRatingValSmall}>{avgs.reb}</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>RPG</Text>
-          </View>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={globalStyles.tosRatingValSmall}>{avgs.ast}</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>APG</Text>
-          </View>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={globalStyles.tosRatingValSmall}>{avgs.fgPct}%</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>FG%</Text>
-          </View>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={globalStyles.tosRatingValSmall}>{avgs.tsPct}%</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>TS%</Text>
-          </View>
-          <View style={globalStyles.tosRatingItem}>
-            <Text style={globalStyles.tosRatingValSmall}>{avgs.usgRate}%</Text>
-            <Text style={globalStyles.tosRatingLabelSmall}>USG%</Text>
+          
+          {/* Row 2: Efficiency Stats */}
+          <View style={globalStyles.tosRatingsRow}>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.fgPct}%</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>FG%</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.threePct}%</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>3P%</Text>
+            </View>
           </View>
         </View>
       </View>

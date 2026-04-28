@@ -264,6 +264,12 @@ export const useGameState = () => {
         return pStat ? updatePlayerStats(p, pStat) : p;
       });
 
+      // Update user team in standings to keep rosters in sync
+      const userTeamInStandings = currentSave.standings.find(t => t.city === currentSave.city);
+      if (userTeamInStandings) {
+        userTeamInStandings.roster = currentSave.roster;
+      }
+
       const aiTeams = currentSave.standings.filter(t => t.city !== currentSave.city && t.city !== opponentCity);
       const todayResults: Record<string, 'W' | 'L'> = { [currentSave.city]: isWin ? 'W' : 'L', [opponentCity]: isWin ? 'L' : 'W' };
 
