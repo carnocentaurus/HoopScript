@@ -1,6 +1,6 @@
 import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import { calculateTeamRatings } from './leagueEngine';
-import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES } from './statsMath';
+import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
 
 export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
@@ -17,6 +17,8 @@ export interface GameResult {
   oppBestPlayer: PlayerStat;
   myTeamStats: PlayerStat[];
   oppTeamStats: PlayerStat[];
+  myPOTGId: string;
+  oppPOTGId: string;
   quarterScores: { my: number, opp: number }[];
   counterResults: string[];
 }
@@ -259,6 +261,8 @@ export const simulateGame = (
     oppBestPlayer: [...oppStats].sort((a, b) => b.pts - a.pts)[0],
     myTeamStats: myStats,
     oppTeamStats: oppStats,
+    myPOTGId: identifyPOTG(myStats),
+    oppPOTGId: identifyPOTG(oppStats),
     quarterScores: [],
     counterResults
   };

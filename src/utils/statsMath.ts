@@ -97,3 +97,50 @@ export const weightedPlayerSelector = (players: Player[], playerMinutes: Record<
   
   return players[0];
 };
+
+/**
+ * Calculates the Hollinger Game Score for a player based on their game stats.
+ * Formula: PTS + (0.4 * FG) - (0.7 * FGA) + (0.5 * REB) + (0.7 * AST) + STL + (0.7 * BLK) - TOV.
+ */
+export const calculateGameScore = (stats: {
+  pts: number;
+  fgm: number;
+  fga: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  tov: number;
+}): number => {
+  return (
+    stats.pts +
+    (0.4 * stats.fgm) -
+    (0.7 * stats.fga) +
+    (0.5 * stats.reb) +
+    (0.7 * stats.ast) +
+    stats.stl +
+    (0.7 * stats.blk) -
+    stats.tov
+  );
+};
+
+/**
+ * Identifies the Player of the Game (POTG) from a team's roster based on Game Score.
+ */
+export const identifyPOTG = (teamStats: any[]): string => {
+  if (!teamStats || teamStats.length === 0) return "";
+  
+  let bestScore = -Infinity;
+  let potgId = "";
+
+  teamStats.forEach(p => {
+    const score = calculateGameScore(p);
+    if (score > bestScore) {
+      bestScore = score;
+      potgId = p.playerId || p.id;
+    }
+  });
+
+  return potgId;
+};
+

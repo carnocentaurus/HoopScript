@@ -42,26 +42,29 @@ const QuickSimScreen = ({
     return selectCPUStrategy();
   });
 
-  const StatTable = ({ stats }: { stats: any[] }) => (
+  const StatTable = ({ stats, potgId }: { stats: any[], potgId?: string }) => (
     <View style={{ flexDirection: 'row', backgroundColor: COLORS.card, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border }}>
       {/* Sticky Player Name Column */}
       <View style={{ backgroundColor: COLORS.secondary, borderRightWidth: 1, borderRightColor: COLORS.border }}>
         <View style={{ paddingVertical: 12, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, backgroundColor: COLORS.secondary }}>
           <Text style={{ color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 10, textTransform: 'uppercase' }}>PLAYER</Text>
         </View>
-        {stats.map((p, i) => (
-          <View key={`name-${i}`} style={{ 
-            paddingVertical: 10, 
-            paddingHorizontal: 15, 
-            height: 40,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: i % 2 === 0 ? COLORS.secondary : COLORS.grayLight 
-          }}>
-            <Text style={{ color: COLORS.textSub, fontFamily: FONTS.primary, fontSize: 9, width: 22 }}>{p.position}</Text>
-            <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 13 }} numberOfLines={1}>{p.lastName}</Text>
-          </View>
-        ))}
+        {stats.map((p, i) => {
+          const isPOTG = p.playerId === potgId;
+          return (
+            <View key={`name-${i}`} style={{ 
+              paddingVertical: 10, 
+              paddingHorizontal: 15, 
+              height: 40,
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: i % 2 === 0 ? COLORS.secondary : COLORS.grayLight 
+            }}>
+              <Text style={{ color: isPOTG ? COLORS.primary : COLORS.textSub, fontFamily: FONTS.primary, fontSize: 9, width: 22 }}>{p.position}</Text>
+              <Text style={{ color: isPOTG ? COLORS.primary : COLORS.white, fontFamily: FONTS.secondary, fontSize: 13 }} numberOfLines={1}>{p.lastName}</Text>
+            </View>
+          );
+        })}
       </View>
 
       {/* Scrollable Stats Columns */}
@@ -81,24 +84,28 @@ const QuickSimScreen = ({
           </View>
 
           {/* Rows */}
-          {stats.map((p, i) => (
-            <View key={`stats-${i}`} style={{ 
-              flexDirection: 'row', 
-              height: 40,
-              alignItems: 'center',
-              backgroundColor: i % 2 === 0 ? COLORS.card : COLORS.grayLight 
-            }}>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{Math.round(p.min)}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.pts}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.reb}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.ast}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.stl}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.blk}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.tov}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11 }]}>{p.fgm}/{p.fga}</Text>
-              <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11 }]}>{p.threePM}/{p.threePA}</Text>
-            </View>
-          ))}
+          {stats.map((p, i) => {
+            const isPOTG = p.playerId === potgId;
+            const rowTextColor = isPOTG ? COLORS.primary : COLORS.text;
+            return (
+              <View key={`stats-${i}`} style={{ 
+                flexDirection: 'row', 
+                height: 40,
+                alignItems: 'center',
+                backgroundColor: i % 2 === 0 ? COLORS.card : COLORS.grayLight 
+              }}>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{Math.round(p.min)}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.pts}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.reb}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.ast}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.stl}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.blk}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13, color: rowTextColor }]}>{p.tov}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11, color: rowTextColor }]}>{p.fgm}/{p.fga}</Text>
+                <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11, color: rowTextColor }]}>{p.threePM}/{p.threePA}</Text>
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
     </View>
@@ -237,10 +244,10 @@ const QuickSimScreen = ({
               {activeTab === 'STATS' ? (
                 <View>
                   <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 15 }]}>{save.city.toUpperCase()}</Text>
-                  <StatTable stats={result?.myTeamStats || []} />
+                  <StatTable stats={result?.myTeamStats || []} potgId={result?.myPOTGId} />
                   
                   <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginVertical: 15 }]}>{opponent.city.toUpperCase()}</Text>
-                  <StatTable stats={result?.oppTeamStats || []} />
+                  <StatTable stats={result?.oppTeamStats || []} potgId={result?.oppPOTGId} />
                 </View>
               ) : (
                 <View style={globalStyles.scoutModalContent}>
