@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
-import { calculateTeamRatings } from '../utils/leagueEngine';
+import { calculateTeamRatings, calculateSeasonAverages } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
@@ -46,40 +46,71 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
   const ratings = calculateTeamRatings(roster);
 
-  const renderPlayerRow = (player: Player) => (
-    <View style={globalStyles.tosPlayerCard} key={player.id}>
-      <View style={globalStyles.tosPlayerHeader}>
-        <View style={globalStyles.flexRowAlignCenter}>
-          <Text style={globalStyles.tosPlayerMain}>{player.lastName} <Text style={globalStyles.tosPlayerNum}>#{player.number}</Text></Text>
-          {player.isRookie && (
-            <View style={globalStyles.tosRookieBadge}>
-              <Text style={globalStyles.tosRookieBadgeText}>ROOKIE</Text>
-            </View>
-          )}
+  const renderPlayerRow = (player: Player) => {
+    const avgs = calculateSeasonAverages(player.stats);
+    return (
+      <View style={globalStyles.tosPlayerCard} key={player.id}>
+        <View style={globalStyles.tosPlayerHeader}>
+          <View style={globalStyles.flexRowAlignCenter}>
+            <Text style={globalStyles.tosPlayerMain}>{player.lastName} <Text style={globalStyles.tosPlayerNum}>#{player.number}</Text></Text>
+            {player.isRookie && (
+              <View style={globalStyles.tosRookieBadge}>
+                <Text style={globalStyles.tosRookieBadgeText}>ROOKIE</Text>
+              </View>
+            )}
+          </View>
+          <Text style={globalStyles.tosPlayerPos}>{player.position}</Text>
         </View>
-        <Text style={globalStyles.tosPlayerPos}>{player.position}</Text>
+        
+        <View style={globalStyles.tosRatingsRow}>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{player.age}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>AGE</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{player.offense}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>OFF</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{player.defense}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>DEF</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={[globalStyles.tosRatingValSmall, globalStyles.tosOvrVal]}>{player.overall}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>OVR</Text>
+          </View>
+        </View>
+
+        {/* Season Averages */}
+        <View style={[globalStyles.tosRatingsRow, { marginTop: 10, borderTopWidth: 0.5, borderColor: COLORS.border, paddingTop: 10 }]}>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={[globalStyles.tosRatingValSmall, { color: COLORS.primary }]}>{avgs.pts}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>PPG</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{avgs.reb}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>RPG</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{avgs.ast}</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>APG</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{avgs.fgPct}%</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>FG%</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{avgs.tsPct}%</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>TS%</Text>
+          </View>
+          <View style={globalStyles.tosRatingItem}>
+            <Text style={globalStyles.tosRatingValSmall}>{avgs.usgRate}%</Text>
+            <Text style={globalStyles.tosRatingLabelSmall}>USG%</Text>
+          </View>
+        </View>
       </View>
-      
-      <View style={globalStyles.tosRatingsRow}>
-        <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingValSmall}>{player.age}</Text>
-          <Text style={globalStyles.tosRatingLabelSmall}>AGE</Text>
-        </View>
-        <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingValSmall}>{player.offense}</Text>
-          <Text style={globalStyles.tosRatingLabelSmall}>OFF</Text>
-        </View>
-        <View style={globalStyles.tosRatingItem}>
-          <Text style={globalStyles.tosRatingValSmall}>{player.defense}</Text>
-          <Text style={globalStyles.tosRatingLabelSmall}>DEF</Text>
-        </View>
-        <View style={globalStyles.tosRatingItem}>
-          <Text style={[globalStyles.tosRatingValSmall, globalStyles.tosOvrVal]}>{player.overall}</Text>
-          <Text style={globalStyles.tosRatingLabelSmall}>OVR</Text>
-        </View>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <Screen>

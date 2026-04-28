@@ -1,8 +1,8 @@
-import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult, OffensiveFocus, DefensiveFocus, ScoutReport } from '../types/save';
+import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult, OffensiveFocus, DefensiveFocus, ScoutReport, SeasonStats, Strategy } from '../types/save';
 
 
 
-export const selectCPUStrategy = () => {
+export const selectCPUStrategy = (): Strategy => {
   const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
   const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
   
@@ -12,7 +12,7 @@ export const selectCPUStrategy = () => {
   };
 };
 
-export const generateScoutReport = (cpuStrategy: { offense: OffensiveFocus, defense: DefensiveFocus }, coachingIQ: number): ScoutReport => {
+export const generateScoutReport = (cpuStrategy: Strategy, coachingIQ: number): ScoutReport => {
   const roll = Math.random() * 100;
   const isAccurate = roll < (coachingIQ * 0.8 + 20); // 20% base + up to 80% from IQ
 
@@ -20,7 +20,8 @@ export const generateScoutReport = (cpuStrategy: { offense: OffensiveFocus, defe
     return {
       city: "Opponent",
       predictedOffense: cpuStrategy.offense,
-      predictedDefense: cpuStrategy.defense
+      predictedDefense: cpuStrategy.defense,
+      actualStrategy: cpuStrategy
     };
   } else {
     const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
@@ -29,7 +30,8 @@ export const generateScoutReport = (cpuStrategy: { offense: OffensiveFocus, defe
     return {
       city: "Opponent",
       predictedOffense: offenses[Math.floor(Math.random() * offenses.length)],
-      predictedDefense: defenses[Math.floor(Math.random() * defenses.length)]
+      predictedDefense: defenses[Math.floor(Math.random() * defenses.length)],
+      actualStrategy: cpuStrategy
     };
   }
 };
@@ -58,13 +60,33 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
       blk: (player.stats.blk || 0) + stats.blk,
       tov: (player.stats.tov || 0) + stats.tov,
       threePM: (player.stats.threePM || 0) + stats.threePM,
+      threePA: (player.stats.threePA || 0) + (stats.threePA || Math.round(stats.threePM * 2.8)),
       oreb: (player.stats.oreb || 0) + stats.oreb,
       dreb: (player.stats.dreb || 0) + stats.dreb,
       plusMinus: (player.stats.plusMinus || 0) + stats.plusMinus,
       fgm: (player.stats.fgm || 0) + stats.fgm,
       fga: (player.stats.fga || 0) + stats.fga,
       min: (player.stats.min || 0) + stats.min,
+      possessions: (player.stats.possessions || 0) + (stats.possessions || 0)
     }
+  };
+};
+
+export const calculateSeasonAverages = (stats: SeasonStats) => {
+  const gp = stats.gamesPlayed || 1;
+  const possessions = stats.possessions || (gp * 75); // Fallback
+  return {
+    pts: (stats.pts / gp).toFixed(1),
+    reb: (stats.reb / gp).toFixed(1),
+    ast: (stats.ast / gp).toFixed(1),
+    stl: (stats.stl / gp).toFixed(1),
+    blk: (stats.blk / gp).toFixed(1),
+    tov: (stats.tov / gp).toFixed(1),
+    fgPct: stats.fga > 0 ? ((stats.fgm / stats.fga) * 100).toFixed(1) : "0.0",
+    threePct: stats.threePA > 0 ? ((stats.threePM / stats.threePA) * 100).toFixed(1) : "0.0",
+    min: (stats.min / gp).toFixed(1),
+    tsPct: stats.fga > 0 ? ((stats.pts / (2 * (stats.fga + 0.44 * (stats.pts * 0.1)))) * 100).toFixed(1) : "0.0", // Simplified TS%
+    usgRate: possessions > 0 ? ((stats.fga + 0.44 * (stats.pts * 0.1) + stats.tov) / possessions * 100).toFixed(1) : "0.0"
   };
 };
 
@@ -111,7 +133,8 @@ export const generateInitialStandings = (): TeamStanding[] => {
       losses: 0,
       streak: 0,
       roster,
-      coachingIQ: Math.floor(Math.random() * 51) + 40 // 40 to 90
+      coachingIQ: Math.floor(Math.random() * 51) + 40, // 40 to 90
+      pace: Math.floor(Math.random() * 10) + 95 // 95 to 105
     };
   });
 };
@@ -216,12 +239,13 @@ export const processAging = (roster: Player[]): Player[] => {
       isRookie: false, 
       stats: {
         gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, 
-        threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0
+        threePM: 0, threePA: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0,
+        possessions: 0
       }
     };
   });
 
-  return validateAndFixRoster(agedRoster);
+  return validateAndFixRoster(agedRoster as Player[]);
 };
 
 export const generateFullBracket = (currentSave: GameSave): SeriesMatchup[] => {

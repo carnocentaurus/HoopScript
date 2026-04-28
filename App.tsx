@@ -79,7 +79,8 @@ function MainApp() {
             position: i < 5 ? ["PG", "SG", "SF", "PF", "C"][i] : ["PG", "SG", "SF", "PF", "C"][Math.floor(Math.random() * 5)],
             offense: p.off, defense: p.def, overall: Math.round((p.off + p.def) / 2),
             isStarter: i < 5, heightFactor: 50, speedFactor: 50,
-            stats: { gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0 }
+            usgRate: 20, tsPct: 0.55, blkRate: 1, stlRate: 1, tovRate: 12, targetMinutes: i < 5 ? 32 : 15,
+            stats: { gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, threePM: 0, threePA: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0 }
           }));
           return <TeamOverview city={tempCity} roster={validateAndFixRoster(roster)} onConfirm={handleConfirmTeam} onBack={() => setView('teamSelection')} />;
         })()

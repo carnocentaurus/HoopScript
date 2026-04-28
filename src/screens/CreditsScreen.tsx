@@ -19,9 +19,8 @@ const CreditsScreen = ({ onBack }: CreditsScreenProps) => {
   };
 
   const openUrl = (url: string) => {
-    handlePress(() => {
-      Linking.openURL(url).catch((err) => console.error('An error occurred', err));
-    });
+    playClickSound();
+    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
   };
 
   return (

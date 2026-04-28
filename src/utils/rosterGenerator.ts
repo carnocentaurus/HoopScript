@@ -41,8 +41,15 @@ export const generateRookie = (lastName?: string): Player => {
     isRookie: true,
     stats: {
       gamesPlayed: 0, gamesStarted: 0, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0, 
-      threePM: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0
-    }
+      threePM: 0, threePA: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0, min: 0,
+      possessions: 0
+    },
+    usgRate: Math.floor(Math.random() * 15) + 15,
+    tsPct: (Math.random() * 0.1) + 0.5,
+    blkRate: (Math.random() * 3) + 0.5,
+    stlRate: (Math.random() * 3) + 0.5,
+    tovRate: (Math.random() * 10) + 10,
+    targetMinutes: 15
   };
 };
 
@@ -165,12 +172,14 @@ export const generateRoster = (city: string): Player[] => {
       blk: 0,
       tov: 0,
       threePM: 0,
+      threePA: 0,
       oreb: 0,
       dreb: 0,
       plusMinus: 0,
       fgm: 0,
       fga: 0,
-      min: 0
+      min: 0,
+      possessions: 0
     };
 
     roster.push({
@@ -186,7 +195,13 @@ export const generateRoster = (city: string): Player[] => {
       heightFactor: heightBase,
       speedFactor: speedBase,
       isRookie: age === 19,
-      stats
+      stats,
+      usgRate: isStarter ? (Math.floor(rng() * 10) + 20) : (Math.floor(rng() * 10) + 12),
+      tsPct: (rng() * 0.1) + 0.5,
+      blkRate: (rng() * 3) + 0.5,
+      stlRate: (rng() * 3) + 0.5,
+      tovRate: (rng() * 10) + 10,
+      targetMinutes: isStarter ? 32 : 15
     });
   }
 

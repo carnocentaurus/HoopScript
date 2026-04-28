@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameResult, simulateGame } from '../utils/gameSim';
-import { GameSave, Strategy } from '../types/save';
+import { GameSave, Strategy, OffensiveFocus, DefensiveFocus } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings, selectCPUStrategy } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
-import { COLORS } from '../styles/theme';
+import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
@@ -27,7 +27,13 @@ const QuickSimScreen = ({
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<GameResult | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState<'STATS' | 'ANALYSIS'>('STATS');
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   // Use actualStrategy from scouting report if it exists and matches opponent
   const [cpuStrategy] = useState<Strategy>(() => {
     if (save.lastScoutReport && save.lastScoutReport.city === opponent.city && save.lastScoutReport.actualStrategy) {
@@ -36,10 +42,67 @@ const QuickSimScreen = ({
     return selectCPUStrategy();
   });
 
-  const handlePress = (action: () => void) => {
-    playClickSound();
-    action();
-  };
+  const StatTable = ({ stats }: { stats: any[] }) => (
+    <View style={{ flexDirection: 'row', backgroundColor: COLORS.card, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border }}>
+      {/* Sticky Player Name Column */}
+      <View style={{ backgroundColor: COLORS.secondary, borderRightWidth: 1, borderRightColor: COLORS.border }}>
+        <View style={{ paddingVertical: 12, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: COLORS.border, backgroundColor: COLORS.secondary }}>
+          <Text style={{ color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 10, textTransform: 'uppercase' }}>PLAYER</Text>
+        </View>
+        {stats.map((p, i) => (
+          <View key={`name-${i}`} style={{ 
+            paddingVertical: 10, 
+            paddingHorizontal: 15, 
+            height: 40,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: i % 2 === 0 ? COLORS.secondary : COLORS.grayLight 
+          }}>
+            <Text style={{ color: COLORS.textSub, fontFamily: FONTS.primary, fontSize: 9, width: 22 }}>{p.position}</Text>
+            <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 13 }} numberOfLines={1}>{p.lastName}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Scrollable Stats Columns */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.border, backgroundColor: COLORS.secondary }}>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>MIN</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>PTS</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>REB</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>AST</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>STL</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>BLK</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 45 }]}>TO</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 60 }]}>FG</Text>
+            <Text style={[globalStyles.stHeaderStat, { width: 60 }]}>3P</Text>
+          </View>
+
+          {/* Rows */}
+          {stats.map((p, i) => (
+            <View key={`stats-${i}`} style={{ 
+              flexDirection: 'row', 
+              height: 40,
+              alignItems: 'center',
+              backgroundColor: i % 2 === 0 ? COLORS.card : COLORS.grayLight 
+            }}>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{Math.round(p.min)}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.pts}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.reb}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.ast}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.stl}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.blk}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 45, fontFamily: FONTS.secondary, fontSize: 13 }]}>{p.tov}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11 }]}>{p.fgm}/{p.fga}</Text>
+              <Text style={[globalStyles.stRecordText, { width: 60, fontFamily: FONTS.secondary, fontSize: 11 }]}>{p.threePM}/{p.threePA}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
 
   // Full simulation happens once to get the "script"
   useEffect(() => {
@@ -57,38 +120,13 @@ const QuickSimScreen = ({
       opponent.coachingIQ ?? 60
     );
     setResult(gameResult);
-    startQuarterSim(0, gameResult);
-  }, []);
-
-  const startQuarterSim = (qIdx: number, gameResult: GameResult) => {
-    const qData = gameResult.quarterScores[qIdx];
-    let count = 0;
-    const previousMy = qIdx === 0 ? 0 : gameResult.quarterScores.slice(0, qIdx).reduce((s, d) => s + d.my, 0);
-    const previousOpp = qIdx === 0 ? 0 : gameResult.quarterScores.slice(0, qIdx).reduce((s, d) => s + d.opp, 0);
     
-    const targetMy = previousMy + qData.my;
-    const targetOpp = previousOpp + qData.opp;
-
-    const interval = setInterval(() => {
-      count++;
-      setMyScore(prev => Math.min(targetMy, prev + Math.floor(Math.random() * 3)));
-      setOppScore(prev => Math.min(targetOpp, prev + Math.floor(Math.random() * 3)));
-
-      if (count > 15) {
-        clearInterval(interval);
-        setMyScore(targetMy);
-        setOppScore(targetOpp);
-        
-        if (qIdx < 3) {
-          startQuarterSim(qIdx + 1, gameResult);
-        } else {
-          setMyScore(gameResult.myScore);
-          setOppScore(gameResult.oppScore);
-          setIsFinished(true);
-        }
-      }
-    }, 100);
-  };
+    // We'll skip quarter simulation for now as simulateGame was refactored 
+    // to be one-shot for matchup logic, we can still fake the score progression
+    setMyScore(gameResult.myScore);
+    setOppScore(gameResult.oppScore);
+    setIsFinished(true);
+  }, []);
 
   const UserTeam = () => {
     const ratings = calculateTeamRatings(save.roster);
@@ -170,24 +208,47 @@ const QuickSimScreen = ({
         )}
       </ScrollView>
 
-      {/* TACTICAL ANALYSIS MODAL */}
       <Modal visible={showAnalysisModal} transparent animationType="fade">
         <View style={globalStyles.modalOverlay}>
-          <View style={globalStyles.scoutModalContainer}>
-            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={globalStyles.scoutModalTitle}>TACTICAL ANALYSIS</Text>
+          <View style={[globalStyles.scoutModalContainer, { maxWidth: 500, height: '80%' }]}>
+            {/* TABS */}
+            <View style={[globalStyles.flexRow, { marginBottom: 20 }]}>
+              <TouchableOpacity 
+                style={[globalStyles.flex1, { paddingVertical: 10, borderBottomWidth: 2, borderColor: activeTab === 'STATS' ? COLORS.primary : 'transparent' }]}
+                onPress={() => handlePress(() => setActiveTab('STATS'))}
+              >
+                <Text style={{ textAlign: 'center', color: activeTab === 'STATS' ? COLORS.primary : COLORS.textSub, fontFamily: 'Oswald' }}>STATS</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[globalStyles.flex1, { paddingVertical: 10, borderBottomWidth: 2, borderColor: activeTab === 'ANALYSIS' ? COLORS.primary : 'transparent' }]}
+                onPress={() => handlePress(() => setActiveTab('ANALYSIS'))}
+              >
+                <Text style={{ textAlign: 'center', color: activeTab === 'ANALYSIS' ? COLORS.primary : COLORS.textSub, fontFamily: 'Oswald' }}>ANALYSIS</Text>
+              </TouchableOpacity>
             </View>
-            
-            <View style={globalStyles.scoutModalContent}>
-              <Text style={globalStyles.scoutModalCity}>Game Summary</Text>
-              <View style={globalStyles.scoutModalReport}>
-                {result?.counterResults.map((msg, i) => (
-                  <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10 }]}>
-                    • {msg}
-                  </Text>
-                ))}
-              </View>
-            </View>
+
+            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+              {activeTab === 'STATS' ? (
+                <View>
+                  <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 15 }]}>{save.city.toUpperCase()}</Text>
+                  <StatTable stats={result?.myTeamStats || []} />
+                  
+                  <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginVertical: 15 }]}>{opponent.city.toUpperCase()}</Text>
+                  <StatTable stats={result?.oppTeamStats || []} />
+                </View>
+              ) : (
+                <View style={globalStyles.scoutModalContent}>
+                  <Text style={globalStyles.scoutModalCity}>Game Summary</Text>
+                  <View style={globalStyles.scoutModalReport}>
+                    {result?.counterResults.map((msg, i) => (
+                      <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10, textAlign: 'left' }]}>
+                        • {msg}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              )}
+            </ScrollView>
 
             <TouchableOpacity 
               style={globalStyles.scoutModalCloseBtn}

@@ -7,13 +7,39 @@ export interface SeasonStats {
   stl: number;
   blk: number;
   tov: number;
+  fgm: number;
+  fga: number;
   threePM: number;
+  threePA: number;
   oreb: number;
   dreb: number;
   plusMinus: number;
+  min: number;
+  possessions?: number;
+}
+
+export interface BoxScore {
+  gameId: string;
+  opponent: string;
+  date: number;
+  isWin: boolean;
+  score: string;
+  playerStats: Record<string, PlayerGameStats>;
+}
+
+export interface PlayerGameStats {
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  tov: number;
   fgm: number;
   fga: number;
+  threePM: number;
+  threePA: number;
   min: number;
+  plusMinus: number;
 }
 
 export interface Player {
@@ -30,6 +56,14 @@ export interface Player {
   speedFactor: number;
   isRookie?: boolean;
   stats: SeasonStats;
+  gameHistory?: BoxScore[];
+  // Simulation Ratings
+  usgRate: number;     // 5 to 35
+  tsPct: number;      // 0.45 to 0.65
+  blkRate: number;    // 0 to 10
+  stlRate: number;    // 0 to 10
+  tovRate: number;    // 5 to 25
+  targetMinutes: number;
 }
 
 export interface TeamStanding {
@@ -40,6 +74,7 @@ export interface TeamStanding {
   conf: 'East' | 'West';
   roster: Player[];
   coachingIQ: number;
+  pace: number; // Team possessions per game
 }
 
 export interface PlayoffSeries {

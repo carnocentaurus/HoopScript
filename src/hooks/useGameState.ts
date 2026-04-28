@@ -3,7 +3,8 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameSave, SeriesMatchup, Player } from '../types/save';
 import { validateAndFixRoster } from '../utils/rosterGenerator';
-import { GameResult, generatePlayerStats, randomNormal, COUNTER_MATRIX } from '../utils/gameSim';
+import { GameResult, generatePlayerStats, COUNTER_MATRIX } from '../utils/gameSim';
+import { randomNormal } from '../utils/statsMath';
 import { 
   ALL_CITIES, 
   generateSchedule, 
@@ -47,6 +48,21 @@ export const useGameState = () => {
           const parsed = JSON.parse(storedSaves);
           const migrated = parsed.map((s: any) => {
             if (!s) return null;
+
+            const migrateRoster = (r: any[]) => r.map((p: any) => ({
+              ...p,
+              usgRate: p.usgRate ?? (p.isStarter ? 25 : 18),
+              tsPct: p.tsPct ?? 0.55,
+              blkRate: p.blkRate ?? 1.2,
+              stlRate: p.stlRate ?? 1.5,
+              tovRate: p.tovRate ?? 12,
+              stats: {
+                ...p.stats,
+                threePA: p.stats.threePA ?? Math.round((p.stats.threePM || 0) * 2.8),
+                possessions: p.stats.possessions ?? ((p.stats.gamesPlayed || 0) * 75)
+              }
+            }));
+
             return {
               ...s,
               coachingIQ: s.coachingIQ ?? 60,
@@ -54,10 +70,13 @@ export const useGameState = () => {
                 offense: OffensiveFocus.ATTACK_PAINT,
                 defense: DefensiveFocus.PROTECT_RIM
               },
+              roster: migrateRoster(s.roster || []),
               standings: s.standings?.map((t: any) => ({
                 ...t,
                 coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40),
-                streak: t.streak ?? 0
+                streak: t.streak ?? 0,
+                pace: t.pace ?? 100,
+                roster: migrateRoster(t.roster || [])
               }))
             };
           });
