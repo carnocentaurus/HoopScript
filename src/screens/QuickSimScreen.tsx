@@ -119,6 +119,12 @@ const QuickSimScreen = ({
       save.coachingIQ,
       opponent.coachingIQ ?? 60
     );
+
+    // Sort stats by OVR descending to ensure starters (top 5) are first 
+    // and bench is ordered by quality.
+    gameResult.myTeamStats.sort((a, b) => b.overall - a.overall);
+    gameResult.oppTeamStats.sort((a, b) => b.overall - a.overall);
+
     setResult(gameResult);
     
     // We'll skip quarter simulation for now as simulateGame was refactored 

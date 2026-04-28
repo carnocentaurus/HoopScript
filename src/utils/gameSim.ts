@@ -85,6 +85,8 @@ const simulatePossession = (
   stats: Record<string, PlayerStat>,
   teamScore: { val: number },
   minuteMap: Record<string, number>,
+  oppTeamDefRating: number,
+  isClutchTime: boolean,
   pityMod: number = 1.0,
   focusFactor: number = 1.0
 ) => {
@@ -96,9 +98,9 @@ const simulatePossession = (
   const tovPlayer = getWeightedPlayer(offLineup, 'TURNOVERS');
   if (poissonCheck((tovPlayer.tovRate || 12) / 100)) {
     stats[tovPlayer.id].tov++;
-    // Check for Steal (Positional Weights)
+    // Check for Steal - Scale by defender's DEF rating
     const stealer = getWeightedPlayer(defLineup, 'STEALS');
-    if (poissonCheck((stealer.stlRate || 1.5) / 100)) {
+    if (poissonCheck((stealer.defense * 0.02) / 100)) {
       stats[stealer.id].stl++;
     }
     return;
@@ -123,15 +125,23 @@ const simulatePossession = (
     if (offStrategy.offense === OffensiveFocus.ATTACK_PAINT) tsMod -= 0.05;
   }
 
-  // Block Check (Positional Weights)
+  // Block Check - Scale by defender's DEF rating
   const blocker = getWeightedPlayer(defLineup, 'BLOCKS');
-  if (poissonCheck(((blocker.blkRate || 1.2) * blkMod) / 100)) {
+  if (poissonCheck(((blocker.defense * 0.025) * blkMod) / 100)) {
     stats[blocker.id].blk++;
     return;
   }
 
-  // Success Check
-  if (shotSuccessCheck(offPlayer.tsPct || 0.55, tsMod)) {
+  // Success Check - Rating-Driven Formula
+  let successProb = 0.45 + (offPlayer.offense * 0.002) - (oppTeamDefRating * 0.0015);
+  successProb *= tsMod;
+
+  // Clutch Factor: 5% boost for 85+ OVR in final minutes
+  if (isClutchTime && offPlayer.overall >= 85) {
+    successProb *= 1.05;
+  }
+
+  if (shotSuccessCheck(successProb, 1.0)) {
     // 3PA Frequency based on position
     const threeFreq = (POSITIONAL_PROFILES.THREE_PA[offPlayer.position] || 1.0) / 10;
     const isThree = Math.random() < threeFreq;
@@ -227,8 +237,10 @@ export const simulateGame = (
       if (oppProjected < 80) oppFocusFactor = 1.10;
     }
 
-    simulatePossession(myLineup, oppLineup, myStrategy, oppStrategy, playerStats, myScore, myMinuteMap, myPityMod, myFocusFactor);
-    simulatePossession(oppLineup, myLineup, oppStrategy, myStrategy, playerStats, oppScore, oppMinuteMap, oppPityMod, oppFocusFactor);
+    const isClutch = i >= totalPossessions - 10;
+
+    simulatePossession(myLineup, oppLineup, myStrategy, oppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
+    simulatePossession(oppLineup, myLineup, oppStrategy, myStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
   }
 
   const counterResults = [
