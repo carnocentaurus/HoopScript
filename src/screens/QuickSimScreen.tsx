@@ -9,6 +9,7 @@ import { globalStyles } from '../styles/globalStyles';
 import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
+import { getNarrative, GameNarrative as NarrativeType } from '../utils/narrativeEngine';
 
 const QuickSimScreen = ({ 
   save, 
@@ -28,6 +29,22 @@ const QuickSimScreen = ({
   const [result, setResult] = useState<GameResult | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'STATS' | 'ANALYSIS'>('STATS');
+  const [dynamicNarrative, setDynamicNarrative] = useState<NarrativeType | null>(null);
+
+  // Update narrative whenever we open analysis or switch to analysis tab
+  useEffect(() => {
+    if (result && (showAnalysisModal || activeTab === 'ANALYSIS')) {
+      const narrative = getNarrative({
+        userWon: result.myScore > result.oppScore,
+        tacticsSuccessful: result.efficiencyDelta > 0,
+        coachIQ: save.coachingIQ
+      });
+      setDynamicNarrative({
+        ...narrative,
+        lossReason: result.gameNarrative.lossReason
+      });
+    }
+  }, [showAnalysisModal, activeTab, result]);
 
   const handlePress = (action: () => void) => {
     playClickSound();
@@ -285,19 +302,19 @@ const QuickSimScreen = ({
 
                     <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
 
-                    {result && (
+                    {result && dynamicNarrative && (
                       <View>
                         <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 5, color: COLORS.primary, textAlign: 'left' }]}>
-                          {result.gameNarrative.headline}
+                          {dynamicNarrative.headline}
                         </Text>
                         <Text style={[globalStyles.scoutModalText, { textAlign: 'left', marginBottom: 15 }]}>
-                          {result.gameNarrative.subHeadline}
+                          {dynamicNarrative.subHeadline}
                         </Text>
 
-                        {result.myScore < result.oppScore && result.gameNarrative.lossReason && (
+                        {result.myScore < result.oppScore && dynamicNarrative.lossReason && (
                           <View style={{ backgroundColor: 'rgba(179, 71, 38, 0.1)', padding: 12, borderRadius: 8, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#B34726' }}>
                              <Text style={{ color: '#B34726', fontSize: 10, fontFamily: 'Oswald', marginBottom: 4 }}>WHY WE LOST</Text>
-                             <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary }}>{result.gameNarrative.lossReason}</Text>
+                             <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary }}>{dynamicNarrative.lossReason}</Text>
                           </View>
                         )}
 
@@ -308,7 +325,7 @@ const QuickSimScreen = ({
                           <View style={{ flex: 1 }}>
                             <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 2 }}>COACH'S VERDICT</Text>
                             <Text style={{ color: COLORS.white, fontSize: 14, fontFamily: FONTS.secondary, fontStyle: 'italic' }}>
-                              "{result.gameNarrative.coachVerdict}"
+                              "{dynamicNarrative.coachVerdict}"
                             </Text>
                           </View>
                         </View>

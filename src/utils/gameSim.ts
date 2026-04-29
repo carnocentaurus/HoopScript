@@ -2,6 +2,7 @@ import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../t
 import { calculateTeamRatings } from './leagueEngine';
 import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
+import { getNarrative } from './narrativeEngine';
 
 export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
   [OffensiveFocus.ATTACK_PAINT]: DefensiveFocus.PROTECT_RIM,
@@ -331,37 +332,20 @@ export const simulateGame = (
   const totalFGM = myStats.reduce((sum, p) => sum + p.fgm, 0);
   const fgPct = totalFGA > 0 ? (totalFGM / totalFGA) * 100 : 0;
 
-  // Calculate Bench Impact
-  const starters = myStats.filter(p => myTeam.roster.find(rp => rp.id === p.playerId)?.isStarter);
-  const bench = myStats.filter(p => !myTeam.roster.find(rp => rp.id === p.playerId)?.isStarter);
-  const startersPlusMinus = starters.reduce((sum, p) => sum + (p.plusMinus || 0), 0); // Note: plusMinus isn't calculated yet in possession loop, so we'll use a fallback
-  
   // Narrative Generation
-  let headline = "";
-  let subHeadline = "";
+  const { headline, subHeadline, coachVerdict } = getNarrative({
+    userWon,
+    tacticsSuccessful,
+    coachIQ: myIQ
+  });
+
   let lossReason: string | undefined = undefined;
-  let coachVerdict = "";
 
   const myBest = [...myStats].sort((a, b) => b.pts - a.pts)[0];
   const oppBest = [...oppStats].sort((a, b) => b.pts - a.pts)[0];
 
-  if (userWon) {
+  if (!userWon) {
     if (tacticsSuccessful) {
-      headline = `Strategic Masterclass: Your ${currentMyStrategy.offense} tore through their ${currentOppStrategy.defense}.`;
-      subHeadline = `The game plan worked perfectly, exploiting every weakness in their scheme.`;
-    } else {
-      headline = `Star Power: Individual brilliance overcomes tactical gaps.`;
-      subHeadline = `${myBest.lastName} carried the load tonight with ${myBest.pts} points to seal the win.`;
-    }
-    
-    if (wasOppCountered) {
-      subHeadline = `Clamp City: Your ${currentMyStrategy.defense} took ${oppBest.lastName} completely out of the game.`;
-    }
-  } else {
-    if (tacticsSuccessful) {
-      headline = "On paper, you won the chess match. On the court, the shots just didn't drop.";
-      subHeadline = "Despite a superior strategic approach, the execution failed to match the plan.";
-      
       if (myRatings.overall < oppRatings.overall - 5) {
         lossReason = "The math worked, but their sheer talent was too much to overcome.";
       } else if (fgPct < 42) {
@@ -370,21 +354,8 @@ export const simulateGame = (
         lossReason = "Crucial turnovers and missed opportunities at the stripe proved fatal.";
       }
     } else {
-      headline = "Outcoached and Outplayed: The opponent dictated the flow from start to finish.";
-      subHeadline = `Their ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense} effectively.`;
       lossReason = "A tactical adjustment is needed to counter their defensive pressure.";
     }
-  }
-
-  // Coach Verdict based on IQ
-  if (userWon) {
-    coachVerdict = myIQ > 75 
-      ? "A professional victory. We stayed disciplined and trusted the system."
-      : "We got lucky. The stars bailed us out of a bad scheme.";
-  } else {
-    coachVerdict = myIQ > 75
-      ? "A tough pill to swallow; the plan was right, the execution wasn't."
-      : "I'll take the blame for this one. I didn't have the boys prepared for their adjustments.";
   }
 
   const gameNarrative: GameNarrative = {
