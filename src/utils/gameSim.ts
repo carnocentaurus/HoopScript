@@ -336,7 +336,9 @@ export const simulateGame = (
   const { headline, subHeadline, coachVerdict } = getNarrative({
     userWon,
     tacticsSuccessful,
-    coachIQ: myIQ
+    coachIQ: myIQ,
+    myScore: myScore.val,
+    oppScore: oppScore.val
   });
 
   let lossReason: string | undefined = undefined;

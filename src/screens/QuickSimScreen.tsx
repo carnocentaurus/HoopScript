@@ -37,7 +37,9 @@ const QuickSimScreen = ({
       const narrative = getNarrative({
         userWon: result.myScore > result.oppScore,
         tacticsSuccessful: result.efficiencyDelta > 0,
-        coachIQ: save.coachingIQ
+        coachIQ: save.coachingIQ,
+        myScore: result.myScore,
+        oppScore: result.oppScore
       });
       setDynamicNarrative({
         ...narrative,
