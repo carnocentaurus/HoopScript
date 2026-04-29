@@ -41,6 +41,20 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
 
     const predicted = randomStrategy();
 
+    // Ensure possible strategies are unique if uncertainty is high
+    let secondStrategy = randomStrategy();
+    if (uncertaintyHigh) {
+      let attempts = 0;
+      while (
+        secondStrategy.offense === cpuStrategy.offense && 
+        secondStrategy.defense === cpuStrategy.defense && 
+        attempts < 10
+      ) {
+        secondStrategy = randomStrategy();
+        attempts++;
+      }
+    }
+
     return {
       city: "Opponent",
       predictedOffense: predicted.offense,
@@ -49,7 +63,7 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
       coachingIQ: opponentIQ,
       predictability: opponentPredictability,
       uncertaintyHigh: uncertaintyHigh,
-      possibleStrategies: uncertaintyHigh ? [cpuStrategy, randomStrategy()] : undefined
+      possibleStrategies: uncertaintyHigh ? [cpuStrategy, secondStrategy] : undefined
     };
   }
 };
