@@ -324,7 +324,7 @@ const HomeScreen = ({
 
                   {save.lastScoutReport.uncertaintyHigh && (
                     <View style={{ backgroundColor: '#B34726', padding: 10, borderRadius: 4, marginBottom: 15 }}>
-                      <Text style={{ color: COLORS.white, fontFamily: 'Oswald', fontSize: 12, textAlign: 'center' }}>⚠️ SCOUTING UNCERTAINTY HIGH</Text>
+                      <Text style={{ color: COLORS.white, fontFamily: 'Oswald', fontSize: 12, textAlign: 'center' }}>SCOUTING UNCERTAINTY HIGH</Text>
                       <Text style={{ color: COLORS.white, fontSize: 10, textAlign: 'center', marginTop: 2 }}>Opponent coach is high IQ and hiding tendencies.</Text>
                     </View>
                   )}

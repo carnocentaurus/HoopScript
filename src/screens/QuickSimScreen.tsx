@@ -266,7 +266,7 @@ const QuickSimScreen = ({
                           {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
                        </Text>
                        {result?.wasUserCountered && (
-                         <Text style={{ color: '#B34726', fontSize: 10, marginTop: 4 }}>⚠️ CRITICAL TACTICAL FAILURE: YOUR OFFENSE WAS COUNTERED</Text>
+                         <Text style={{ color: '#B34726', fontSize: 10, marginTop: 4 }}>CRITICAL TACTICAL FAILURE: YOUR OFFENSE WAS COUNTERED</Text>
                        )}
                     </View>
 
