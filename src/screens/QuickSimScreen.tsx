@@ -285,16 +285,35 @@ const QuickSimScreen = ({
 
                     <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
 
-                    <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 10 }]}>Performance Impact</Text>
-                    <Text style={[globalStyles.scoutModalText, { textAlign: 'left', marginBottom: 15 }]}>
-                       Your tactical decisions resulted in an <Text style={{ color: (result?.efficiencyDelta || 0) > 0 ? '#4caf50' : '#B34726', fontWeight: 'bold' }}>Efficiency Delta of {(result?.efficiencyDelta || 0).toFixed(1)}%</Text>.
-                    </Text>
+                    {result && (
+                      <View>
+                        <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 5, color: COLORS.primary, textAlign: 'left' }]}>
+                          {result.gameNarrative.headline}
+                        </Text>
+                        <Text style={[globalStyles.scoutModalText, { textAlign: 'left', marginBottom: 15 }]}>
+                          {result.gameNarrative.subHeadline}
+                        </Text>
 
-                    {result?.counterResults.map((msg, i) => (
-                      <Text key={i} style={[globalStyles.scoutModalText, { marginBottom: 10, textAlign: 'left', color: msg.includes('LOSS') || msg.includes('HOLE') ? '#B34726' : COLORS.white }]}>
-                        • {msg}
-                      </Text>
-                    ))}
+                        {result.myScore < result.oppScore && result.gameNarrative.lossReason && (
+                          <View style={{ backgroundColor: 'rgba(179, 71, 38, 0.1)', padding: 12, borderRadius: 8, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#B34726' }}>
+                             <Text style={{ color: '#B34726', fontSize: 10, fontFamily: 'Oswald', marginBottom: 4 }}>WHY WE LOST</Text>
+                             <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary }}>{result.gameNarrative.lossReason}</Text>
+                          </View>
+                        )}
+
+                        <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
+                        
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                          <Icon name="chatbubble-ellipses-outline" size={24} color={COLORS.primary} style={{ marginRight: 12, marginTop: 2 }} />
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 2 }}>COACH'S VERDICT</Text>
+                            <Text style={{ color: COLORS.white, fontSize: 14, fontFamily: FONTS.secondary, fontStyle: 'italic' }}>
+                              "{result.gameNarrative.coachVerdict}"
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
                   </View>
                 </View>
               )}

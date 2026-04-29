@@ -9,6 +9,13 @@ export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
   [OffensiveFocus.ISO_STAR]: DefensiveFocus.DOUBLE_TEAM,
 };
 
+export interface GameNarrative {
+  headline: string;
+  subHeadline: string;
+  lossReason?: string;
+  coachVerdict: string;
+}
+
 export interface GameResult {
   myScore: number;
   oppScore: number;
@@ -26,6 +33,7 @@ export interface GameResult {
   efficiencyDelta: number;
   wasUserCountered: boolean;
   wasOppCountered: boolean;
+  gameNarrative: GameNarrative;
 }
 
 export interface PlayerStat {
@@ -280,6 +288,28 @@ export const simulateGame = (
     simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
   }
 
+  // --- OVERTIME LOGIC ---
+  let otCount = 0;
+  while (myScore.val === oppScore.val && otCount < 3) {
+    otCount++;
+    const otPossessions = 12; // Shorter period for OT
+    for (let i = 0; i < otPossessions; i++) {
+      const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
+      const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
+      simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, true, myPityMod, myFocusFactor);
+      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, oppFocusFactor);
+    }
+  }
+
+  // Force Tie-Breaker (No Ties Allowed)
+  if (myScore.val === oppScore.val) {
+    if (Math.random() > 0.5) {
+      myScore.val += 2;
+    } else {
+      oppScore.val += 2;
+    }
+  }
+
   const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
 
   const wasUserCountered = COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
@@ -293,12 +323,83 @@ export const simulateGame = (
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
   const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
 
+  const userWon = myScore.val > oppScore.val;
+  const tacticsSuccessful = efficiencyDelta > 0;
+  
+  // Calculate Team FG%
+  const totalFGA = myStats.reduce((sum, p) => sum + p.fga, 0);
+  const totalFGM = myStats.reduce((sum, p) => sum + p.fgm, 0);
+  const fgPct = totalFGA > 0 ? (totalFGM / totalFGA) * 100 : 0;
+
+  // Calculate Bench Impact
+  const starters = myStats.filter(p => myTeam.roster.find(rp => rp.id === p.playerId)?.isStarter);
+  const bench = myStats.filter(p => !myTeam.roster.find(rp => rp.id === p.playerId)?.isStarter);
+  const startersPlusMinus = starters.reduce((sum, p) => sum + (p.plusMinus || 0), 0); // Note: plusMinus isn't calculated yet in possession loop, so we'll use a fallback
+  
+  // Narrative Generation
+  let headline = "";
+  let subHeadline = "";
+  let lossReason: string | undefined = undefined;
+  let coachVerdict = "";
+
+  const myBest = [...myStats].sort((a, b) => b.pts - a.pts)[0];
+  const oppBest = [...oppStats].sort((a, b) => b.pts - a.pts)[0];
+
+  if (userWon) {
+    if (tacticsSuccessful) {
+      headline = `Strategic Masterclass: Your ${currentMyStrategy.offense} tore through their ${currentOppStrategy.defense}.`;
+      subHeadline = `The game plan worked perfectly, exploiting every weakness in their scheme.`;
+    } else {
+      headline = `Star Power: Individual brilliance overcomes tactical gaps.`;
+      subHeadline = `${myBest.lastName} carried the load tonight with ${myBest.pts} points to seal the win.`;
+    }
+    
+    if (wasOppCountered) {
+      subHeadline = `Clamp City: Your ${currentMyStrategy.defense} took ${oppBest.lastName} completely out of the game.`;
+    }
+  } else {
+    if (tacticsSuccessful) {
+      headline = "On paper, you won the chess match. On the court, the shots just didn't drop.";
+      subHeadline = "Despite a superior strategic approach, the execution failed to match the plan.";
+      
+      if (myRatings.overall < oppRatings.overall - 5) {
+        lossReason = "The math worked, but their sheer talent was too much to overcome.";
+      } else if (fgPct < 42) {
+        lossReason = `You created the right looks, but the rims were unkind tonight (Final FG%: ${fgPct.toFixed(1)}%).`;
+      } else {
+        lossReason = "Crucial turnovers and missed opportunities at the stripe proved fatal.";
+      }
+    } else {
+      headline = "Outcoached and Outplayed: The opponent dictated the flow from start to finish.";
+      subHeadline = `Their ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense} effectively.`;
+      lossReason = "A tactical adjustment is needed to counter their defensive pressure.";
+    }
+  }
+
+  // Coach Verdict based on IQ
+  if (userWon) {
+    coachVerdict = myIQ > 75 
+      ? "A professional victory. We stayed disciplined and trusted the system."
+      : "We got lucky. The stars bailed us out of a bad scheme.";
+  } else {
+    coachVerdict = myIQ > 75
+      ? "A tough pill to swallow; the plan was right, the execution wasn't."
+      : "I'll take the blame for this one. I didn't have the boys prepared for their adjustments.";
+  }
+
+  const gameNarrative: GameNarrative = {
+    headline,
+    subHeadline,
+    lossReason,
+    coachVerdict
+  };
+
   return {
     myScore: myScore.val,
     oppScore: oppScore.val,
-    otCount: 0,
-    myBestPlayer: [...myStats].sort((a, b) => b.pts - a.pts)[0],
-    oppBestPlayer: [...oppStats].sort((a, b) => b.pts - a.pts)[0],
+    otCount,
+    myBestPlayer: myBest,
+    oppBestPlayer: oppBest,
     myTeamStats: myStats,
     oppTeamStats: oppStats,
     myPOTGId: identifyPOTG(myStats),
@@ -309,7 +410,8 @@ export const simulateGame = (
     finalOppStrategy: currentOppStrategy,
     efficiencyDelta,
     wasUserCountered,
-    wasOppCountered
+    wasOppCountered,
+    gameNarrative
   };
 };
 
