@@ -134,11 +134,24 @@ const QuickSimScreen = ({
 
     setResult(gameResult);
     
-    // We'll skip quarter simulation for now as simulateGame was refactored 
-    // to be one-shot for matchup logic, we can still fake the score progression
-    setMyScore(gameResult.myScore);
-    setOppScore(gameResult.oppScore);
-    setIsFinished(true);
+    // Smoothly animate score progression over ~4 seconds
+    const duration = 4000;
+    const startTime = Date.now();
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      setMyScore(Math.floor(gameResult.myScore * progress));
+      setOppScore(Math.floor(gameResult.oppScore * progress));
+
+      if (progress >= 1) {
+        setIsFinished(true);
+        clearInterval(interval);
+      }
+    }, 50); // Tick every 50ms for smoothness
+
+    return () => clearInterval(interval);
   }, []);
 
   const UserTeam = () => {

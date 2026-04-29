@@ -737,6 +737,18 @@ export const globalStyles = StyleSheet.create({
   qsWinnerTerracotta: { color: '#B34726' },
   qsContinueButtonTerracotta: { backgroundColor: '#B34726', padding: 18, borderRadius: 12, alignItems: 'center' },
   qsContinueTextBlack: { fontFamily: FONTS.primary, fontSize: 16, color: COLORS.black, textTransform: 'uppercase' },
+  qsQuarterIndicator: {
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  qsQuarterText: {
+    color: COLORS.primary,
+    fontFamily: FONTS.primary,
+    fontSize: 22,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
 
   // --- STANDINGS SCREEN ---
   stHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20 },
