@@ -15,7 +15,7 @@ interface StandingsProps {
 }
 
 const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
-  const [activeConf, setActiveConf] = useState<'East' | 'West'>(save.conference);
+  const [activeConf, setActiveConf] = useState<'East' | 'West' | 'League'>(save.conference);
   const { playClickSound } = useSound();
 
   const handlePress = (action: () => void) => {
@@ -24,7 +24,7 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
   };
 
   const filteredTeams = save.standings
-    .filter(t => t.conf === activeConf)
+    .filter(t => activeConf === 'League' ? true : t.conf === activeConf)
     .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
 
   const renderTeam = ({ item, index }: { item: TeamStanding, index: number }) => {
@@ -63,6 +63,13 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
           onPress={() => handlePress(() => setActiveConf('West'))}
         >
           <Text style={[globalStyles.stTabText, activeConf === 'West' && globalStyles.stActiveTabText]}>WEST</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[globalStyles.stTab, activeConf === 'League' && globalStyles.stActiveTab]} 
+          onPress={() => handlePress(() => setActiveConf('League'))}
+        >
+          <Text style={[globalStyles.stTabText, activeConf === 'League' && globalStyles.stActiveTabText]}>LEAGUE</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
