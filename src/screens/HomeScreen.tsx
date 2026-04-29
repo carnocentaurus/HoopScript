@@ -5,7 +5,7 @@ import { GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/sav
 import Screen from '../components/Screen';
 import { calculateTeamRatings } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
-import { COLORS } from '../styles/theme';
+import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
@@ -344,8 +344,8 @@ const HomeScreen = ({
 
                         if (isUnique) {
                           return strats.map((strat, idx) => (
-                            <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 10, borderRadius: 6, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
-                               <Text style={{ color: COLORS.textSub, fontSize: 11 }}>PROBABILITY {idx === 0 ? 'A' : 'B'}</Text>
+                            <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 10, borderRadius: 6, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                               <Text style={{ color: COLORS.textSub, fontSize: 11, fontFamily: FONTS.secondary }}>Probability {idx === 0 ? 'A' : 'B'}</Text>
                                <Text style={{ color: COLORS.white, fontSize: 11, fontFamily: 'Oswald' }}>{strat.offense} / {strat.defense}</Text>
                             </View>
                           ));
