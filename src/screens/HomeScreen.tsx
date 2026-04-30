@@ -322,67 +322,73 @@ const HomeScreen = ({
                      </View>
                   </View>
 
-                  {save.lastScoutReport.uncertaintyHigh && (
-                    <View style={{ backgroundColor: '#B34726', padding: 10, borderRadius: 4, marginBottom: 15 }}>
-                      <Text style={{ color: COLORS.white, fontFamily: 'Oswald', fontSize: 12, textAlign: 'center' }}>SCOUTING UNCERTAINTY HIGH</Text>
-                      <Text style={{ color: COLORS.white, fontSize: 10, textAlign: 'center', marginTop: 2 }}>Opponent coach is high IQ and hiding tendencies.</Text>
-                    </View>
-                  )}
+                  {(() => {
+                    const report = save.lastScoutReport;
+                    const predictability = report.predictability;
+                    
+                    let boxColor = '#B34726'; // Default: Orange (Uncertainty High)
+                    let mainText = 'SCOUTING UNCERTAINTY HIGH';
+                    let subText = 'Opponent tendencies are difficult to pin down.';
 
-                  <Text style={globalStyles.scoutModalText}>
-                    {save.lastScoutReport.uncertaintyHigh 
+                    if (predictability > 75) {
+                      boxColor = '#2D5A27'; // Green
+                      mainText = 'SCOUTING LOCKED';
+                      subText = 'Opponent tendencies are highly predictable.';
+                    } else if (predictability >= 60) {
+                      boxColor = '#D69E2E'; // Yellow/Neutral
+                      mainText = 'SCOUTING DEVELOPING';
+                      subText = 'Opponent tendencies are showing patterns.';
+                    }
+
+                    return (
+                      <View style={{ backgroundColor: boxColor, padding: 12, borderRadius: 8, marginBottom: 15 }}>
+                        <Text style={{ color: COLORS.white, fontFamily: FONTS.primary, fontSize: 13, textAlign: 'center', letterSpacing: 0.5 }}>{mainText}</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 11, textAlign: 'center', marginTop: 4, lineHeight: 14 }}>{subText}</Text>
+                      </View>
+                    );
+                  })()}
+
+                  <Text style={[globalStyles.scoutModalText, { marginBottom: 10, paddingHorizontal: 10 }]}>
+                    {save.lastScoutReport.displayMode === 'dual' 
                       ? "Our scouts have identified two possible strategies they might employ:" 
                       : "Based on recent tendencies, our scouts expect the opponent to focus on:"}
                   </Text>
 
-                  {save.lastScoutReport.uncertaintyHigh && save.lastScoutReport.possibleStrategies ? (
-                    <View style={{ marginTop: 10 }}>
-                      {(() => {
-                        const strats = save.lastScoutReport.possibleStrategies;
-                        const isUnique = strats.length > 1 && 
-                          (strats[0].offense !== strats[1].offense || strats[0].defense !== strats[1].defense);
-
-                        if (isUnique) {
-                          return strats.map((strat, idx) => (
-                            <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 10, borderRadius: 6, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                               <Text style={{ color: COLORS.textSub, fontSize: 11, fontFamily: FONTS.secondary }}>Probability {idx === 0 ? 'A' : 'B'}</Text>
-                               <Text style={{ color: COLORS.white, fontSize: 11, fontFamily: 'Oswald' }}>{strat.offense} / {strat.defense}</Text>
-                            </View>
-                          ));
-                        } else {
-                          // Fallback: If for some reason they are the same, show only one but note the lower confidence
-                          return (
-                            <View style={{ backgroundColor: COLORS.grayLight, padding: 10, borderRadius: 6, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
-                               <Text style={{ color: COLORS.textSub, fontSize: 11 }}>PRIMARY POSSIBILITY</Text>
-                               <Text style={{ color: COLORS.white, fontSize: 11, fontFamily: 'Oswald' }}>{strats[0].offense} / {strats[0].defense}</Text>
-                            </View>
-                          );
-                        }
-                      })()}
+                  {save.lastScoutReport.displayMode === 'dual' && save.lastScoutReport.possibleStrategies ? (
+                    <View style={{ marginBottom: 5 }}>
+                      {save.lastScoutReport.possibleStrategies.map((strat, idx) => (
+                        <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 12, borderRadius: 10, marginBottom: 12, flexDirection: 'column', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
+                           <Text style={{ color: COLORS.textSub, fontSize: 9, fontFamily: FONTS.primary, marginBottom: 4, letterSpacing: 1 }}>POSSIBLE STRATEGY {idx === 0 ? 'A' : 'B'}</Text>
+                           <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: 'Oswald' }} numberOfLines={1}>{strat.offense} / {strat.defense}</Text>
+                        </View>
+                      ))}
                     </View>
                   ) : (
-                    <View style={globalStyles.scoutModalFocusRow}>
-                      <View style={globalStyles.scoutModalFocusItem}>
-                        <Text style={globalStyles.scoutModalFocusLabel}>OFFENSE</Text>
-                        <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedOffense}</Text>
-                      </View>
-                      <View style={globalStyles.scoutModalFocusItem}>
-                        <Text style={globalStyles.scoutModalFocusLabel}>DEFENSE</Text>
-                        <Text style={globalStyles.scoutModalFocusValue}>{save.lastScoutReport.predictedDefense}</Text>
+                    <View style={{ alignItems: 'center', marginBottom: 5 }}>
+                      <View style={{ backgroundColor: COLORS.grayLight, paddingVertical: 30, paddingHorizontal: 20, borderRadius: 12, width: '100%', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(179, 71, 38, 0.2)', minHeight: 120 }}>
+                         <Text style={{ color: COLORS.primary, fontSize: 10, fontFamily: 'Oswald', letterSpacing: 2, marginBottom: 10 }}>DETECTED SCHEME</Text>
+                         <Text style={{ color: COLORS.white, fontSize: 16, fontFamily: 'Oswald', textAlign: 'center' }} numberOfLines={1}>{save.lastScoutReport.predictedOffense} / {save.lastScoutReport.predictedDefense}</Text>
                       </View>
                     </View>
                   )}
                   
-                  <Text style={[globalStyles.scoutModalText, { fontSize: 10, marginTop: 15, opacity: 0.6 }]}>
-                    {(() => {
-                       const strats = save.lastScoutReport.possibleStrategies;
-                       const isUnique = !save.lastScoutReport.uncertaintyHigh || (strats && strats.length > 1 && 
-                         (strats[0].offense !== strats[1].offense || strats[0].defense !== strats[1].defense));
-                       
-                       const confidence = isUnique ? save.lastScoutReport.predictability : Math.floor(save.lastScoutReport.predictability * 0.7);
-                       return `Confidence based on your staff's analysis of their ${confidence}% predictability.`;
-                    })()}
-                  </Text>
+                  <View style={{ paddingHorizontal: 5 }}>
+                    <Text style={[globalStyles.scoutModalText, { fontSize: 10, marginTop: 8, opacity: 0.6, lineHeight: 12 }]}>
+                      {(() => {
+                        const report = save.lastScoutReport;
+                        if (report.predictability > 75) {
+                          return "Our scouts are highly confident in this specific read.";
+                        }
+                        
+                        const strats = report.possibleStrategies;
+                        const isUnique = report.displayMode === 'single' || (strats && strats.length > 1 && 
+                          (strats[0].offense !== strats[1].offense || strats[0].defense !== strats[1].defense));
+                        
+                        const confidence = isUnique ? report.predictability : Math.floor(report.predictability * 0.7);
+                        return `Confidence based on your staff's analysis of their ${confidence}% predictability.`;
+                      })()}
+                    </Text>
+                  </View>
                 </View>
               ) : (
                 <Text style={globalStyles.scoutModalText}>No scouting data available for this game.</Text>

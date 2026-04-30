@@ -20,50 +20,71 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
   const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
   const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
 
+  let displayMode: 'single' | 'dual' = 'single';
+  let uncertaintyHigh = false;
+
+  // New threshold logic: predictability > 75 is single, otherwise dual
+  if (opponentPredictability > 75) {
+    displayMode = 'single';
+    uncertaintyHigh = false;
+  } else {
+    displayMode = 'dual';
+    uncertaintyHigh = opponentPredictability < 60;
+  }
+
+  const allStrategies: Strategy[] = [];
+  offenses.forEach(o => {
+    defenses.forEach(d => {
+      allStrategies.push({ offense: o, defense: d });
+    });
+  });
+
+  // Probability A is always the actual strategy (or what the AI decided to show)
+  const probA = cpuStrategy;
+
+  // Filter out Probability A from the pool for Probability B
+  const availableForB = allStrategies.filter(s => 
+    s.offense !== probA.offense || s.defense !== probA.defense
+  );
+
+  // IF only one strategy exists in the pool (impossible here but good for logic), force single
+  if (availableForB.length === 0) {
+    displayMode = 'single';
+    uncertaintyHigh = false;
+  }
+
+  const secondStrategy = availableForB[Math.floor(Math.random() * availableForB.length)];
+
   if (isAccurate) {
     return {
       city: "Opponent",
-      predictedOffense: cpuStrategy.offense,
-      predictedDefense: cpuStrategy.defense,
-      actualStrategy: cpuStrategy,
-      coachingIQ: opponentIQ,
-      predictability: opponentPredictability,
-      uncertaintyHigh: false
-    };
-  } else {
-    // If opponent is high IQ, scouting might yield multiple possibilities (Uncertainty)
-    const uncertaintyHigh = opponentIQ > 70;
-    
-    const randomStrategy = (): Strategy => ({
-      offense: offenses[Math.floor(Math.random() * offenses.length)],
-      defense: defenses[Math.floor(Math.random() * defenses.length)]
-    });
-
-    const predicted = randomStrategy();
-
-    // Ensure possible strategies are unique if uncertainty is high
-    let secondStrategy = randomStrategy();
-    if (uncertaintyHigh) {
-      let attempts = 0;
-      while (
-        secondStrategy.offense === cpuStrategy.offense && 
-        secondStrategy.defense === cpuStrategy.defense && 
-        attempts < 10
-      ) {
-        secondStrategy = randomStrategy();
-        attempts++;
-      }
-    }
-
-    return {
-      city: "Opponent",
-      predictedOffense: predicted.offense,
-      predictedDefense: predicted.defense,
-      actualStrategy: cpuStrategy,
+      predictedOffense: probA.offense,
+      predictedDefense: probA.defense,
+      actualStrategy: probA,
       coachingIQ: opponentIQ,
       predictability: opponentPredictability,
       uncertaintyHigh: uncertaintyHigh,
-      possibleStrategies: uncertaintyHigh ? [cpuStrategy, secondStrategy] : undefined
+      displayMode: displayMode,
+      possibleStrategies: displayMode === 'dual' ? [probA, secondStrategy] : undefined
+    };
+  } else {
+    // If not accurate, we show a random strategy as Probability A
+    const wrongProbA = availableForB[Math.floor(Math.random() * availableForB.length)];
+    const availableForWrongB = allStrategies.filter(s => 
+      s.offense !== wrongProbA.offense || s.defense !== wrongProbA.defense
+    );
+    const wrongProbB = availableForWrongB[Math.floor(Math.random() * availableForWrongB.length)];
+
+    return {
+      city: "Opponent",
+      predictedOffense: wrongProbA.offense,
+      predictedDefense: wrongProbA.defense,
+      actualStrategy: probA,
+      coachingIQ: opponentIQ,
+      predictability: opponentPredictability,
+      uncertaintyHigh: uncertaintyHigh,
+      displayMode: displayMode,
+      possibleStrategies: displayMode === 'dual' ? [wrongProbA, wrongProbB] : undefined
     };
   }
 };

@@ -158,6 +158,7 @@ export interface ScoutReport {
   predictability: number;
   uncertaintyHigh: boolean;
   possibleStrategies?: Strategy[];
+  displayMode: 'single' | 'dual';
 }
 
 export interface GameSave {
