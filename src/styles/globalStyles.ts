@@ -347,6 +347,35 @@ export const globalStyles = StyleSheet.create({
   scoutModalReport: {
     marginTop: 10,
   },
+  analysisRow: {
+    marginBottom: 20,
+  },
+  analysisLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontFamily: 'Oswald',
+    marginBottom: 5,
+    textTransform: 'uppercase',
+  },
+  analysisValue: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontFamily: 'Oswald',
+  },
+  analysisCounterText: {
+    color: '#B34726',
+    fontSize: 10,
+    fontFamily: FONTS.secondary,
+    marginTop: 4,
+    textTransform: 'uppercase',
+  },
+  analysisCounterWinText: {
+    color: COLORS.success,
+    fontSize: 10,
+    fontFamily: FONTS.secondary,
+    marginTop: 4,
+    textTransform: 'uppercase',
+  },
   scoutModalText: {
     fontSize: 14,
     color: COLORS.textSub,

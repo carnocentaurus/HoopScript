@@ -285,21 +285,31 @@ const QuickSimScreen = ({
                 <View style={globalStyles.scoutModalContent}>
                   <Text style={globalStyles.scoutModalCity}>Tactical Analysis</Text>
                   <View style={globalStyles.scoutModalReport}>
-                    <View style={{ marginBottom: 20 }}>
-                       <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 5 }}>EXPECTED STRATEGY</Text>
-                       <Text style={{ color: COLORS.white, fontSize: 14, fontFamily: 'Oswald' }}>
+                    <View style={globalStyles.analysisRow}>
+                       <Text style={globalStyles.analysisLabel}>OPPONENT EXPECTED</Text>
+                       <Text style={globalStyles.analysisValue}>
                           {save.lastScoutReport?.predictedOffense} / {save.lastScoutReport?.predictedDefense}
                        </Text>
                     </View>
 
-                    <View style={{ marginBottom: 20 }}>
-                       <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 5 }}>ACTUAL STRATEGY</Text>
-                       <Text style={{ color: result?.wasUserCountered ? '#B34726' : COLORS.white, fontSize: 14, fontFamily: 'Oswald' }}>
+                    <View style={globalStyles.analysisRow}>
+                       <Text style={globalStyles.analysisLabel}>OPPONENT ACTUAL</Text>
+                       <Text style={globalStyles.analysisValue}>
                           {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
                        </Text>
-                       {result?.wasUserCountered && (
-                         <Text style={{ color: '#B34726', fontSize: 10, marginTop: 4 }}>CRITICAL TACTICAL FAILURE: YOUR OFFENSE WAS COUNTERED</Text>
-                       )}
+                    </View>
+
+                    <View style={globalStyles.analysisRow}>
+                       <Text style={globalStyles.analysisLabel}>YOUR SELECTION</Text>
+                       <Text style={globalStyles.analysisValue}>
+                          {result?.finalUserStrategy.offense} / {result?.finalUserStrategy.defense}
+                       </Text>
+                       <Text style={result?.myScore! > result?.oppScore! ? globalStyles.analysisCounterWinText : globalStyles.analysisCounterText}>
+                         {result?.wasUserCountered 
+                           ? `YOUR ${result?.finalUserStrategy.offense} WAS NEUTRALIZED BY THEIR ${result?.finalOppStrategy.defense}`
+                           : `YOUR ${result?.finalUserStrategy.offense} WAS EFFECTIVE AGAINST THEIR ${result?.finalOppStrategy.defense}`
+                         }
+                       </Text>
                     </View>
 
                     <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
