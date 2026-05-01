@@ -105,15 +105,45 @@ const simulatePossession = (
   pityMod: number = 1.0,
   focusFactor: number = 1.0
 ) => {
-  // 1. Who Shoots? (Usage Rate * (Minutes / 48))
-  const offPlayer = weightedPlayerSelector(offLineup, minuteMap);
+  // --- 1. TACTICAL PRE-PROCESSING ---
+  
+  // Find "The Star" for both teams (Highest OVR)
+  const offStar = [...offLineup].sort((a, b) => b.overall - a.overall)[0];
+  const defStar = [...defLineup].sort((a, b) => b.overall - a.overall)[0];
+
+  // RPS Counter Logic
+  const isCountered = COUNTER_MATRIX[offStrategy.offense] === defStrategy.defense;
+  const isCountering = COUNTER_MATRIX[defStrategy.offense] === offStrategy.defense;
+  
+  let rpsEfficiencyMod = 1.0;
+  if (isCountered) rpsEfficiencyMod = 0.90; // -10% Penalty
+  else if (isCountering) rpsEfficiencyMod = 1.10; // +10% Bonus
+
+  // --- 2. WHO SHOOTS? (Usage Selection) ---
+  
+  // Apply Iso-Star Usage Boost
+  let activeMinuteMap = { ...minuteMap };
+  if (offStrategy.offense === OffensiveFocus.ISO_STAR && offStar) {
+    // Boost star's usage probability significantly
+    activeMinuteMap[offStar.id] = (activeMinuteMap[offStar.id] || 20) * 1.25;
+  }
+
+  const offPlayer = weightedPlayerSelector(offLineup, activeMinuteMap);
   stats[offPlayer.id].possessions++;
 
-  // 2. Turnover Check (Positional Weights)
+  // --- 3. TURNOVER CHECK ---
+  
+  let tovProb = (offPlayer.tovRate || 12) / 100;
+  
+  // Defensive Suppression: Double Team targets the ball handler if they are the star
+  if (defStrategy.defense === DefensiveFocus.DOUBLE_TEAM && offPlayer.id === offStar.id) {
+    tovProb *= 1.15; // +15% Turnover rate
+  }
+
   const tovPlayer = getWeightedPlayer(offLineup, 'TURNOVERS');
-  if (poissonCheck((tovPlayer.tovRate || 12) / 100)) {
-    stats[tovPlayer.id].tov++;
-    // Check for Steal - Scale by defender's DEF rating
+  if (poissonCheck(tovProb)) {
+    stats[offPlayer.id].tov++; // Charge TO to the actual player with the ball
+    
     const stealer = getWeightedPlayer(defLineup, 'STEALS');
     if (poissonCheck((stealer.defense * 0.02) / 100)) {
       stats[stealer.id].stl++;
@@ -121,8 +151,19 @@ const simulatePossession = (
     return;
   }
 
-  // 3. Determine Shot Type (2PT vs 3PT)
-  const threeFreq = (POSITIONAL_PROFILES.THREE_PA[offPlayer.position] || 1.0) / 10;
+  // --- 4. SHOT SELECTION ---
+  
+  let threeFreq = (POSITIONAL_PROFILES.THREE_PA[offPlayer.position] || 1.0) / 10;
+  
+  // Offensive Focus: Pace & Space (+25% 3PA for guards)
+  if (offStrategy.offense === OffensiveFocus.PACE_SPACE && (offPlayer.position === 'PG' || offPlayer.position === 'SG')) {
+    threeFreq *= 1.25;
+  }
+  // Offensive Focus: Attack Paint (PF/C shoot fewer 3s)
+  if (offStrategy.offense === OffensiveFocus.ATTACK_PAINT && (offPlayer.position === 'PF' || offPlayer.position === 'C')) {
+    threeFreq *= 0.7;
+  }
+
   const isThreePointer = Math.random() < threeFreq;
 
   stats[offPlayer.id].fga++;
@@ -130,34 +171,48 @@ const simulatePossession = (
     stats[offPlayer.id].threePA++;
   }
 
-  // Strategy & Positional Modifiers
-  let tsMod = 1.0 * pityMod * focusFactor;
+  // --- 5. EFFICIENCY MODIFIERS ---
+  
+  let tsMod = 1.0 * pityMod * focusFactor * rpsEfficiencyMod;
   let blkMod = 1.0;
 
-  // Add Positional FG% Bias
+  // Defensive Suppression
+  if (isThreePointer && defStrategy.defense === DefensiveFocus.PERIMETER_LOCK) {
+    tsMod *= 0.85; // -15% Opponent 3P%
+  }
+  if (!isThreePointer && defStrategy.defense === DefensiveFocus.PROTECT_RIM) {
+    tsMod *= 0.80; // -20% Opponent Finishing%
+    blkMod *= 1.5;
+  }
+  if (defStrategy.defense === DefensiveFocus.DOUBLE_TEAM && offPlayer.id === offStar.id) {
+    tsMod *= 0.75; // -25% Efficiency for Double Teamed Star
+  }
+
+  // Offensive Focus Penalties
+  if (!isThreePointer && offStrategy.offense === OffensiveFocus.PACE_SPACE) {
+    tsMod *= 0.90; // -10% Points in Paint for Pace & Space
+  }
+
+  // Positional Bias
   tsMod += getPositionalFGBias(offPlayer.position);
 
-  if (COUNTER_MATRIX[offStrategy.offense] === defStrategy.defense) {
-    tsMod -= 0.10;
-  }
-
-  if (defStrategy.defense === DefensiveFocus.PROTECT_RIM) {
-    blkMod += 0.5;
-    if (offStrategy.offense === OffensiveFocus.ATTACK_PAINT) tsMod -= 0.05;
-  }
-
-  // Block Check - Scale by defender's DEF rating
+  // Block Check
   const blocker = getWeightedPlayer(defLineup, 'BLOCKS');
   if (poissonCheck(((blocker.defense * 0.025) * blkMod) / 100)) {
     stats[blocker.id].blk++;
     return;
   }
 
-  // Success Check - Rating-Driven Formula with Realism Logic
+  // --- 6. SUCCESS CHECK ---
+  
   let successProb = calculateShotSuccessRate(offPlayer.offense, isThreePointer, oppTeamDefRating);
   successProb *= tsMod;
 
-  // Clutch Factor: 5% boost for 85+ OVR in final minutes
+  // Attack Paint Bonus: PF/C get a slight efficiency bump on 2s
+  if (!isThreePointer && offStrategy.offense === OffensiveFocus.ATTACK_PAINT && (offPlayer.position === 'PF' || offPlayer.position === 'C')) {
+    successProb *= 1.10;
+  }
+
   if (isClutchTime && offPlayer.overall >= 85) {
     successProb *= 1.05;
   }
@@ -172,7 +227,7 @@ const simulatePossession = (
     }
     teamScore.val += points;
 
-    // Assist Check (~60% of shots are assisted, Positional Weights)
+    // Assist Check
     if (Math.random() < 0.60) {
       const remainingOffense = offLineup.filter(p => p.id !== offPlayer.id);
       if (remainingOffense.length > 0) {
@@ -181,7 +236,7 @@ const simulatePossession = (
       }
     }
   } else {
-    // Rebound Check (Positional Weights)
+    // Rebound Check
     const offRebProb = 0.25; 
     if (Math.random() < offRebProb) {
       const rebber = getWeightedPlayer(offLineup, 'REBOUNDING');
