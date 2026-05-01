@@ -322,13 +322,6 @@ const QuickSimScreen = ({
 
                     {result && dynamicNarrative && (
                       <View>
-                        <Text style={[globalStyles.scoutModalCity, { fontSize: 14, marginBottom: 5, color: COLORS.primary, textAlign: 'left' }]}>
-                          {dynamicNarrative.headline}
-                        </Text>
-                        <Text style={[globalStyles.scoutModalText, { textAlign: 'left', marginBottom: 15 }]}>
-                          {dynamicNarrative.subHeadline}
-                        </Text>
-
                         {result.myScore < result.oppScore && dynamicNarrative.lossReason && (
                           <View style={{ backgroundColor: 'rgba(179, 71, 38, 0.1)', padding: 12, borderRadius: 8, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#B34726' }}>
                              <Text style={{ color: '#B34726', fontSize: 10, fontFamily: 'Oswald', marginBottom: 4 }}>WHY WE LOST</Text>

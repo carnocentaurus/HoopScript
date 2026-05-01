@@ -11,7 +11,6 @@ export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
 };
 
 export interface GameNarrative {
-  headline: string;
   subHeadline: string;
   lossReason?: string;
   coachVerdict: string;
@@ -333,7 +332,7 @@ export const simulateGame = (
   const fgPct = totalFGA > 0 ? (totalFGM / totalFGA) * 100 : 0;
 
   // Narrative Generation
-  const { headline, subHeadline, coachVerdict } = getNarrative({
+  const { coachVerdict } = getNarrative({
     userWon,
     tacticsSuccessful,
     coachIQ: myIQ,
@@ -361,8 +360,6 @@ export const simulateGame = (
   }
 
   const gameNarrative: GameNarrative = {
-    headline,
-    subHeadline,
     lossReason,
     coachVerdict
   };
