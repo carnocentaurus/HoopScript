@@ -10,6 +10,12 @@ export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
   [OffensiveFocus.ISO_STAR]: DefensiveFocus.DOUBLE_TEAM,
 };
 
+export const EXPLOIT_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
+  [OffensiveFocus.ATTACK_PAINT]: DefensiveFocus.PERIMETER_LOCK,
+  [OffensiveFocus.PACE_SPACE]: DefensiveFocus.DOUBLE_TEAM,
+  [OffensiveFocus.ISO_STAR]: DefensiveFocus.PROTECT_RIM,
+};
+
 export interface GameNarrative {
   analysisLines: string[];
 }
@@ -30,7 +36,9 @@ export interface GameResult {
   finalOppStrategy: Strategy;
   efficiencyDelta: number;
   wasUserCountered: boolean;
+  wasUserExploiting: boolean;
   wasOppCountered: boolean;
+  wasOppExploiting: boolean;
   gameNarrative: GameNarrative;
 }
 
@@ -111,11 +119,11 @@ const simulatePossession = (
 
   // RPS Counter Logic
   const isCountered = COUNTER_MATRIX[offStrategy.offense] === defStrategy.defense;
-  const isCountering = COUNTER_MATRIX[defStrategy.offense] === offStrategy.defense;
+  const isExploiting = EXPLOIT_MATRIX[offStrategy.offense] === defStrategy.defense;
   
   let rpsEfficiencyMod = 1.0;
   if (isCountered) rpsEfficiencyMod = 0.90; // -10% Penalty
-  else if (isCountering) rpsEfficiencyMod = 1.10; // +10% Bonus
+  else if (isExploiting) rpsEfficiencyMod = 1.10; // +10% Bonus
 
   // --- 2. WHO SHOOTS? (Usage Selection) ---
   
@@ -332,8 +340,10 @@ export const simulateGame = (
     // Track strategy efficiency for delta
     if (COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
       totalCounterBonus -= 0.10;
+    } else if (EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
+      totalCounterBonus += 0.10;
     } else {
-      totalCounterBonus += 0.05; // Small bonus for exploiting
+      totalCounterBonus += 0.05; // Standard efficiency for neutral matchup
     }
     counteringPossessions++;
 
@@ -366,12 +376,19 @@ export const simulateGame = (
   const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
 
   const wasUserCountered = COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
+  const wasUserExploiting = EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
   const wasOppCountered = COUNTER_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
+  const wasOppExploiting = EXPLOIT_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
 
-  const counterResults = [
-    wasUserCountered ? `TACTICAL LOSS: Opponent's ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense}.` : `TACTICAL WIN: Your ${currentMyStrategy.offense} exploited their ${currentOppStrategy.defense}.`,
-    wasOppCountered ? `DEFENSIVE LOCK: You neutralized their ${currentOppStrategy.offense} with ${currentMyStrategy.defense}!` : `DEFENSIVE HOLE: Their ${currentOppStrategy.offense} broke through your ${currentMyStrategy.defense}.`
-  ];
+  let tacticalUserResult = "TACTICAL STALEMATE: Neither team gained a clear schematic advantage.";
+  if (wasUserCountered) tacticalUserResult = `TACTICAL LOSS: Opponent's ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense}.`;
+  else if (wasUserExploiting) tacticalUserResult = `TACTICAL WIN: Your ${currentMyStrategy.offense} exploited their ${currentOppStrategy.defense}.`;
+
+  let tacticalOppResult = "DEFENSIVE STALEMATE: Coverage was standard across the board.";
+  if (wasOppCountered) tacticalOppResult = `DEFENSIVE LOCK: You neutralized their ${currentOppStrategy.offense} with ${currentMyStrategy.defense}!`;
+  else if (wasOppExploiting) tacticalOppResult = `DEFENSIVE HOLE: Their ${currentOppStrategy.offense} broke through your ${currentMyStrategy.defense}.`;
+
+  const counterResults = [tacticalUserResult, tacticalOppResult];
 
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
   const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
@@ -432,7 +449,9 @@ export const simulateGame = (
     finalOppStrategy: currentOppStrategy,
     efficiencyDelta,
     wasUserCountered,
+    wasUserExploiting,
     wasOppCountered,
+    wasOppExploiting,
     gameNarrative
   };
 };

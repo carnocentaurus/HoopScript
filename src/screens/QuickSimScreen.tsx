@@ -302,10 +302,12 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
                        </Text>
-                       <Text style={result?.wasOppCountered ? globalStyles.analysisCounterWinText : globalStyles.analysisCounterText}>
+                       <Text style={result?.wasOppCountered ? globalStyles.analysisCounterWinText : (result?.wasOppExploiting ? globalStyles.analysisCounterText : { color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginTop: 5 })}>
                          {result?.wasOppCountered 
                            ? `DEFENSIVE LOCK: YOU NEUTRALIZED THEIR ${result?.finalOppStrategy.offense}`
-                           : `DEFENSIVE HOLE: THEIR ${result?.finalOppStrategy.offense} BROKE THROUGH`
+                           : result?.wasOppExploiting 
+                             ? `DEFENSIVE HOLE: THEIR ${result?.finalOppStrategy.offense} BROKE THROUGH`
+                             : `DEFENSIVE STALEMATE: STANDARD COVERAGE`
                          }
                        </Text>
                     </View>
@@ -315,10 +317,12 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalUserStrategy.offense} / {result?.finalUserStrategy.defense}
                        </Text>
-                       <Text style={result?.wasUserCountered ? globalStyles.analysisCounterText : globalStyles.analysisCounterWinText}>
+                       <Text style={result?.wasUserCountered ? globalStyles.analysisCounterText : (result?.wasUserExploiting ? globalStyles.analysisCounterWinText : { color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginTop: 5 })}>
                          {result?.wasUserCountered 
                            ? `OFFENSIVE STALL: YOUR ${result?.finalUserStrategy.offense} WAS NEUTRALIZED`
-                           : `OFFENSIVE SUCCESS: YOUR ${result?.finalUserStrategy.offense} WAS EFFECTIVE`
+                           : result?.wasUserExploiting 
+                             ? `OFFENSIVE SUCCESS: YOUR ${result?.finalUserStrategy.offense} WAS EFFECTIVE`
+                             : `OFFENSIVE STALEMATE: STANDARD EXECUTION`
                          }
                        </Text>
                     </View>
