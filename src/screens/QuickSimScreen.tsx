@@ -328,18 +328,6 @@ const QuickSimScreen = ({
                              <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary }}>{dynamicNarrative.lossReason}</Text>
                           </View>
                         )}
-
-                        <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
-                        
-                        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                          <Icon name="chatbubble-ellipses-outline" size={24} color={COLORS.primary} style={{ marginRight: 12, marginTop: 2 }} />
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginBottom: 2 }}>COACH'S VERDICT</Text>
-                            <Text style={{ color: COLORS.white, fontSize: 14, fontFamily: FONTS.secondary, fontStyle: 'italic' }}>
-                              "{dynamicNarrative.coachVerdict}"
-                            </Text>
-                          </View>
-                        </View>
                       </View>
                     )}
                   </View>

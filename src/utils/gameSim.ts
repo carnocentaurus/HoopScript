@@ -11,9 +11,7 @@ export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
 };
 
 export interface GameNarrative {
-  subHeadline: string;
   lossReason?: string;
-  coachVerdict: string;
 }
 
 export interface GameResult {
@@ -352,7 +350,7 @@ export const simulateGame = (
       const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
       const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
       simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, true, myPityMod, myFocusFactor);
-      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, oppFocusFactor);
+      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, focusFactor);
     }
   }
 
@@ -387,7 +385,7 @@ export const simulateGame = (
   const fgPct = totalFGA > 0 ? (totalFGM / totalFGA) * 100 : 0;
 
   // Narrative Generation
-  const { coachVerdict } = getNarrative({
+  const { lossReason: autoLossReason } = getNarrative({
     userWon,
     tacticsSuccessful,
     coachIQ: myIQ,
@@ -395,7 +393,7 @@ export const simulateGame = (
     oppScore: oppScore.val
   });
 
-  let lossReason: string | undefined = undefined;
+  let lossReason = autoLossReason;
 
   const myBest = [...myStats].sort((a, b) => b.pts - a.pts)[0];
   const oppBest = [...oppStats].sort((a, b) => b.pts - a.pts)[0];
@@ -415,8 +413,7 @@ export const simulateGame = (
   }
 
   const gameNarrative: GameNarrative = {
-    lossReason,
-    coachVerdict
+    lossReason
   };
 
   return {
