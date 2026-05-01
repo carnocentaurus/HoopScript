@@ -114,6 +114,10 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
           {/* Row 2: Efficiency Stats */}
           <View style={globalStyles.tosRatingsRow}>
             <View style={globalStyles.tosRatingItem}>
+              <Text style={globalStyles.tosRatingValSmall}>{avgs.min}</Text>
+              <Text style={globalStyles.tosRatingLabelSmall}>MPG</Text>
+            </View>
+            <View style={globalStyles.tosRatingItem}>
               <Text style={globalStyles.tosRatingValSmall}>{avgs.fgPct}%</Text>
               <Text style={globalStyles.tosRatingLabelSmall}>FG%</Text>
             </View>
