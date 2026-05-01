@@ -9,7 +9,7 @@ import { globalStyles } from '../styles/globalStyles';
 import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
-import { getNarrative, GameNarrative as NarrativeType } from '../utils/narrativeEngine';
+import { getNarrative, GameNarrative as NarrativeType, getPostGameAnalysis, getGameIntensity } from '../utils/narrativeEngine';
 
 const QuickSimScreen = ({ 
   save, 
@@ -29,22 +29,27 @@ const QuickSimScreen = ({
   const [result, setResult] = useState<GameResult | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'STATS' | 'ANALYSIS'>('STATS');
-  const [dynamicNarrative, setDynamicNarrative] = useState<NarrativeType | null>(null);
+  const [analysisLines, setAnalysisLines] = useState<string[]>([]);
 
-  // Update narrative whenever we open analysis or switch to analysis tab
+  // Update analysis whenever we open analysis tab
   useEffect(() => {
     if (result && (showAnalysisModal || activeTab === 'ANALYSIS')) {
-      const narrative = getNarrative({
-        userWon: result.myScore > result.oppScore,
-        tacticsSuccessful: result.efficiencyDelta > 0,
-        coachIQ: save.coachingIQ,
-        myScore: result.myScore,
-        oppScore: result.oppScore
+      const userWon = result.myScore > result.oppScore;
+      const scoreDiff = Math.abs(result.myScore - result.oppScore);
+      const intensity = getGameIntensity(result.myScore, result.oppScore);
+
+      const lines = getPostGameAnalysis({
+        userWon,
+        intensity,
+        userOffense: result.finalUserStrategy.offense,
+        oppDefense: result.finalOppStrategy.defense,
+        topScorer: result.myBestPlayer,
+        oppBestPlayer: result.oppBestPlayer,
+        scoreDiff,
+        isCountered: result.wasUserCountered,
+        isCountering: result.wasOppCountered
       });
-      setDynamicNarrative({
-        ...narrative,
-        lossReason: result.gameNarrative.lossReason
-      });
+      setAnalysisLines(lines);
     }
   }, [showAnalysisModal, activeTab, result]);
 
@@ -320,14 +325,30 @@ const QuickSimScreen = ({
 
                     <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 15 }} />
 
-                    {result && dynamicNarrative && (
+                    {result && (
                       <View>
-                        {result.myScore < result.oppScore && dynamicNarrative.lossReason && (
-                          <View style={{ backgroundColor: 'rgba(179, 71, 38, 0.1)', padding: 12, borderRadius: 8, marginBottom: 15, borderLeftWidth: 3, borderLeftColor: '#B34726' }}>
-                             <Text style={{ color: '#B34726', fontSize: 10, fontFamily: 'Oswald', marginBottom: 4 }}>WHY WE LOST</Text>
-                             <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary }}>{dynamicNarrative.lossReason}</Text>
-                          </View>
-                        )}
+                        <View style={{ 
+                          backgroundColor: result.myScore > result.oppScore ? 'rgba(76, 175, 80, 0.1)' : 'rgba(179, 71, 38, 0.1)', 
+                          padding: 15, 
+                          borderRadius: 12, 
+                          marginBottom: 15, 
+                          borderLeftWidth: 4, 
+                          borderLeftColor: result.myScore > result.oppScore ? COLORS.success : '#B34726',
+                          borderWidth: 1,
+                          borderColor: COLORS.border
+                        }}>
+                           <Text style={{ color: result.myScore > result.oppScore ? COLORS.success : '#B34726', fontSize: 12, fontFamily: 'Oswald', marginBottom: 8, letterSpacing: 1 }}>
+                             {result.myScore > result.oppScore ? 'WHY WE WON' : 'WHY WE LOST'}
+                           </Text>
+                           {analysisLines.map((line, idx) => (
+                             <View key={idx} style={{ flexDirection: 'row', marginBottom: 6 }}>
+                               <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary, marginRight: 8, opacity: 0.7 }}>•</Text>
+                               <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: FONTS.secondary, flex: 1, lineHeight: 18 }}>
+                                 {line}
+                               </Text>
+                             </View>
+                           ))}
+                        </View>
                       </View>
                     )}
                   </View>

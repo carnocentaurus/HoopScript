@@ -11,7 +11,7 @@ export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
 };
 
 export interface GameNarrative {
-  lossReason?: string;
+  analysisLines: string[];
 }
 
 export interface GameResult {
