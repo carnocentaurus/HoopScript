@@ -297,6 +297,12 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
                        </Text>
+                       <Text style={result?.wasOppCountered ? globalStyles.analysisCounterWinText : globalStyles.analysisCounterText}>
+                         {result?.wasOppCountered 
+                           ? `DEFENSIVE LOCK: YOU NEUTRALIZED THEIR ${result?.finalOppStrategy.offense}`
+                           : `DEFENSIVE HOLE: THEIR ${result?.finalOppStrategy.offense} BROKE THROUGH`
+                         }
+                       </Text>
                     </View>
 
                     <View style={globalStyles.analysisRow}>
@@ -304,10 +310,10 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalUserStrategy.offense} / {result?.finalUserStrategy.defense}
                        </Text>
-                       <Text style={result?.myScore! > result?.oppScore! ? globalStyles.analysisCounterWinText : globalStyles.analysisCounterText}>
+                       <Text style={result?.wasUserCountered ? globalStyles.analysisCounterText : globalStyles.analysisCounterWinText}>
                          {result?.wasUserCountered 
-                           ? `YOUR ${result?.finalUserStrategy.offense} WAS NEUTRALIZED BY THEIR ${result?.finalOppStrategy.defense}`
-                           : `YOUR ${result?.finalUserStrategy.offense} WAS EFFECTIVE AGAINST THEIR ${result?.finalOppStrategy.defense}`
+                           ? `OFFENSIVE STALL: YOUR ${result?.finalUserStrategy.offense} WAS NEUTRALIZED`
+                           : `OFFENSIVE SUCCESS: YOUR ${result?.finalUserStrategy.offense} WAS EFFECTIVE`
                          }
                        </Text>
                     </View>
