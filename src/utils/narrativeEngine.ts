@@ -13,6 +13,7 @@ export interface NarrativeParams {
 
 export interface GameNarrative {
   analysisLines: string[];
+  lossReason: string;
 }
 
 export const getGameIntensity = (myPts: number, oppPts: number): GameIntensity => {
@@ -121,5 +122,5 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
 };
 
 export const getNarrative = (params: NarrativeParams): GameNarrative => {
-  return { analysisLines: [] };
+  return { analysisLines: [], lossReason: "" };
 };

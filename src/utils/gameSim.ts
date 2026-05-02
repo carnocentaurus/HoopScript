@@ -1,4 +1,5 @@
 import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
+import { MIN_TEAM_SCORE, MIN_POSSESSIONS } from '../types';
 import { calculateTeamRatings } from './leagueEngine';
 import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
@@ -17,7 +18,7 @@ export const EXPLOIT_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
 };
 
 export interface GameNarrative {
-  analysisLines: string[];
+  lossReason: string;
 }
 
 export interface GameResult {
@@ -65,6 +66,28 @@ export interface PlayerStat {
   fga: number;
   possessions: number;
 }
+
+/**
+ * Calculates final shot probability with efficiency floors.
+ */
+const applyTacticalModifiers = (
+  offPlayer: Player,
+  isThree: boolean,
+  baseProb: number,
+  tsMod: number,
+  offStrategy: OffensiveFocus
+): number => {
+  let finalProb = baseProb * tsMod;
+
+  // Attack Paint Bonus: PF/C get a slight efficiency bump on 2s
+  if (!isThree && offStrategy === OffensiveFocus.ATTACK_PAINT && (offPlayer.position === 'PF' || offPlayer.position === 'C')) {
+    finalProb *= 1.10;
+  }
+
+  // The Floor Logic: Ensure basement levels for shooting percentages
+  const efficiencyFloor = isThree ? 0.28 : 0.38;
+  return Math.max(finalProb, efficiencyFloor);
+};
 
 /**
  * Selects an active 5-man lineup based on minute-based probability.
@@ -212,21 +235,25 @@ const simulatePossession = (
 
   // --- 6. SUCCESS CHECK ---
   
-  let successProb = calculateShotSuccessRate(offPlayer.offense, isThreePointer, oppTeamDefRating);
-  successProb *= tsMod;
-
-  // Attack Paint Bonus: PF/C get a slight efficiency bump on 2s
-  if (!isThreePointer && offStrategy.offense === OffensiveFocus.ATTACK_PAINT && (offPlayer.position === 'PF' || offPlayer.position === 'C')) {
-    successProb *= 1.10;
-  }
+  const rawProb = calculateShotSuccessRate(offPlayer.offense, isThreePointer, oppTeamDefRating);
+  const successProb = applyTacticalModifiers(offPlayer, isThreePointer, rawProb, tsMod, offStrategy.offense);
 
   if (isClutchTime && offPlayer.overall >= 85) {
-    successProb *= 1.05;
+    // Clutch bonus applied after floor to ensure star players remain elite
+    if (shotSuccessCheck(successProb * 1.05, 1.0)) {
+      handleSuccessfulShot();
+      return;
+    }
   }
 
   if (shotSuccessCheck(successProb, 1.0)) {
+    handleSuccessfulShot();
+  } else {
+    handleMissedShot();
+  }
+
+  function handleSuccessfulShot() {
     const points = isThreePointer ? 3 : 2;
-    
     stats[offPlayer.id].pts += points;
     stats[offPlayer.id].fgm++;
     if (isThreePointer) {
@@ -242,7 +269,9 @@ const simulatePossession = (
         stats[passer.id].ast++;
       }
     }
-  } else {
+  }
+
+  function handleMissedShot() {
     // Rebound Check
     const offRebProb = 0.25; 
     if (Math.random() < offRebProb) {
@@ -255,6 +284,61 @@ const simulatePossession = (
       stats[rebber.id].dreb++;
     }
   }
+};
+
+/**
+ * Ensures team score reaches MIN_TEAM_SCORE if simulation fell short.
+ * Points are distributed based on usage rate and minutes played.
+ */
+const normalizeStatsToFloor = (
+  teamRoster: Player[],
+  teamStats: PlayerStat[],
+  currentScore: { val: number }
+) => {
+  const diff = MIN_TEAM_SCORE - currentScore.val;
+  if (diff <= 0) return;
+
+  const usgMap: Record<string, number> = {};
+  teamRoster.forEach(p => usgMap[p.id] = p.usgRate || 20);
+
+  const totalWeight = teamStats.reduce((sum, p) => sum + (p.min * usgMap[p.playerId]), 0);
+  if (totalWeight === 0) return;
+
+  let pointsToAdd = diff;
+  
+  // Sort by weight descending to ensure high-usage players get priority
+  const sortedStats = [...teamStats].sort((a, b) => {
+    const weightA = a.min * usgMap[a.playerId];
+    const weightB = b.min * usgMap[b.playerId];
+    return weightB - weightA;
+  });
+
+  sortedStats.forEach(p => {
+    const weight = p.min * usgMap[p.playerId];
+    const share = weight / totalWeight;
+    let ptsForPlayer = Math.round(diff * share);
+    
+    // Clamp to remaining points
+    ptsForPlayer = Math.min(ptsForPlayer, pointsToAdd);
+    
+    if (ptsForPlayer > 0) {
+      p.pts += ptsForPlayer;
+      const fgmToAdd = Math.ceil(ptsForPlayer / 2.2); // Average slightly over 2pts per FGM
+      p.fgm += fgmToAdd;
+      p.fga += fgmToAdd;
+      pointsToAdd -= ptsForPlayer;
+    }
+  });
+
+  // Final cleanup for any rounding remainders
+  if (pointsToAdd > 0 && teamStats.length > 0) {
+    const best = [...teamStats].sort((a, b) => b.pts - a.pts)[0];
+    best.pts += pointsToAdd;
+    best.fgm += 1;
+    best.fga += 1;
+  }
+
+  currentScore.val = MIN_TEAM_SCORE;
 };
 
 const BASE_PACE = 102;
@@ -295,7 +379,15 @@ export const simulateGame = (
   const myScore = { val: 0 };
   const oppScore = { val: 0 };
 
-  const totalPossessions = BASE_PACE;
+  // --- DYNAMIC PACE ADJUSTMENT ---
+  let totalPossessions = Math.max(BASE_PACE, MIN_POSSESSIONS);
+  const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === cpuStrategy.defense;
+  const isOppCountered = COUNTER_MATRIX[cpuStrategy.offense] === userStrategy.defense;
+  
+  // If a team is countered, their efficiency drops. We increase pace to compensate 
+  // and give them more opportunities to reach the floor.
+  if (isUserCountered) totalPossessions += 4;
+  if (isOppCountered) totalPossessions += 4;
 
   let myPityMod = myRatings.offense < 75 ? 1.08 : 1.0;
   let oppPityMod = oppRatings.offense < 75 ? 1.08 : 1.0;
@@ -328,7 +420,7 @@ export const simulateGame = (
     const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
     const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
 
-    // Scoring Floor Logic
+    // Scoring Floor Logic (Proactive efficiency boost)
     if (i > 0 && i % 10 === 0) {
       const myProjected = (myScore.val / i) * totalPossessions;
       const oppProjected = (oppScore.val / i) * totalPossessions;
@@ -361,7 +453,7 @@ export const simulateGame = (
       const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
       const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
       simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, true, myPityMod, myFocusFactor);
-      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, focusFactor);
+      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, oppFocusFactor);
     }
   }
 
@@ -374,25 +466,14 @@ export const simulateGame = (
     }
   }
 
-  const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
-
-  const wasUserCountered = COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
-  const wasUserExploiting = EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
-  const wasOppCountered = COUNTER_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
-  const wasOppExploiting = EXPLOIT_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
-
-  let tacticalUserResult = "TACTICAL STALEMATE: Neither team gained a clear schematic advantage.";
-  if (wasUserCountered) tacticalUserResult = `TACTICAL LOSS: Opponent's ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense}.`;
-  else if (wasUserExploiting) tacticalUserResult = `TACTICAL WIN: Your ${currentMyStrategy.offense} exploited their ${currentOppStrategy.defense}.`;
-
-  let tacticalOppResult = "DEFENSIVE STALEMATE: Coverage was standard across the board.";
-  if (wasOppCountered) tacticalOppResult = `DEFENSIVE LOCK: You neutralized their ${currentOppStrategy.offense} with ${currentMyStrategy.defense}!`;
-  else if (wasOppExploiting) tacticalOppResult = `DEFENSIVE HOLE: Their ${currentOppStrategy.offense} broke through your ${currentMyStrategy.defense}.`;
-
-  const counterResults = [tacticalUserResult, tacticalOppResult];
-
+  // --- EMERGENCY FLOOR SCALING ---
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
   const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
+
+  normalizeStatsToFloor(myTeam.roster, myStats, myScore);
+  normalizeStatsToFloor(oppRoster, oppStats, oppScore);
+
+  const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
 
   const userWon = myScore.val > oppScore.val;
   const tacticsSuccessful = efficiencyDelta > 0;
@@ -429,6 +510,21 @@ export const simulateGame = (
       lossReason = "A tactical adjustment is needed to counter their defensive pressure.";
     }
   }
+
+  const wasUserCountered = COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
+  const wasUserExploiting = EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense;
+  const wasOppCountered = COUNTER_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
+  const wasOppExploiting = EXPLOIT_MATRIX[currentOppStrategy.offense] === currentMyStrategy.defense;
+
+  let tacticalUserResult = "TACTICAL STALEMATE: Neither team gained a clear schematic advantage.";
+  if (wasUserCountered) tacticalUserResult = `TACTICAL LOSS: Opponent's ${currentOppStrategy.defense} neutralized your ${currentMyStrategy.offense}.`;
+  else if (wasUserExploiting) tacticalUserResult = `TACTICAL WIN: Your ${currentMyStrategy.offense} exploited their ${currentOppStrategy.defense}.`;
+
+  let tacticalOppResult = "DEFENSIVE STALEMATE: Coverage was standard across the board.";
+  if (wasOppCountered) tacticalOppResult = `DEFENSIVE LOCK: You neutralized their ${currentOppStrategy.offense} with ${currentMyStrategy.defense}!`;
+  else if (wasOppExploiting) tacticalOppResult = `DEFENSIVE HOLE: Their ${currentOppStrategy.offense} broke through your ${currentMyStrategy.defense}.`;
+
+  const counterResults = [tacticalUserResult, tacticalOppResult];
 
   const gameNarrative: GameNarrative = {
     lossReason
@@ -469,7 +565,7 @@ export const generatePlayerStats = (
 ): PlayerStat => {
   return {
     playerId: player.id, lastName: player.lastName, number: player.number, position: player.position,
-    overall: player.overall, min: 30, pts: 20, reb: 5, ast: 5, stl: 1, blk: 1, tov: 2,
+    overall: player.overall, isStarter: player.isStarter, min: 30, pts: 20, reb: 5, ast: 5, stl: 1, blk: 1, tov: 2,
     threePM: 2, threePA: 5, oreb: 1, dreb: 4, plusMinus: 0, fgm: 8, fga: 15, possessions: 100
   };
 };
