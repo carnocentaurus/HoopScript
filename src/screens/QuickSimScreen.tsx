@@ -10,6 +10,7 @@ import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 import { getNarrative, GameNarrative as NarrativeType, getPostGameAnalysis, getGameIntensity } from '../utils/narrativeEngine';
+import { sortRosterByPosition } from '../utils/rosterUtils';
 
 const QuickSimScreen = ({ 
   save, 
@@ -151,10 +152,9 @@ const QuickSimScreen = ({
       opponent.coachingIQ ?? 60
     );
 
-    // Sort stats by OVR descending to ensure starters (top 5) are first 
-    // and bench is ordered by quality.
-    gameResult.myTeamStats.sort((a, b) => b.overall - a.overall);
-    gameResult.oppTeamStats.sort((a, b) => b.overall - a.overall);
+    // Apply strict positional sorting (Starters first, then PG->C, then OVR)
+    gameResult.myTeamStats = sortRosterByPosition(gameResult.myTeamStats);
+    gameResult.oppTeamStats = sortRosterByPosition(gameResult.oppTeamStats);
 
     setResult(gameResult);
     

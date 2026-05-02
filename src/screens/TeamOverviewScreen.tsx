@@ -4,6 +4,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { Player, SeasonHistory } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings, calculateSeasonAverages } from '../utils/leagueEngine';
+import { sortRosterByPosition } from '../utils/rosterUtils';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
@@ -30,20 +31,10 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
     return <ChampionshipsScreen city={city} history={history} onBack={() => setShowChampionships(false)} />;
   }
 
-  const POSITION_ORDER: Record<string, number> = { "PG": 1, "SG": 2, "SF": 3, "PF": 4, "C": 5 };
   const logo = TEAM_LOGOS[city];
 
-  const sortPlayersByPosition = (players: Player[]) => {
-    return [...players].sort((a, b) => {
-      const orderA = POSITION_ORDER[a.position] || 99;
-      const orderB = POSITION_ORDER[b.position] || 99;
-      if (orderA !== orderB) return orderA - orderB;
-      return b.overall - a.overall; // Secondary sort by overall
-    });
-  };
-
-  const starters = sortPlayersByPosition(roster.filter(p => p.isStarter));
-  const bench = [...roster.filter(p => !p.isStarter)].sort((a, b) => b.overall - a.overall);
+  const starters = sortRosterByPosition(roster.filter(p => p.isStarter));
+  const bench = sortRosterByPosition(roster.filter(p => !p.isStarter));
   const ratings = calculateTeamRatings(roster);
 
   const renderPlayerRow = (player: Player) => {

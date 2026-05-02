@@ -48,6 +48,7 @@ export interface PlayerStat {
   number: number;
   position: string;
   overall: number;
+  isStarter: boolean;
   min: number;
   pts: number;
   reb: number;
@@ -277,7 +278,7 @@ export const simulateGame = (
   myTeam.roster.forEach(p => {
     playerStats[p.id] = {
       playerId: p.id, lastName: p.lastName, number: p.number, position: p.position,
-      overall: p.overall, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0,
+      overall: p.overall, isStarter: p.isStarter, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0,
       threePM: 0, threePA: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0,
       min: myMinuteMap[p.id], possessions: 0
     };
@@ -285,7 +286,7 @@ export const simulateGame = (
   oppRoster.forEach((p: any) => {
     playerStats[p.id] = {
       playerId: p.id, lastName: p.lastName, number: p.number, position: p.position,
-      overall: p.overall, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0,
+      overall: p.overall, isStarter: p.isStarter, pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tov: 0,
       threePM: 0, threePA: 0, oreb: 0, dreb: 0, plusMinus: 0, fgm: 0, fga: 0,
       min: oppMinuteMap[p.id], possessions: 0
     };
