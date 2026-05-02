@@ -3,7 +3,7 @@ import { MIN_TEAM_SCORE, MIN_POSSESSIONS } from '../types';
 import { calculateTeamRatings, selectCPUStrategy, updatePlayerStats, getTeamStrength } from './leagueEngine';
 import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate, generateSimulatedStats } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
-import { getNarrative } from './narrativeEngine';
+import { getNarrative, GameNarrative } from './narrativeEngine';
 
 /**
  * Runs a 'Light Sim' for AI vs AI games.
@@ -67,10 +67,6 @@ export const EXPLOIT_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
   [OffensiveFocus.PACE_SPACE]: DefensiveFocus.DOUBLE_TEAM,
   [OffensiveFocus.ISO_STAR]: DefensiveFocus.PROTECT_RIM,
 };
-
-export interface GameNarrative {
-  lossReason: string;
-}
 
 export interface GameResult {
   myScore: number;
@@ -554,6 +550,7 @@ export const simulateGame = (
   const counterResults = [tacticalUserResult, tacticalOppResult];
 
   const gameNarrative: GameNarrative = {
+    analysisLines: [],
     lossReason
   };
 

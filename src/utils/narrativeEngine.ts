@@ -2,19 +2,22 @@ import { Strategy, OffensiveFocus, DefensiveFocus } from '../types/save';
 
 export type GameIntensity = 'clutch' | 'normal' | 'blowout';
 
+export interface GameNarrative {
+  analysisLines: string[];
+  lossReason: string;
+}
+
 export interface NarrativeParams {
   userWon: boolean;
   tacticsSuccessful: boolean;
   coachIQ: number;
   myScore: number;
   oppScore: number;
-  stats?: any;
 }
 
-export interface GameNarrative {
-  analysisLines: string[];
-  lossReason: string;
-}
+export const getNarrative = (params: NarrativeParams): GameNarrative => {
+  return { analysisLines: [], lossReason: "" };
+};
 
 export const getGameIntensity = (myPts: number, oppPts: number): GameIntensity => {
   const diff = Math.abs(myPts - oppPts);
@@ -35,6 +38,9 @@ export interface AnalysisParams {
   isCountering: boolean;
 }
 
+// Helper to grab a random line from a pool
+const pick = (lines: string[]) => lines[Math.floor(Math.random() * lines.length)];
+
 const TACTICAL_MAP: any = {
   OFFENSE: {
     [OffensiveFocus.ATTACK_PAINT]: { counteredBy: DefensiveFocus.PROTECT_RIM, exploits: DefensiveFocus.PERIMETER_LOCK },
@@ -44,31 +50,50 @@ const TACTICAL_MAP: any = {
 };
 
 /**
- * Determines the tactical narrative based on offense/defense matchup.
+ * DETERMINES TACTICAL NARRATIVE WITH VARIATION
  */
 export const getTacticalNarrative = (userOffense: string, oppDefense: string, starFG: number, starName: string): string => {
   const mapping = TACTICAL_MAP.OFFENSE[userOffense];
-  if (!mapping) return "Tactical Stalemate: Both teams played to their strengths, but neither side gained a clear schematic advantage.";
+  
+  const stalemates = [
+    "Tactical Stalemate: Both teams played to their strengths, but neither side gained a clear schematic advantage.",
+    "Gridlock: The tactical battle ended in a draw, forcing the players to win it on sheer talent.",
+    "Matching Wits: Both coaching staffs anticipated the other's moves, resulting in a wash."
+  ];
+
+  if (!mapping) return pick(stalemates);
 
   if (oppDefense === mapping.counteredBy) {
     if (starFG > 55) {
-      return `Brute Force: They had the right scheme to stop your ${userOffense}, but ${starName} was simply too talented to be contained.`;
+      return pick([
+        `Brute Force: They had the right scheme to stop your ${userOffense}, but ${starName} was simply too talented to be contained.`,
+        `Skill Gap: Despite being tactically countered, ${starName} powered through their ${oppDefense} with elite shot-making.`,
+        `Outplaying the Blueprint: The scheme was a failure, but ${starName} saved the day by ignoring the double-teams.`
+      ]);
     }
-    return `Tactical Failure: Their ${oppDefense} successfully neutralized your ${userOffense}.`;
+    return pick([
+      `Tactical Failure: Their ${oppDefense} successfully neutralized your ${userOffense}.`,
+      `Out-Coached: We walked right into their ${oppDefense} and never found an answer.`,
+      `System Shutdown: The coaching staff failed to adjust as the ${oppDefense} stifled our ${userOffense}.`
+    ]);
   }
 
   if (oppDefense === mapping.exploits) {
-    return `Tactical Edge: Your ${userOffense} successfully exploited their ${oppDefense}.`;
+    return pick([
+      `Tactical Edge: Your ${userOffense} successfully exploited their ${oppDefense}.`,
+      `Schematic Masterclass: We completely dismantled their ${oppDefense} by sticking to our ${userOffense} philosophy.`,
+      `The Right Blueprint: Our scouts nailed it—their ${oppDefense} had no answer for our ${userOffense}.`
+    ]);
   }
 
-  return `Tactical Stalemate: Both teams played to their strengths, but neither side gained a clear schematic advantage.`;
+  return pick(stalemates);
 };
 
 /**
- * Generates a multi-point analysis of why the game ended the way it did.
+ * GENERATES DYNAMIC ANALYSIS
  */
 export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
-  const { userWon, intensity, userOffense, oppDefense, topScorer, oppBestPlayer, scoreDiff, isCountered, isCountering } = params;
+  const { userWon, intensity, userOffense, oppDefense, topScorer, oppBestPlayer, scoreDiff } = params;
   const lines: string[] = [];
 
   const oppFGPercent = oppBestPlayer.fga > 0 ? (oppBestPlayer.fgm / oppBestPlayer.fga) * 100 : 0;
@@ -78,33 +103,61 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   const isLockdown = oppFGPercent < 42 && opp3PPercent < 33;
   const isDefensiveBreach = oppFGPercent > 50;
 
-  // 1. Tactical Reason (Governed by TACTICAL_MAP)
+  // 1. Tactical Reason
   lines.push(getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName));
 
-  // 2. Star Player Impact (Outcome Firewall)
+  // 2. Star Player Impact
   if (userWon) {
-    lines.push(`Maintained Pressure: ${topScorer.lastName} was the difference-maker, dropping ${topScorer.pts} points on high efficiency.`);
+    lines.push(pick([
+      `Maintained Pressure: ${topScorer.lastName} was the difference-maker, dropping ${topScorer.pts} points.`,
+      `Leading the Charge: ${topScorer.lastName} took over when it mattered most, finishing with ${topScorer.pts} points.`,
+      `Elite Execution: A dominant ${topScorer.pts}-point night from ${topScorer.lastName} secured the victory.`
+    ]));
   } else {
-    lines.push(`${topScorer.lastName} carried the load with ${topScorer.pts} points, but we were outclassed as a unit.`);
+    lines.push(pick([
+      `${topScorer.lastName} carried the load with ${topScorer.pts} points, but we were outclassed as a unit.`,
+      `Empty Stats: Despite ${topScorer.pts} points from ${topScorer.lastName}, the rest of the roster struggled to contribute.`,
+      `Sole Provider: ${topScorer.lastName} gave us ${topScorer.pts} points, but we couldn't bridge the gap elsewhere.`
+    ]));
   }
 
-  // 3. Intensity/Differential (Outcome Firewall)
+  // 3. Intensity/Differential
   if (intensity === 'clutch') {
-    lines.push(`Poise under pressure: ${userWon ? 'Winning' : 'Losing'} a ${scoreDiff}-point game came down to the final possessions.`);
+    lines.push(pick([
+      `Poise under pressure: ${userWon ? 'Winning' : 'Losing'} a ${scoreDiff}-point game came down to the final possessions.`,
+      `Down to the Wire: This ${scoreDiff}-point nail-biter was decided by sheer mental toughness in the final minute.`,
+      `Heart-Stopper: A grueling battle that ${userWon ? 'went our way' : 'slipped through our fingers'} by just ${scoreDiff} points.`
+    ]));
   } else if (intensity === 'blowout') {
     if (userWon) {
-      lines.push(`Dominant performance: We maintained a ${scoreDiff}-point gap by controlling the tempo.`);
+      lines.push(pick([
+        `Dominant performance: We maintained a ${scoreDiff}-point gap by controlling the tempo.`,
+        `Total Command: We dictated every aspect of the game, coasting to a ${scoreDiff}-point win.`,
+        `No Contest: A massive ${scoreDiff}-point margin proves we were the superior team from tip-off.`
+      ]));
     } else {
-      lines.push(`Uphill battle: We conceded a ${scoreDiff}-point gap as they dictated the tempo throughout.`);
+      lines.push(pick([
+        `Uphill battle: We conceded a ${scoreDiff}-point gap as they dictated the tempo throughout.`,
+        `System Collapse: We were overwhelmed early and allowed a ${scoreDiff}-point deficit to spiral.`,
+        `Embarrassing Defeat: Letting a ${scoreDiff}-point gap open up is a sign of deep defensive issues.`
+      ]));
     }
   } else {
-    lines.push(`Steady execution: A ${scoreDiff}-point margin reflected ${userWon ? 'consistent play' : 'a struggle to bridge the gap'} across all four quarters.`);
+    lines.push(pick([
+      `Steady execution: A ${scoreDiff}-point margin reflected ${userWon ? 'consistent play' : 'a struggle to bridge the gap'} across all four quarters.`,
+      `Controlled Pace: We ${userWon ? 'kept them at arm\'s length' : 'were kept at arm\'s length'} for a ${scoreDiff}-point finish.`,
+      `Consistent Gap: Neither team went on a major run, resulting in a steady ${scoreDiff}-point difference.`
+    ]));
   }
 
-  // 4. Defensive Result (Efficiency Thresholds + Outcome Firewall)
+  // 4. Defensive Result
   if (userWon) {
     if (isLockdown) {
-      lines.push(`Defensive Lockdown: Your scheme limited their best player, ${oppBestPlayer.lastName}, to ${Math.round(oppFGPercent)}% shooting.`);
+      lines.push(pick([
+        `Defensive Lockdown: Your scheme limited ${oppBestPlayer.lastName} to ${Math.round(oppFGPercent)}% shooting.`,
+        `Clamped Down: ${oppBestPlayer.lastName} was in handcuffs tonight, finishing at a miserable ${Math.round(oppFGPercent)}%.`,
+        `Defensive Masterclass: We took ${oppBestPlayer.lastName} completely out of the game.`
+      ]));
     } else if (isDefensiveBreach) {
       lines.push(`Defensive Breach: Despite the win, ${oppBestPlayer.lastName} was an unstoppable force, shooting a clinical ${Math.round(oppFGPercent)}%.`);
     } else {
@@ -119,8 +172,4 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   }
 
   return lines;
-};
-
-export const getNarrative = (params: NarrativeParams): GameNarrative => {
-  return { analysisLines: [], lossReason: "" };
 };
