@@ -22,7 +22,7 @@ export const getNarrative = (params: NarrativeParams): GameNarrative => {
 export const getGameIntensity = (myPts: number, oppPts: number): GameIntensity => {
   const diff = Math.abs(myPts - oppPts);
   if (diff <= 5) return 'clutch';
-  if (diff >= 15) return 'blowout';
+  if (diff >= 10) return 'blowout'; // Updated from 15 to 10
   return 'normal';
 };
 
@@ -131,22 +131,22 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   } else if (intensity === 'blowout') {
     if (userWon) {
       lines.push(pick([
-        `Dominant performance: We maintained a ${scoreDiff}-point gap by controlling the tempo.`,
-        `Total Command: We dictated every aspect of the game, coasting to a ${scoreDiff}-point win.`,
-        `No Contest: A massive ${scoreDiff}-point margin proves we were the superior team from tip-off.`
+        `Dominant performance: We maintained a ${scoreDiff}-point lead by dictating the pace.`,
+        `Total Command: A ${scoreDiff}-point victory shows we were the superior team tonight.`,
+        `Blowout: We overwhelmed them, finishing with a commanding ${scoreDiff}-point margin.`
       ]));
     } else {
       lines.push(pick([
-        `Uphill battle: We conceded a ${scoreDiff}-point gap as they dictated the tempo throughout.`,
-        `System Collapse: We were overwhelmed early and allowed a ${scoreDiff}-point deficit to spiral.`,
-        `Embarrassing Defeat: Letting a ${scoreDiff}-point gap open up is a sign of deep defensive issues.`
+        `Uphill battle: We conceded a ${scoreDiff}-point gap as they dictated the tempo.`,
+        `Outclassed: We had no answer for their run, resulting in a ${scoreDiff}-point defeat.`,
+        `System Collapse: A ${scoreDiff}-point loss points to a total breakdown in execution.`
       ]));
     }
-  } else {
+  } else if (intensity === 'normal') {
     lines.push(pick([
-      `Steady execution: A ${scoreDiff}-point margin reflected ${userWon ? 'consistent play' : 'a struggle to bridge the gap'} across all four quarters.`,
-      `Controlled Pace: We ${userWon ? 'kept them at arm\'s length' : 'were kept at arm\'s length'} for a ${scoreDiff}-point finish.`,
-      `Consistent Gap: Neither team went on a major run, resulting in a steady ${scoreDiff}-point difference.`
+      `Steady execution: A ${scoreDiff}-point margin reflected consistent play from both sides.`,
+      `Controlled Finish: We ${userWon ? 'held them off' : 'were kept at bay'} for a ${scoreDiff}-point conclusion.`,
+      `Consistent Gap: Neither team went on a major run, keeping the game within ${scoreDiff} points.`
     ]));
   }
 
