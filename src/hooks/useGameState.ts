@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameSave, SeriesMatchup, Player } from '../types/save';
 import { validateAndFixRoster } from '../utils/rosterGenerator';
-import { GameResult, generatePlayerStats, COUNTER_MATRIX } from '../utils/gameSim';
+import { GameResult, generatePlayerStats, COUNTER_MATRIX, simulateLeagueDay } from '../utils/gameSim';
 import { randomNormal } from '../utils/statsMath';
 import { 
   ALL_CITIES, 
@@ -277,41 +277,8 @@ export const useGameState = () => {
       const aiTeams = currentSave.standings.filter(t => t.city !== currentSave.city && t.city !== opponentCity);
       const todayResults: Record<string, 'W' | 'L'> = { [currentSave.city]: isWin ? 'W' : 'L', [opponentCity]: isWin ? 'L' : 'W' };
 
-      for (let i = 0; i < aiTeams.length; i += 2) {
-        const teamA = aiTeams[i]; const teamB = aiTeams[i + 1];
-        if (teamB) {
-          const strategyA = selectCPUStrategy();
-          const strategyB = selectCPUStrategy();
-          
-          const teamAStrength = getTeamStrength(teamA.city, currentSave.standings);
-          const teamBStrength = getTeamStrength(teamB.city, currentSave.standings);
-          
-          // OVR modifier for simulation probabilities with Tactical Resilience
-          let modA = 1.0;
-          let modB = 1.0;
-
-          const getAIPenalty = (iq: number) => 0.12 - ((iq / 100) * 0.08); // Max reduction from 12% to 4%
-
-          if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) {
-            modA -= getAIPenalty(teamA.coachingIQ);
-          }
-          if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) {
-            modB -= getAIPenalty(teamB.coachingIQ);
-          }
-
-          const finalA = teamAStrength * modA;
-          const finalB = teamBStrength * modB;
-
-          const aWon = Math.random() < (0.5 + (finalA - finalB) / 100);
-          todayResults[teamA.city] = aWon ? 'W' : 'L';
-          todayResults[teamB.city] = aWon ? 'L' : 'W';
-          const aScore = Math.round(randomNormal(110 + (finalA - finalB), 10));
-          const bScore = Math.round(randomNormal(110 + (finalB - finalA), 10));
-          
-          teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore, aScore - bScore, strategyA, strategyB, false)));
-          teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore, bScore - aScore, strategyB, strategyA, false)));
-        }
-      }
+      const dayResults = simulateLeagueDay(currentSave.standings, currentSave.city, opponentCity);
+      Object.assign(todayResults, dayResults);
 
       const oppTeam = currentSave.standings.find(t => t.city === opponentCity);
       if (oppTeam) oppTeam.roster = oppTeam.roster.map(p => {

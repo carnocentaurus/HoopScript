@@ -1,4 +1,4 @@
-import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult, OffensiveFocus, DefensiveFocus, ScoutReport, SeasonStats, Strategy } from '../types/save';
+import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult, OffensiveFocus, DefensiveFocus, ScoutReport, SeasonStats, Strategy, PlayerStat } from '../types/save';
 
 
 
@@ -89,7 +89,6 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
   }
 };
 import { generateRoster, generateRookie, validateAndFixRoster } from './rosterGenerator';
-import { PlayerStat } from './gameSim';
 
 export const ALL_CITIES = [
   "Toronto", "Boston", "New York", "Brooklyn", "Philadelphia",

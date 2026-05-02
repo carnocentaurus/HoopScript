@@ -1,9 +1,60 @@
-import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
+import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy, TeamStanding, PlayerStat } from '../types/save';
 import { MIN_TEAM_SCORE, MIN_POSSESSIONS } from '../types';
-import { calculateTeamRatings } from './leagueEngine';
-import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate } from './statsMath';
+import { calculateTeamRatings, selectCPUStrategy, updatePlayerStats, getTeamStrength } from './leagueEngine';
+import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate, generateSimulatedStats } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
 import { getNarrative } from './narrativeEngine';
+
+/**
+ * Runs a 'Light Sim' for AI vs AI games.
+ * Pulls from tactical focuses logic.
+ */
+export const simulateLeagueDay = (
+  standings: TeamStanding[],
+  userCity: string,
+  opponentCity: string
+): Record<string, 'W' | 'L'> => {
+  const aiTeams = standings.filter(t => t.city !== userCity && t.city !== opponentCity);
+  const dayResults: Record<string, 'W' | 'L'> = {};
+
+  for (let i = 0; i < aiTeams.length; i += 2) {
+    const teamA = aiTeams[i];
+    const teamB = aiTeams[i + 1];
+    if (teamB) {
+      const strategyA = selectCPUStrategy();
+      const strategyB = selectCPUStrategy();
+      
+      const teamAStrength = getTeamStrength(teamA.city, standings);
+      const teamBStrength = getTeamStrength(teamB.city, standings);
+      
+      let modA = 1.0;
+      let modB = 1.0;
+
+      const getAIPenalty = (iq: number) => 0.12 - ((iq / 100) * 0.08);
+
+      if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) {
+        modA -= getAIPenalty(teamA.coachingIQ);
+      }
+      if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) {
+        modB -= getAIPenalty(teamB.coachingIQ);
+      }
+
+      const finalA = teamAStrength * modA;
+      const finalB = teamBStrength * modB;
+
+      const aWon = Math.random() < (0.5 + (finalA - finalB) / 100);
+      dayResults[teamA.city] = aWon ? 'W' : 'L';
+      dayResults[teamB.city] = aWon ? 'L' : 'W';
+      
+      const aScore = Math.round(randomNormal(110 + (finalA - finalB), 10));
+      const bScore = Math.round(randomNormal(110 + (finalB - finalA), 10));
+      
+      teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore, aScore - bScore, strategyA, strategyB, false)));
+      teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore, bScore - aScore, strategyB, strategyA, false)));
+    }
+  }
+  return dayResults;
+};
 
 export const COUNTER_MATRIX: Record<OffensiveFocus, DefensiveFocus> = {
   [OffensiveFocus.ATTACK_PAINT]: DefensiveFocus.PROTECT_RIM,
@@ -41,30 +92,6 @@ export interface GameResult {
   wasOppCountered: boolean;
   wasOppExploiting: boolean;
   gameNarrative: GameNarrative;
-}
-
-export interface PlayerStat {
-  playerId: string;
-  lastName: string;
-  number: number;
-  position: string;
-  overall: number;
-  isStarter: boolean;
-  min: number;
-  pts: number;
-  reb: number;
-  ast: number;
-  stl: number;
-  blk: number;
-  tov: number;
-  threePM: number;
-  threePA: number;
-  oreb: number;
-  dreb: number;
-  plusMinus: number;
-  fgm: number;
-  fga: number;
-  possessions: number;
 }
 
 /**
@@ -563,9 +590,14 @@ export const generatePlayerStats = (
   oppStrategy: Strategy,
   isUser: boolean
 ): PlayerStat => {
+  const stats = generateSimulatedStats(player, isWinner, teamScore, teamMargin);
   return {
-    playerId: player.id, lastName: player.lastName, number: player.number, position: player.position,
-    overall: player.overall, isStarter: player.isStarter, min: 30, pts: 20, reb: 5, ast: 5, stl: 1, blk: 1, tov: 2,
-    threePM: 2, threePA: 5, oreb: 1, dreb: 4, plusMinus: 0, fgm: 8, fga: 15, possessions: 100
+    ...stats,
+    playerId: player.id,
+    lastName: player.lastName,
+    number: player.number,
+    position: player.position,
+    overall: player.overall,
+    isStarter: player.isStarter
   };
 };

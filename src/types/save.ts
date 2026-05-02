@@ -1,3 +1,27 @@
+export interface PlayerStat {
+  playerId: string;
+  lastName: string;
+  number: number;
+  position: string;
+  overall: number;
+  isStarter: boolean;
+  min: number;
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  tov: number;
+  threePM: number;
+  threePA: number;
+  oreb: number;
+  dreb: number;
+  plusMinus: number;
+  fgm: number;
+  fga: number;
+  possessions: number;
+}
+
 export interface SeasonStats {
   gamesPlayed: number;
   gamesStarted: number;
