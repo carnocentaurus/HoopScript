@@ -364,6 +364,34 @@ const normalizeStatsToFloor = (
   currentScore.val = MIN_TEAM_SCORE;
 };
 
+/**
+ * Sudden Death Failsafe: Breaks ties by awarding 1 point to the tactically superior team.
+ */
+const forceWinner = (
+  teamAStats: PlayerStat[],
+  teamBStats: PlayerStat[],
+  scoreA: { val: number },
+  scoreB: { val: number },
+  iqA: number,
+  iqB: number,
+  delta: number
+) => {
+  if (scoreA.val !== scoreB.val) return;
+
+  // Higher Coach IQ or positive efficiency delta wins the tie-breaker
+  const aWins = (iqA + delta) >= iqB;
+  const winnerStats = aWins ? teamAStats : teamBStats;
+  const winnerScore = aWins ? scoreA : scoreB;
+
+  winnerScore.val += 1;
+  const star = [...winnerStats].sort((a, b) => b.overall - a.overall)[0];
+  if (star) {
+    star.pts += 1;
+    star.fgm += 1;
+    star.fga += 1;
+  }
+};
+
 const BASE_PACE = 102;
 
 export const simulateGame = (
@@ -402,99 +430,96 @@ export const simulateGame = (
   const myScore = { val: 0 };
   const oppScore = { val: 0 };
 
-  // --- DYNAMIC PACE ADJUSTMENT ---
-  let totalPossessions = Math.max(BASE_PACE, MIN_POSSESSIONS);
-  const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === cpuStrategy.defense;
-  const isOppCountered = COUNTER_MATRIX[cpuStrategy.offense] === userStrategy.defense;
-  
-  // If a team is countered, their efficiency drops. We increase pace to compensate 
-  // and give them more opportunities to reach the floor.
-  if (isUserCountered) totalPossessions += 4;
-  if (isOppCountered) totalPossessions += 4;
-
-  let myPityMod = myRatings.offense < 75 ? 1.08 : 1.0;
-  let oppPityMod = oppRatings.offense < 75 ? 1.08 : 1.0;
-  
-  let myFocusFactor = 1.0;
-  let oppFocusFactor = 1.0;
-
   let currentMyStrategy = { ...userStrategy };
   let currentOppStrategy = { ...cpuStrategy };
 
   let totalCounterBonus = 0;
   let counteringPossessions = 0;
 
-  for (let i = 0; i < totalPossessions; i++) {
-    // MID-GAME ADJUSTMENT (Start of 3rd Quarter, approx possession 51)
-    if (i === 51) {
-      // User Coach Adjustment
-      const myMargin = myScore.val - oppScore.val;
-      if (myMargin <= -10 && (Math.random() * 100 < myIQ)) {
-        currentMyStrategy.defense = COUNTER_MATRIX[currentOppStrategy.offense];
-      }
-      // Opponent Coach Adjustment
-      const oppMargin = oppScore.val - myScore.val;
-      if (oppMargin <= -10 && (Math.random() * 100 < oppIQ)) {
-        currentOppStrategy.defense = COUNTER_MATRIX[currentMyStrategy.offense];
-      }
-    }
+  const myPityMod = myRatings.offense < 75 ? 1.08 : 1.0;
+  const oppPityMod = oppRatings.offense < 75 ? 1.08 : 1.0;
+  let myFocusFactor = 1.0;
+  let oppFocusFactor = 1.0;
 
-    // Participation Gate: Get active lineups for this possession
-    const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
-    const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
-
-    // Scoring Floor Logic (Proactive efficiency boost)
-    if (i > 0 && i % 10 === 0) {
-      const myProjected = (myScore.val / i) * totalPossessions;
-      const oppProjected = (oppScore.val / i) * totalPossessions;
-      if (myProjected < 80) myFocusFactor = 1.10;
-      if (oppProjected < 80) oppFocusFactor = 1.10;
-    }
-
-    const isClutch = i >= totalPossessions - 10;
-
-    // Track strategy efficiency for delta
-    if (COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
-      totalCounterBonus -= 0.10;
-    } else if (EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
-      totalCounterBonus += 0.10;
-    } else {
-      totalCounterBonus += 0.05; // Standard efficiency for neutral matchup
-    }
-    counteringPossessions++;
-
-    simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
-    simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
-  }
-
-  // --- OVERTIME LOGIC ---
   let otCount = 0;
-  while (myScore.val === oppScore.val && otCount < 3) {
-    otCount++;
-    const otPossessions = 12; // Shorter period for OT
-    for (let i = 0; i < otPossessions; i++) {
+  let gameIsOver = false;
+
+  // --- 1. RUN SIMULATION PERIODS (Regulation + OT) ---
+  while (!gameIsOver) {
+    const isOvertime = otCount > 0;
+    
+    // Calculate possessions for this period
+    let periodPossessions = isOvertime ? 12 : Math.max(BASE_PACE, MIN_POSSESSIONS);
+    
+    if (!isOvertime) {
+      // Dynamic Pace adjustment only for regulation
+      const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === cpuStrategy.defense;
+      const isOppCountered = COUNTER_MATRIX[cpuStrategy.offense] === userStrategy.defense;
+      if (isUserCountered) periodPossessions += 4;
+      if (isOppCountered) periodPossessions += 4;
+    }
+
+    for (let i = 0; i < periodPossessions; i++) {
+      // Mid-game adjustment logic (Regulation only, 3rd quarter)
+      if (!isOvertime && i === 51) {
+        const myMargin = myScore.val - oppScore.val;
+        if (myMargin <= -10 && (Math.random() * 100 < myIQ)) {
+          currentMyStrategy.defense = COUNTER_MATRIX[currentOppStrategy.offense];
+        }
+        const oppMargin = oppScore.val - myScore.val;
+        if (oppMargin <= -10 && (Math.random() * 100 < oppIQ)) {
+          currentOppStrategy.defense = COUNTER_MATRIX[currentMyStrategy.offense];
+        }
+      }
+
       const myLineup = getProbabilisticLineup(myTeam.roster, myMinuteMap);
       const oppLineup = getProbabilisticLineup(oppRoster, oppMinuteMap);
-      simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, true, myPityMod, myFocusFactor);
-      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, true, oppPityMod, oppFocusFactor);
-    }
-  }
 
-  // Force Tie-Breaker (No Ties Allowed)
-  if (myScore.val === oppScore.val) {
-    if (Math.random() > 0.5) {
-      myScore.val += 2;
+      // Scoring Floor Efficiency Boost (Proactive)
+      if (i > 0 && i % 10 === 0) {
+        const myProjected = (myScore.val / i) * periodPossessions;
+        const oppProjected = (oppScore.val / i) * periodPossessions;
+        if (myProjected < 80) myFocusFactor = 1.10;
+        if (oppProjected < 80) oppFocusFactor = 1.10;
+      }
+
+      const isClutch = isOvertime || i >= periodPossessions - 10;
+
+      // Track Strategy Delta
+      if (COUNTER_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
+        totalCounterBonus -= 0.10;
+      } else if (EXPLOIT_MATRIX[currentMyStrategy.offense] === currentOppStrategy.defense) {
+        totalCounterBonus += 0.10;
+      } else {
+        totalCounterBonus += 0.05;
+      }
+      counteringPossessions++;
+
+      simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
+      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
+    }
+
+    // --- 2. APPLY SCORE FLOOR IMMEDIATELY ---
+    const myStats = myTeam.roster.map(p => playerStats[p.id]);
+    const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
+    normalizeStatsToFloor(myTeam.roster, myStats, myScore);
+    normalizeStatsToFloor(oppRoster, oppStats, oppScore);
+
+    // --- 3. FINAL CHECK / TIE BREAK ---
+    if (myScore.val !== oppScore.val) {
+      gameIsOver = true;
     } else {
-      oppScore.val += 2;
+      otCount++;
+      if (otCount >= 3) {
+        // Sudden death after 3OTs to prevent infinite loops
+        forceWinner(myStats, oppStats, myScore, oppScore, myIQ, oppIQ, totalCounterBonus / counteringPossessions);
+        gameIsOver = true;
+      }
     }
   }
 
-  // --- EMERGENCY FLOOR SCALING ---
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
   const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
-
-  normalizeStatsToFloor(myTeam.roster, myStats, myScore);
-  normalizeStatsToFloor(oppRoster, oppStats, oppScore);
 
   const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
 
