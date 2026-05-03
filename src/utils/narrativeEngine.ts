@@ -1,4 +1,5 @@
-import { Strategy, OffensiveFocus, DefensiveFocus } from '../types/save';
+import { Strategy, OffensiveFocus, DefensiveFocus, PlayerStat } from '../types/save';
+import { calculateGameScore } from './statsMath';
 
 export type GameIntensity = 'clutch' | 'normal' | 'blowout';
 
@@ -31,8 +32,10 @@ export interface AnalysisParams {
   intensity: GameIntensity;
   userOffense: string;
   oppDefense: string;
-  topScorer: { lastName: string, pts: number, fgm: number, fga: number, threePM: number, threePA: number };
-  oppBestPlayer: { lastName: string, pts: number, fgm: number, fga: number, threePM: number, threePA: number };
+  topScorer: PlayerStat;
+  oppBestPlayer: PlayerStat;
+  homeStats: PlayerStat[];
+  awayStats: PlayerStat[];
   scoreDiff: number;
   isCountered: boolean;
   isCountering: boolean;
@@ -40,6 +43,55 @@ export interface AnalysisParams {
 
 // Helper to grab a random line from a pool
 const pick = (lines: string[]) => lines[Math.floor(Math.random() * lines.length)];
+
+/**
+ * DETECTS STATISTICAL MILESTONES
+ */
+const checkMilestones = (player: PlayerStat) => {
+  const stats = [player.pts, player.reb, player.ast, player.stl, player.blk];
+  const countsGE10 = stats.filter(s => s >= 10).length;
+  
+  let milestone = "";
+  if (countsGE10 >= 3) milestone = "Triple-Double";
+  else if (countsGE10 >= 2) milestone = "Double-Double";
+
+  const defensiveAnchor = (player.stl + player.blk) >= 5;
+  const highTurnovers = player.tov >= 5;
+
+  return { milestone, defensiveAnchor, highTurnovers };
+};
+
+const MILESTONE_LINES = [
+  "Historic Night: ${name} posted a massive ${milestone}, dominating every facet of the floor.",
+  "All-Around Masterclass: ${name} stuffed the stat sheet with a ${milestone}, proving to be the ultimate Swiss Army knife tonight.",
+  "Statistical Dominance: Whether it was scoring, boards, or facilitating, ${name} was everywhere, logging a massive ${milestone}."
+];
+
+const DEFENSIVE_LINES = {
+  BLOCKS: [
+    "No Fly Zone: ${name} anchored the defense with ${blocks} blocks, making every entry pass a risk.",
+    "Paint Protector: The interior was off-limits tonight as ${name} swatted ${blocks} shots, effectively erasing easy looks at the rim."
+  ],
+  STEALS: [
+    "Thievery in the Passing Lanes: ${name} was a nightmare for their ball-handlers, snagging ${steals} steals and fueling our transition game."
+  ],
+  GENERAL: [
+    "Defensive Anchor: ${name} was everywhere on the defensive end, disrupting the opponent's rhythm all night."
+  ]
+};
+
+const TURNOVER_LINES = {
+  WIN: [
+    "Careless but Capable: Despite ${name}'s ${to} turnovers, the team survived the sloppy play.",
+    "Escaping the Mess: We survived ${name}'s ${to} giveaways, though the lack of ball security made this win much harder than it needed to be.",
+    "Unforced Errors: Despite ${name} struggling with ${to} turnovers, the team's overall efficiency masked the individual sloppiness."
+  ],
+  LOSS: [
+    "Ball Security Crisis: ${name}'s ${to} turnovers proved fatal, gifting the opponent easy transition buckets.",
+    "Point of Failure: It is impossible to win when your primary option coughs up the ball ${to} times; the turnovers completely stalled our momentum.",
+    "Self-Inflicted Wounds: ${name}'s ${to} turnovers were the story of the game, as we repeatedly handed the ball back to an opponent who capitalized on every mistake."
+  ]
+};
 
 const TACTICAL_MAP: any = {
   OFFENSE: {
@@ -193,6 +245,58 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
       lines.push(`Defensive Breach: Despite the scheme, ${oppBestPlayer.lastName} was unstoppable, shooting a clinical ${Math.round(oppFGPercent)}%.`);
     } else {
       lines.push(`Deficit in Coverage: ${oppBestPlayer.lastName} found too many openings, finishing with ${oppBestPlayer.pts} points.`);
+    }
+  }
+
+  // 5. Milestones, Defense, and Ball Security (New)
+  const userTeamStats = params.homeStats.find(p => p.lastName === topScorer.lastName) ? params.homeStats : params.awayStats;
+  const extraLines: string[] = [];
+
+  // POTG & Milestones
+  let bestGameScore = -Infinity;
+  let potg: PlayerStat | null = null;
+  for (const p of userTeamStats) {
+    const score = calculateGameScore(p);
+    if (score > bestGameScore) {
+      bestGameScore = score;
+      potg = p;
+    }
+  }
+
+  if (potg) {
+    const { milestone } = checkMilestones(potg);
+    if (milestone) {
+      extraLines.push(pick(MILESTONE_LINES).replace("${name}", potg.lastName).replace("${milestone}", milestone));
+    }
+  }
+
+  // Defensive Standout
+  const defensiveStandout = userTeamStats.find(p => (p.stl + p.blk) >= 5);
+  if (defensiveStandout) {
+    let defLine = "";
+    if (defensiveStandout.blk >= 3) {
+      defLine = pick(DEFENSIVE_LINES.BLOCKS).replace("${name}", defensiveStandout.lastName).replace("${blocks}", defensiveStandout.blk.toString());
+    } else if (defensiveStandout.stl >= 3) {
+      defLine = pick(DEFENSIVE_LINES.STEALS).replace("${name}", defensiveStandout.lastName).replace("${steals}", defensiveStandout.stl.toString());
+    } else {
+      defLine = pick(DEFENSIVE_LINES.GENERAL).replace("${name}", defensiveStandout.lastName);
+    }
+    extraLines.push(defLine);
+  }
+
+  // Ball Security
+  const highTOPlayer = userTeamStats.find(p => p.tov >= 5);
+  if (highTOPlayer) {
+    const toLines = userWon ? TURNOVER_LINES.WIN : TURNOVER_LINES.LOSS;
+    extraLines.push(pick(toLines).replace("${name}", highTOPlayer.lastName).replace("${to}", highTOPlayer.tov.toString()));
+  }
+
+  // Randomly append 1-2 extra lines
+  if (extraLines.length > 0) {
+    const count = Math.min(extraLines.length, Math.floor(Math.random() * 2) + 1);
+    const shuffled = extraLines.sort(() => 0.5 - Math.random());
+    for (let i = 0; i < count; i++) {
+      lines.push(shuffled[i]);
     }
   }
 

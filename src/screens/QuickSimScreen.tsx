@@ -46,6 +46,8 @@ const QuickSimScreen = ({
         oppDefense: result.finalOppStrategy.defense,
         topScorer: result.myBestPlayer,
         oppBestPlayer: result.oppBestPlayer,
+        homeStats: result.myTeamStats,
+        awayStats: result.oppTeamStats,
         scoreDiff,
         isCountered: result.wasUserCountered,
         isCountering: result.wasOppCountered
