@@ -52,7 +52,14 @@ const TACTICAL_MAP: any = {
 /**
  * DETERMINES TACTICAL NARRATIVE WITH VARIATION
  */
-export const getTacticalNarrative = (userOffense: string, oppDefense: string, starFG: number, starName: string): string => {
+export const getTacticalNarrative = (
+  userOffense: string, 
+  oppDefense: string, 
+  starFG: number, 
+  starName: string,
+  userWon: boolean,
+  intensity: GameIntensity
+): string => {
   const mapping = TACTICAL_MAP.OFFENSE[userOffense];
   
   const stalemates = [
@@ -63,14 +70,23 @@ export const getTacticalNarrative = (userOffense: string, oppDefense: string, st
 
   if (!mapping) return pick(stalemates);
 
+  // SCENARIO 1: YOU WERE COUNTERED
   if (oppDefense === mapping.counteredBy) {
-    if (starFG > 55) {
+    if (userWon) {
+      if (starFG > 55) {
+        return pick([
+          `Brute Force: They had the right scheme to stop your ${userOffense}, but ${starName} was simply too talented to be contained.`,
+          `Skill Gap: Despite being tactically countered, ${starName} powered through their ${oppDefense} with elite shot-making.`,
+          `Outplaying the Blueprint: The scheme was a failure, but ${starName} saved the day by ignoring the double-teams.`
+        ]);
+      }
       return pick([
-        `Brute Force: They had the right scheme to stop your ${userOffense}, but ${starName} was simply too talented to be contained.`,
-        `Skill Gap: Despite being tactically countered, ${starName} powered through their ${oppDefense} with elite shot-making.`,
-        `Outplaying the Blueprint: The scheme was a failure, but ${starName} saved the day by ignoring the double-teams.`
+        `Gritty Survival: Their ${oppDefense} nearly neutralized our ${userOffense}, but we found a way to win the ${intensity} battle anyway.`,
+        `Winning Ugly: We were tactically outmatched by their ${oppDefense}, but pure execution secured the victory.`,
+        `Overcoming the Odds: Despite a schematic disadvantage, the roster powered through to a victory.`
       ]);
     }
+    // Lost and countered
     return pick([
       `Tactical Failure: Their ${oppDefense} successfully neutralized your ${userOffense}.`,
       `Out-Coached: We walked right into their ${oppDefense} and never found an answer.`,
@@ -78,11 +94,20 @@ export const getTacticalNarrative = (userOffense: string, oppDefense: string, st
     ]);
   }
 
+  // SCENARIO 2: YOU COUNTERED THEM
   if (oppDefense === mapping.exploits) {
+    if (userWon) {
+      return pick([
+        `Tactical Edge: Your ${userOffense} successfully exploited their ${oppDefense}.`,
+        `Schematic Masterclass: We completely dismantled their ${oppDefense} by sticking to our ${userOffense} philosophy.`,
+        `The Right Blueprint: Our scouts nailed it—their ${oppDefense} had no answer for our ${userOffense}.`
+      ]);
+    }
+    // Countered them but lost
     return pick([
-      `Tactical Edge: Your ${userOffense} successfully exploited their ${oppDefense}.`,
-      `Schematic Masterclass: We completely dismantled their ${oppDefense} by sticking to our ${userOffense} philosophy.`,
-      `The Right Blueprint: Our scouts nailed it—their ${oppDefense} had no answer for our ${userOffense}.`
+      `Empty Edge: The strategy was perfect, but even exploiting their ${oppDefense} wasn't enough to secure the win.`,
+      `Wasted Blueprint: Our ${userOffense} worked as intended, but we failed to capitalize in the ${intensity} moments.`,
+      `Execution Deficit: We won the coaching battle, but the performance on the floor let us down.`
     ]);
   }
 
@@ -103,8 +128,8 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   const isLockdown = oppFGPercent < 42 && opp3PPercent < 33;
   const isDefensiveBreach = oppFGPercent > 50;
 
-  // 1. Tactical Reason
-  lines.push(getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName));
+  // 1. Tactical Reason (Updated to pass userWon and intensity)
+  lines.push(getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName, userWon, intensity));
 
   // 2. Star Player Impact
   if (userWon) {
