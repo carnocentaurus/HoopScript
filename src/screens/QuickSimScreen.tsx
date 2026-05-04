@@ -294,9 +294,19 @@ const QuickSimScreen = ({
                   <View style={globalStyles.scoutModalReport}>
                     <View style={globalStyles.analysisRow}>
                        <Text style={globalStyles.analysisLabel}>OPPONENT EXPECTED</Text>
-                       <Text style={globalStyles.analysisValue}>
-                          {save.lastScoutReport?.predictedOffense} / {save.lastScoutReport?.predictedDefense}
-                       </Text>
+                       {save.lastScoutReport?.displayMode === 'dual' && save.lastScoutReport.possibleStrategies ? (
+                         <View>
+                           {save.lastScoutReport.possibleStrategies.map((strat, idx) => (
+                             <Text key={idx} style={globalStyles.analysisValue}>
+                               {strat.offense} / {strat.defense}
+                             </Text>
+                           ))}
+                         </View>
+                       ) : (
+                         <Text style={globalStyles.analysisValue}>
+                            {save.lastScoutReport?.predictedOffense} / {save.lastScoutReport?.predictedDefense}
+                         </Text>
+                       )}
                     </View>
 
                     <View style={globalStyles.analysisRow}>
@@ -344,7 +354,7 @@ const QuickSimScreen = ({
                           borderColor: COLORS.border
                         }}>
                            <Text style={{ color: result.myScore > result.oppScore ? COLORS.success : '#B34726', fontSize: 12, fontFamily: 'Oswald', marginBottom: 8, letterSpacing: 1 }}>
-                             {result.myScore > result.oppScore ? 'WHY WE WON' : 'WHY WE LOST'}
+                             {result.myScore > result.oppScore ? 'GAME SUMMARY (WIN)' : 'GAME SUMMARY (LOSS)'}
                            </Text>
                            {analysisLines.map((line, idx) => (
                              <View key={idx} style={{ flexDirection: 'row', marginBottom: 6 }}>
