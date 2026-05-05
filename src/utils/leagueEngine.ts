@@ -2,14 +2,91 @@ import { Player, GameSave, TeamStanding, DraftPick, SeriesMatchup, LotteryResult
 
 
 
-export const selectCPUStrategy = (): Strategy => {
-  const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
-  const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
-  
-  return {
-    offense: offenses[Math.floor(Math.random() * offenses.length)],
-    defense: defenses[Math.floor(Math.random() * defenses.length)]
-  };
+/**
+ * Determines a team's natural identity based on roster composition.
+ */
+export const getTeamIdentity = (roster: Player[]): Strategy => {
+  const starters = roster.filter(p => p.isStarter);
+  const team = starters.length >= 5 ? starters : roster.slice(0, 5);
+
+  // Offensive Identity
+  let offense = OffensiveFocus.PACE_SPACE;
+  const guards = team.filter(p => p.position === 'PG' || p.position === 'SG');
+  const bigs = team.filter(p => p.position === 'PF' || p.position === 'C');
+  const star = [...team].sort((a, b) => b.overall - a.overall)[0];
+  const secondStar = [...team].sort((a, b) => b.overall - a.overall)[1];
+
+  const guardsOffense = guards.reduce((sum, p) => sum + p.offense, 0) / (guards.length || 1);
+  const bigsOffense = bigs.reduce((sum, p) => sum + p.offense, 0) / (bigs.length || 1);
+
+  if (star && secondStar && (star.overall - secondStar.overall > 8)) {
+    offense = OffensiveFocus.ISO_STAR;
+  } else if (bigsOffense > guardsOffense + 5) {
+    offense = OffensiveFocus.ATTACK_PAINT;
+  } else {
+    offense = OffensiveFocus.PACE_SPACE;
+  }
+
+  // Defensive Identity
+  let defense = DefensiveFocus.PERIMETER_LOCK;
+  const perimeterDef = guards.reduce((sum, p) => sum + p.defense, 0) / (guards.length || 1);
+  const interiorDef = bigs.reduce((sum, p) => sum + p.defense, 0) / (bigs.length || 1);
+
+  if (interiorDef > perimeterDef + 3) {
+    defense = DefensiveFocus.PROTECT_RIM;
+  } else if (perimeterDef > interiorDef + 3) {
+    defense = DefensiveFocus.PERIMETER_LOCK;
+  } else {
+    defense = Math.random() > 0.5 ? DefensiveFocus.DOUBLE_TEAM : DefensiveFocus.PROTECT_RIM;
+  }
+
+  return { offense, defense };
+};
+
+/**
+ * Selects a strategy for the CPU, influenced by identity, coaching IQ, and context.
+ */
+export const selectCPUStrategy = (
+  team: TeamStanding, 
+  opponent?: TeamStanding, 
+  isPlayoffs: boolean = false
+): Strategy => {
+  const identity = getTeamIdentity(team.roster);
+  const coachingIQ = team.coachingIQ || 60;
+  const predictability = team.predictability || 70;
+
+  // 1. Determine base strategy (sticking to identity)
+  let strategy = { ...identity };
+
+  // 2. Playoff Intensity: Coaches are more likely to deviate from "predictability" to win
+  const effectivePredictability = isPlayoffs ? predictability * 0.7 : predictability;
+
+  // 3. Roll for Adaptation: High IQ coaches are better at identifying counters
+  const roll = Math.random() * 100;
+  if (roll > effectivePredictability && opponent) {
+    const oppIdentity = getTeamIdentity(opponent.roster);
+    
+    // Adaptation Logic: Attempt to counter the opponent's likely focus
+    if (roll < effectivePredictability + (coachingIQ / 2)) {
+      // Offensive adaptation: exploit opponent's likely defensive weakness
+      if (oppIdentity.defense === DefensiveFocus.PROTECT_RIM) strategy.offense = OffensiveFocus.PACE_SPACE;
+      else if (oppIdentity.defense === DefensiveFocus.PERIMETER_LOCK) strategy.offense = OffensiveFocus.ATTACK_PAINT;
+      else if (oppIdentity.defense === DefensiveFocus.DOUBLE_TEAM) strategy.offense = OffensiveFocus.ISO_STAR;
+
+      // Defensive adaptation: counter opponent's likely offensive focus
+      if (oppIdentity.offense === OffensiveFocus.ATTACK_PAINT) strategy.defense = DefensiveFocus.PROTECT_RIM;
+      else if (oppIdentity.offense === OffensiveFocus.PACE_SPACE) strategy.defense = DefensiveFocus.PERIMETER_LOCK;
+      else if (oppIdentity.offense === OffensiveFocus.ISO_STAR) strategy.defense = DefensiveFocus.DOUBLE_TEAM;
+    } else {
+      // Random variation (trying something new)
+      const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+      const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+      strategy.offense = offenses[Math.floor(Math.random() * offenses.length)];
+      strategy.defense = defenses[Math.floor(Math.random() * defenses.length)];
+    }
+  }
+
+  return strategy;
 };
 
 export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, opponentPredictability: number): ScoutReport => {
@@ -55,6 +132,20 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
 
   const secondStrategy = availableForB[Math.floor(Math.random() * availableForB.length)];
 
+  // Determine Coaching Profile
+  let coachingProfile = "Standard";
+  if (opponentIQ >= 85) coachingProfile = "Elite Tactician";
+  else if (opponentIQ >= 70) coachingProfile = "Modern Strategist";
+  else if (opponentIQ <= 45) coachingProfile = "Traditionalist";
+
+  if (opponentPredictability <= 40) coachingProfile = "Wild Card";
+  else if (opponentPredictability >= 80) coachingProfile += " (Rigid)";
+
+  // Determine Adjustment Tendency
+  let adjustmentTendency: 'Low' | 'Moderate' | 'High' = 'Moderate';
+  if (opponentIQ >= 80) adjustmentTendency = 'High';
+  else if (opponentIQ <= 50) adjustmentTendency = 'Low';
+
   if (isAccurate) {
     return {
       city: "Opponent",
@@ -65,7 +156,9 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
       predictability: opponentPredictability,
       uncertaintyHigh: uncertaintyHigh,
       displayMode: displayMode,
-      possibleStrategies: displayMode === 'dual' ? [probA, secondStrategy] : undefined
+      possibleStrategies: displayMode === 'dual' ? [probA, secondStrategy] : undefined,
+      coachingProfile,
+      adjustmentTendency
     };
   } else {
     // If not accurate, we show a random strategy as Probability A
@@ -84,7 +177,9 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
       predictability: opponentPredictability,
       uncertaintyHigh: uncertaintyHigh,
       displayMode: displayMode,
-      possibleStrategies: displayMode === 'dual' ? [wrongProbA, wrongProbB] : undefined
+      possibleStrategies: displayMode === 'dual' ? [wrongProbA, wrongProbB] : undefined,
+      coachingProfile,
+      adjustmentTendency
     };
   }
 };

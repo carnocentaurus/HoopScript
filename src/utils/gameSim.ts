@@ -12,7 +12,8 @@ import { getNarrative, GameNarrative } from './narrativeEngine';
 export const simulateLeagueDay = (
   standings: TeamStanding[],
   userCity: string,
-  opponentCity: string
+  opponentCity: string,
+  isPlayoffs: boolean = false
 ): Record<string, 'W' | 'L'> => {
   const aiTeams = standings.filter(t => t.city !== userCity && t.city !== opponentCity);
   const dayResults: Record<string, 'W' | 'L'> = {};
@@ -21,8 +22,8 @@ export const simulateLeagueDay = (
     const teamA = aiTeams[i];
     const teamB = aiTeams[i + 1];
     if (teamB) {
-      const strategyA = selectCPUStrategy();
-      const strategyB = selectCPUStrategy();
+      const strategyA = selectCPUStrategy(teamA, teamB, isPlayoffs);
+      const strategyB = selectCPUStrategy(teamB, teamA, isPlayoffs);
       
       const teamAStrength = getTeamStrength(teamA.city, standings);
       const teamBStrength = getTeamStrength(teamB.city, standings);
@@ -88,6 +89,8 @@ export interface GameResult {
   wasOppCountered: boolean;
   wasOppExploiting: boolean;
   gameNarrative: GameNarrative;
+  userAdjustedMidGame: boolean;
+  oppAdjustedMidGame: boolean;
 }
 
 /**
@@ -433,6 +436,9 @@ export const simulateGame = (
   let currentMyStrategy = { ...userStrategy };
   let currentOppStrategy = { ...cpuStrategy };
 
+  let userAdjustedMidGame = false;
+  let oppAdjustedMidGame = false;
+
   let totalCounterBonus = 0;
   let counteringPossessions = 0;
 
@@ -464,11 +470,15 @@ export const simulateGame = (
       if (!isOvertime && i === 51) {
         const myMargin = myScore.val - oppScore.val;
         if (myMargin <= -10 && (Math.random() * 100 < myIQ)) {
+          const oldDef = currentMyStrategy.defense;
           currentMyStrategy.defense = COUNTER_MATRIX[currentOppStrategy.offense];
+          if (oldDef !== currentMyStrategy.defense) userAdjustedMidGame = true;
         }
         const oppMargin = oppScore.val - myScore.val;
         if (oppMargin <= -10 && (Math.random() * 100 < oppIQ)) {
+          const oldDef = currentOppStrategy.defense;
           currentOppStrategy.defense = COUNTER_MATRIX[currentMyStrategy.offense];
+          if (oldDef !== currentOppStrategy.defense) oppAdjustedMidGame = true;
         }
       }
 
@@ -598,7 +608,9 @@ export const simulateGame = (
     wasUserExploiting,
     wasOppCountered,
     wasOppExploiting,
-    gameNarrative
+    gameNarrative,
+    userAdjustedMidGame,
+    oppAdjustedMidGame
   };
 };
 

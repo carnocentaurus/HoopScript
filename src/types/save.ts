@@ -183,6 +183,8 @@ export interface ScoutReport {
   uncertaintyHigh: boolean;
   possibleStrategies?: Strategy[];
   displayMode: 'single' | 'dual';
+  coachingProfile: string;
+  adjustmentTendency: 'Low' | 'Moderate' | 'High';
 }
 
 export interface GameSave {

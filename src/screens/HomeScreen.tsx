@@ -313,12 +313,12 @@ const HomeScreen = ({
                 <View style={globalStyles.scoutModalReport}>
                   <View style={[globalStyles.flexRow, { justifyContent: 'space-around', marginBottom: 20, backgroundColor: COLORS.secondary, padding: 10, borderRadius: 8 }]}>
                      <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>COACH IQ</Text>
-                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.coachingIQ}</Text>
+                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>COACHING PROFILE</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.coachingProfile}</Text>
                      </View>
                      <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>PREDICTABILITY</Text>
-                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.predictability}%</Text>
+                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>ADJUSTMENT TENDENCY</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.adjustmentTendency}</Text>
                      </View>
                   </View>
 

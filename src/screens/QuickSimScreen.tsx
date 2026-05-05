@@ -66,7 +66,9 @@ const QuickSimScreen = ({
     if (save.lastScoutReport && save.lastScoutReport.city === opponent.city && save.lastScoutReport.actualStrategy) {
       return save.lastScoutReport.actualStrategy;
     }
-    return selectCPUStrategy();
+    const oppTeam = save.standings.find(t => t.city === opponent.city);
+    const myTeam = save.standings.find(t => t.city === save.city);
+    return selectCPUStrategy(oppTeam!, myTeam, !!save.playoffs);
   });
 
   const StatTable = ({ stats, potgId }: { stats: any[], potgId?: string }) => (
@@ -292,6 +294,16 @@ const QuickSimScreen = ({
                 <View style={globalStyles.scoutModalContent}>
                   <Text style={globalStyles.scoutModalCity}>Tactical Analysis</Text>
                   <View style={globalStyles.scoutModalReport}>
+                    {save.lastScoutReport && (
+                      <View style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', padding: 12, borderRadius: 8, marginBottom: 15 }}>
+                        <Text style={{ color: COLORS.textSub, fontSize: 10, fontFamily: 'Oswald', letterSpacing: 1 }}>COACHING PROFILE</Text>
+                        <Text style={{ color: COLORS.primary, fontSize: 16, fontFamily: 'Oswald', marginVertical: 4 }}>{save.lastScoutReport.coachingProfile}</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 11, fontFamily: FONTS.secondary, opacity: 0.8 }}>
+                          Tendency to Adjust: <Text style={{ color: save.lastScoutReport.adjustmentTendency === 'High' ? COLORS.primary : COLORS.white }}>{save.lastScoutReport.adjustmentTendency}</Text>
+                        </Text>
+                      </View>
+                    )}
+
                     <View style={globalStyles.analysisRow}>
                        <Text style={globalStyles.analysisLabel}>OPPONENT EXPECTED</Text>
                        {save.lastScoutReport?.displayMode === 'dual' && save.lastScoutReport.possibleStrategies ? (
@@ -314,6 +326,9 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
                        </Text>
+                       {result?.oppAdjustedMidGame && (
+                         <Text style={{ color: COLORS.primary, fontSize: 9, fontFamily: 'Oswald', marginTop: 2 }}>* ADJUSTED DEFENSE IN 2ND HALF</Text>
+                       )}
                        <Text style={result?.wasOppCountered ? globalStyles.analysisCounterWinText : (result?.wasOppExploiting ? globalStyles.analysisCounterText : { color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginTop: 5 })}>
                          {result?.wasOppCountered 
                            ? `DEFENSIVE LOCK: YOU NEUTRALIZED THEIR ${result?.finalOppStrategy.offense}`
@@ -329,6 +344,9 @@ const QuickSimScreen = ({
                        <Text style={globalStyles.analysisValue}>
                           {result?.finalUserStrategy.offense} / {result?.finalUserStrategy.defense}
                        </Text>
+                       {result?.userAdjustedMidGame && (
+                         <Text style={{ color: COLORS.primary, fontSize: 9, fontFamily: 'Oswald', marginTop: 2 }}>* ADJUSTED DEFENSE IN 2ND HALF</Text>
+                       )}
                        <Text style={result?.wasUserCountered ? globalStyles.analysisCounterText : (result?.wasUserExploiting ? globalStyles.analysisCounterWinText : { color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald', marginTop: 5 })}>
                          {result?.wasUserCountered 
                            ? `OFFENSIVE STALL: YOUR ${result?.finalUserStrategy.offense} WAS NEUTRALIZED`
@@ -364,6 +382,13 @@ const QuickSimScreen = ({
                                </Text>
                              </View>
                            ))}
+                           {result.oppAdjustedMidGame && (
+                             <View style={{ flexDirection: 'row', marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' }}>
+                               <Text style={{ color: COLORS.primary, fontSize: 11, fontFamily: FONTS.secondary, lineHeight: 16 }}>
+                                 NOTE: The opposing coach adjusted their defense mid-game to better counter your offensive scheme.
+                               </Text>
+                             </View>
+                           )}
                         </View>
                       </View>
                     )}

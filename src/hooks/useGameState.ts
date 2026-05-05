@@ -201,8 +201,13 @@ export const useGameState = () => {
     }
 
     const oppTeam = currentSave.standings.find(t => t.city === oppCity);
-    const oppStrategy = selectCPUStrategy(); 
-    const report = generateScoutReport(oppStrategy, oppTeam?.coachingIQ ?? 60, oppTeam?.predictability ?? 60);
+    const myTeam = currentSave.standings.find(t => t.city === currentSave.city);
+
+    if (!oppTeam || !myTeam) return;
+
+    // We pass the context to selectCPUStrategy to see what they are LIKELY to do
+    const oppStrategy = selectCPUStrategy(oppTeam, myTeam, !!currentSave.playoffs); 
+    const report = generateScoutReport(oppStrategy, oppTeam.coachingIQ ?? 60, oppTeam.predictability ?? 60);
     report.city = oppCity;
     report.actualStrategy = oppStrategy;
 
@@ -227,23 +232,44 @@ export const useGameState = () => {
     if (!currentSave) return;
 
     if (currentSave.playoffs) {
-      // ... playoff logic (unchanged internally)
+      const isUserWin = result.myScore > result.oppScore;
+      const opponentCity = currentSave.playoffs.opponentCity;
+
+      // Update User Roster
+      currentSave.roster = currentSave.roster.map(p => {
+        const pStat = result.myTeamStats.find(s => s.playerId === p.id);
+        return pStat ? updatePlayerStats(p, pStat) : p;
+      });
+
+      // Update Opponent Roster
+      const oppTeam = currentSave.standings.find(t => t.city === opponentCity);
+      if (oppTeam) oppTeam.roster = oppTeam.roster.map(p => {
+        const pStat = result.oppTeamStats.find(s => s.playerId === p.id);
+        return pStat ? updatePlayerStats(p, pStat) : p;
+      });
+
       const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
         (s.highSeed === currentSave.city || s.lowSeed === currentSave.city) && s.round === currentSave.playoffs!.round
       )?.id;
 
+      // Simulate ALL playoff games for this "day" (one game per series)
+      const playoffResults = simulateLeagueDay(currentSave.standings, currentSave.city, opponentCity, true);
+
       currentSave.playoffBracket = currentSave.playoffBracket?.map((series: SeriesMatchup) => {
         if (series.isCompleted || series.round !== currentSave.playoffs!.round) return series;
-        const highProb = getHighSeedWinProb(series.highSeed, series.lowSeed, currentSave.standings);
-        let highWon = Math.random() < highProb;
-
+        
+        let highWon = false;
         if (series.id === userSeriesId) {
           const isUserHigh = series.highSeed === currentSave.city;
-          const userWon = result.myScore > result.oppScore;
-          highWon = isUserHigh ? userWon : !userWon;
-          if (userWon) currentSave.playoffs!.myWins += 1;
+          highWon = isUserHigh ? isUserWin : !isUserWin;
+          if (isUserWin) currentSave.playoffs!.myWins += 1;
           else currentSave.playoffs!.oppWins += 1;
+        } else {
+          // AI Series
+          const resHigh = playoffResults[series.highSeed];
+          highWon = resHigh === 'W';
         }
+
         if (highWon) series.highSeedWins += 1;
         else series.lowSeedWins += 1;
         if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
@@ -365,10 +391,18 @@ export const useGameState = () => {
     if (!currentSave || !currentSave.playoffBracket) return;
 
     const round = currentSave.playoffs?.round || 1;
+    const isPlayoffs = !!currentSave.playoffs;
+
+    // Use simulateLeagueDay for strategy-aware outcomes
+    const dailyResults = simulateLeagueDay(currentSave.standings, "NONE", "NONE", isPlayoffs);
+
     currentSave.playoffBracket = currentSave.playoffBracket.map(series => {
       if (series.round !== round || series.isCompleted) return series;
-      const prob = getHighSeedWinProb(series.highSeed, series.lowSeed, currentSave.standings);
-      if (Math.random() < prob) series.highSeedWins += 1;
+      
+      const resHigh = dailyResults[series.highSeed];
+      const highWon = resHigh === 'W';
+
+      if (highWon) series.highSeedWins += 1;
       else series.lowSeedWins += 1;
       if (series.highSeedWins === 4 || series.lowSeedWins === 4) series.isCompleted = true;
       return series;
