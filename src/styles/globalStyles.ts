@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { COLORS, SPACING, FONTS } from './theme';
 
 export const globalStyles = StyleSheet.create({
@@ -301,6 +301,84 @@ export const globalStyles = StyleSheet.create({
   scoutReportValue: {
     color: COLORS.primary,
     fontWeight: 'bold'
+  },
+  scoutStatusBox: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  scoutStatusText: {
+    color: '#F0F0F0',
+    fontFamily: FONTS.primary,
+    fontSize: 13,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  scoutStatusSubText: {
+    color: '#F0F0F0',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 4,
+    lineHeight: 14,
+  },
+  scoutStrategyCard: {
+    backgroundColor: '#1E1E1E',
+    padding: 8,
+    borderRadius: 12,
+    marginBottom: 12,
+    flexDirection: 'column',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  scoutStrategyAccent: {
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.orange,
+  },
+  scoutStrategyHeader: {
+    color: COLORS.textSub,
+    fontSize: 9,
+    fontFamily: FONTS.primary,
+    marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  scoutStrategyValue: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontFamily: 'Oswald',
+  },
+  scoutChipRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  scoutChip: {
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+  },
+  scoutChipLabel: {
+    color: COLORS.textMuted,
+    fontSize: 8,
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
+  },
+  scoutChipValue: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontFamily: 'Oswald',
+  },
+  scoutPredictabilityMonospace: {
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
 
   // --- MODALS ---

@@ -304,70 +304,76 @@ const HomeScreen = ({
         <View style={globalStyles.modalOverlay}>
           <View style={globalStyles.scoutModalContainer}>
             <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-              <Text style={globalStyles.scoutModalTitle}>SCOUTING REPORT</Text>
+              <Text style={[globalStyles.scoutModalTitle, { color: COLORS.orange }]}>SCOUTING REPORT</Text>
             </View>
             
             <View style={globalStyles.scoutModalContent}>
               <Text style={globalStyles.scoutModalCity}>{opponent.city}</Text>
               {save.lastScoutReport && save.lastScoutReport.city === opponent.city ? (
                 <View style={globalStyles.scoutModalReport}>
-                  <View style={[globalStyles.flexRow, { justifyContent: 'space-around', marginBottom: 20, backgroundColor: COLORS.secondary, padding: 10, borderRadius: 8 }]}>
-                     <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>COACHING PROFILE</Text>
-                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.coachingProfile}</Text>
-                     </View>
-                     <View style={{ alignItems: 'center' }}>
-                        <Text style={{ color: COLORS.textMuted, fontSize: 10, fontFamily: 'Oswald' }}>ADJUSTMENT TENDENCY</Text>
-                        <Text style={{ color: COLORS.white, fontSize: 18, fontFamily: 'Oswald' }}>{save.lastScoutReport.adjustmentTendency}</Text>
-                     </View>
+                  <View style={globalStyles.scoutChipRow}>
+                    <View style={globalStyles.scoutChip}>
+                      <Text style={globalStyles.scoutChipLabel}>COACHING PROFILE</Text>
+                      <Text style={globalStyles.scoutChipValue}>{save.lastScoutReport.coachingProfile}</Text>
+                    </View>
+                    <View style={globalStyles.scoutChip}>
+                      <Text style={globalStyles.scoutChipLabel}>ADJUSTMENT</Text>
+                      <Text style={globalStyles.scoutChipValue}>{save.lastScoutReport.adjustmentTendency}</Text>
+                    </View>
                   </View>
 
                   {(() => {
                     const report = save.lastScoutReport;
                     const predictability = report.predictability;
                     
-                    let boxColor = '#B34726'; // Default: Orange (Uncertainty High)
+                    let borderColor = COLORS.primary; 
                     let mainText = 'SCOUTING UNCERTAINTY HIGH';
                     let subText = 'Opponent tendencies are difficult to pin down.';
+                    let iconName = "alert-circle-outline";
 
                     if (predictability > 75) {
-                      boxColor = '#2D5A27'; // Green
+                      borderColor = COLORS.success;
                       mainText = 'SCOUTING LOCKED';
                       subText = 'Opponent tendencies are highly predictable.';
+                      iconName = "checkmark-circle-outline";
                     } else if (predictability >= 60) {
-                      boxColor = '#D69E2E'; // Yellow/Neutral
+                      borderColor = COLORS.warning;
                       mainText = 'SCOUTING DEVELOPING';
                       subText = 'Opponent tendencies are showing patterns.';
+                      iconName = "pulse-outline";
                     }
 
                     return (
-                      <View style={{ backgroundColor: boxColor, padding: 12, borderRadius: 8, marginBottom: 15 }}>
-                        <Text style={{ color: COLORS.white, fontFamily: FONTS.primary, fontSize: 13, textAlign: 'center', letterSpacing: 0.5 }}>{mainText}</Text>
-                        <Text style={{ color: COLORS.white, fontSize: 11, textAlign: 'center', marginTop: 4, lineHeight: 14 }}>{subText}</Text>
+                      <View style={[globalStyles.scoutStatusBox, { borderColor }]}>
+                        <Icon name={iconName as any} size={18} color={borderColor} style={{ marginRight: 10 }} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={globalStyles.scoutStatusText}>{mainText}</Text>
+                          <Text style={globalStyles.scoutStatusSubText}>{subText}</Text>
+                        </View>
                       </View>
                     );
                   })()}
 
-                  <Text style={[globalStyles.scoutModalText, { marginBottom: 10, paddingHorizontal: 10 }]}>
+                  <Text style={[globalStyles.scoutModalText, { marginBottom: 15, paddingHorizontal: 10, fontSize: 12 }]}>
                     {save.lastScoutReport.displayMode === 'dual' 
                       ? "Our scouts have identified two possible strategies they might employ:" 
                       : "Based on recent tendencies, our scouts expect the opponent to focus on:"}
                   </Text>
 
                   {save.lastScoutReport.displayMode === 'dual' && save.lastScoutReport.possibleStrategies ? (
-                    <View style={{ marginBottom: 5 }}>
+                    <View style={{ marginBottom: 10, gap: 16 }}>
                       {save.lastScoutReport.possibleStrategies.map((strat, idx) => (
-                        <View key={idx} style={{ backgroundColor: COLORS.grayLight, padding: 12, borderRadius: 10, marginBottom: 12, flexDirection: 'column', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
-                           <Text style={{ color: COLORS.textSub, fontSize: 9, fontFamily: FONTS.primary, marginBottom: 4, letterSpacing: 1 }}>POSSIBLE STRATEGY {idx === 0 ? 'A' : 'B'}</Text>
-                           <Text style={{ color: COLORS.white, fontSize: 13, fontFamily: 'Oswald' }} numberOfLines={1}>{strat.offense} / {strat.defense}</Text>
+                        <View key={idx} style={[globalStyles.scoutStrategyCard, globalStyles.scoutStrategyAccent]}>
+                           <Text style={globalStyles.scoutStrategyHeader}>POSSIBLE STRATEGY {idx === 0 ? 'A' : 'B'}</Text>
+                           <Text style={globalStyles.scoutStrategyValue} numberOfLines={1}>{strat.offense} / {strat.defense}</Text>
                         </View>
                       ))}
                     </View>
                   ) : (
-                    <View style={{ alignItems: 'center', marginBottom: 5 }}>
-                      <View style={{ backgroundColor: COLORS.grayLight, paddingVertical: 30, paddingHorizontal: 20, borderRadius: 12, width: '100%', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(179, 71, 38, 0.2)', minHeight: 120 }}>
-                         <Text style={{ color: COLORS.primary, fontSize: 10, fontFamily: 'Oswald', letterSpacing: 2, marginBottom: 10 }}>DETECTED SCHEME</Text>
-                         <Text style={{ color: COLORS.white, fontSize: 16, fontFamily: 'Oswald', textAlign: 'center' }} numberOfLines={1}>{save.lastScoutReport.predictedOffense} / {save.lastScoutReport.predictedDefense}</Text>
+                    <View style={{ alignItems: 'center', marginBottom: 10 }}>
+                      <View style={[globalStyles.scoutStrategyCard, { paddingVertical: 30, paddingHorizontal: 20, width: '100%', alignItems: 'center', justifyContent: 'center', minHeight: 120 }]}>
+                         <Text style={[globalStyles.scoutStrategyHeader, { color: COLORS.orange, fontSize: 10, letterSpacing: 2, marginBottom: 10 }]}>DETECTED SCHEME</Text>
+                         <Text style={[globalStyles.scoutStrategyValue, { fontSize: 16, textAlign: 'center' }]} numberOfLines={1}>{save.lastScoutReport.predictedOffense} / {save.lastScoutReport.predictedDefense}</Text>
                       </View>
                     </View>
                   )}
@@ -385,7 +391,11 @@ const HomeScreen = ({
                           (strats[0].offense !== strats[1].offense || strats[0].defense !== strats[1].defense));
                         
                         const confidence = isUnique ? report.predictability : Math.floor(report.predictability * 0.7);
-                        return `Confidence based on your staff's analysis of their ${confidence}% predictability.`;
+                        return (
+                          <Text>
+                            Confidence based on staff analysis of their <Text style={globalStyles.scoutPredictabilityMonospace}>{confidence}%</Text> predictability.
+                          </Text>
+                        );
                       })()}
                     </Text>
                   </View>
@@ -396,7 +406,7 @@ const HomeScreen = ({
             </View>
 
             <TouchableOpacity 
-              style={globalStyles.scoutModalCloseBtn}
+              style={[globalStyles.scoutModalCloseBtn, { backgroundColor: COLORS.orange }]}
               onPress={() => handlePress(() => setShowScoutModal(false))}
             >
               <Text style={globalStyles.scoutModalCloseBtnText}>DISMISS</Text>

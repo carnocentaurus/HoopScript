@@ -11,6 +11,8 @@ export const COLORS = {
   black: '#000000',
   success: '#4CAF50',
   error: '#E53935',
+  warning: '#D69E2E',
+  orange: '#FF5722',
   border: '#333333',
   darkBg: '#000000',
   darkCard: '#111111',
