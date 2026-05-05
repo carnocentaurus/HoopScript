@@ -381,6 +381,73 @@ export const globalStyles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
   },
 
+  // --- TACTICAL ANALYSIS ---
+  tacticalCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 12,
+  },
+  tacticalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  tacticalLabel: {
+    color: COLORS.textSub,
+    fontSize: 10,
+    fontFamily: FONTS.primary,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  tacticalValue: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontFamily: 'Oswald',
+  },
+  outcomeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginTop: 10,
+    alignSelf: 'flex-start',
+  },
+  outcomeBadgeText: {
+    color: COLORS.black,
+    fontSize: 10,
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  scoutHitBadge: {
+    backgroundColor: COLORS.success,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scoutHitText: {
+    color: COLORS.white,
+    fontSize: 8,
+    fontFamily: FONTS.primary,
+    textTransform: 'uppercase',
+    marginLeft: 2,
+  },
+  coachingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
   // --- MODALS ---
   modalOverlay: {
     flex: 1,
