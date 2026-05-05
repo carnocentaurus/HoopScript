@@ -80,12 +80,24 @@ const DEFENSIVE_LINES = {
   ]
 };
 
-const TURNOVER_LINES = {
-  WIN: [
-    "Careless but Capable: Despite ${name}'s ${to} turnovers, the team survived the sloppy play.",
-    "Escaping the Mess: We survived ${name}'s ${to} giveaways, though the lack of ball security made this win much harder than it needed to be.",
-    "Unforced Errors: Despite ${name} struggling with ${to} turnovers, the team's overall efficiency masked the individual sloppiness."
-  ],
+const TURNOVER_LINES: any = {
+  WIN: {
+    blowout: [
+      "Minor Speedbumps: We dominated the scoreboard so thoroughly that ${name}'s ${to} turnovers were merely a footnote in a commanding win.",
+      "Overwhelming Talent: Despite ${name} coughing up the ball ${to} times, our offensive efficiency marginalized the mistakes in this blowout.",
+      "Unstoppable Force: The team's double-digit lead was never in jeopardy, even with ${name}'s ${to} unforced errors stalling a few possessions."
+    ],
+    normal: [
+      "Treading Water: We kept a steady cushion, but ${name}'s ${to} giveaways prevented us from truly pulling away and ending the game earlier.",
+      "Managing the Mess: Despite ${name} losing the ball ${to} times, our consistent scoring kept the lead out of the opponent's reach.",
+      "Room for Improvement: We secured a solid result, but cleaning up ${name}'s ${to} turnovers will be a priority to avoid closer games in the future."
+    ],
+    clutch: [
+      "Careless but Capable: Despite ${name}'s ${to} turnovers, the team survived the sloppy play in a tight finish.",
+      "Escaping the Mess: We survived ${name}'s ${to} giveaways, though the lack of ball security made this win much harder than it needed to be.",
+      "Playing with Fire: In a game decided by a few possessions, ${name}'s ${to} turnovers nearly cost us the entire victory."
+    ]
+  },
   LOSS: [
     "Ball Security Crisis: ${name}'s ${to} turnovers proved fatal, gifting the opponent easy transition buckets.",
     "Point of Failure: It is impossible to win when your primary option coughs up the ball ${to} times; the turnovers completely stalled our momentum.",
@@ -287,7 +299,7 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   // Ball Security
   const highTOPlayer = userTeamStats.find(p => p.tov >= 5);
   if (highTOPlayer) {
-    const toLines = userWon ? TURNOVER_LINES.WIN : TURNOVER_LINES.LOSS;
+    const toLines = userWon ? TURNOVER_LINES.WIN[intensity] : TURNOVER_LINES.LOSS;
     extraLines.push(pick(toLines).replace("${name}", highTOPlayer.lastName).replace("${to}", highTOPlayer.tov.toString()));
   }
 

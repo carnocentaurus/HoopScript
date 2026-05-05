@@ -379,7 +379,7 @@ export const useGameState = () => {
         const lastSeries = roundSeries[0];
         const champion = lastSeries.highSeedWins === 4 ? lastSeries.highSeed : lastSeries.lowSeed;
         currentSave.playoffs.isChampion = (champion === currentSave.city);
-        alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+        // alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
       }
     }
   };
