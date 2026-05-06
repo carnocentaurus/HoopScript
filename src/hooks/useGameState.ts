@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameSave, SeriesMatchup, Player } from '../types/save';
-import { validateAndFixRoster } from '../utils/rosterGenerator';
+import { GameSave, SeriesMatchup, Player, TeamStanding } from '../types/save';
+import { validateAndFixRoster, clearNameRegistry, registerName, generateUniqueName } from '../utils/rosterGenerator';
 import { GameResult, generatePlayerStats, COUNTER_MATRIX, simulateLeagueDay } from '../utils/gameSim';
 import { randomNormal } from '../utils/statsMath';
 import { 
@@ -19,7 +19,8 @@ import {
   getTeamStrength,
   trimRosters,
   selectCPUStrategy,
-  generateScoutReport
+  generateScoutReport,
+  initializeNewLeague
 } from '../utils/leagueEngine';
 
 import { useSound } from './useSound';
@@ -48,6 +49,42 @@ export const useGameState = () => {
           const parsed = JSON.parse(storedSaves);
           const migrated = parsed.map((s: any) => {
             if (!s) return null;
+
+            // Legacy Migration to Version 2.0 (Unique Names)
+            if (!s.version || s.version < 2.0) {
+              clearNameRegistry();
+              
+              const fixRosterNames = (roster: any[]) => {
+                return roster.map((p: any) => ({
+                  ...p,
+                  lastName: generateUniqueName(p.lastName)
+                }));
+              };
+
+              s.standings = s.standings?.map((t: any) => ({
+                ...t,
+                roster: fixRosterNames(t.roster || [])
+              }));
+
+              // Fix history names
+              s.history = s.history?.map((h: any) => ({
+                ...h,
+                standings: h.standings?.map((t: any) => ({
+                  ...t,
+                  roster: fixRosterNames(t.roster || [])
+                }))
+              }));
+
+              // Sync user roster
+              const myTeam = s.standings?.find((t: any) => t.city === s.city);
+              if (myTeam) s.roster = myTeam.roster;
+
+              if (s.draftState?.pool) {
+                s.draftState.pool = fixRosterNames(s.draftState.pool);
+              }
+
+              s.version = 2.0;
+            }
 
             const migrateRoster = (r: any[]) => r.map((p: any) => ({
               ...p,
@@ -131,10 +168,21 @@ export const useGameState = () => {
     );
   };
 
+  const populateNameRegistry = (save: GameSave) => {
+    clearNameRegistry();
+    save.standings.forEach(team => {
+      team.roster.forEach(p => registerName(p.lastName));
+    });
+    if (save.draftState?.pool) {
+      save.draftState.pool.forEach(p => registerName(p.lastName));
+    }
+  };
+
   const handleSelectSlot = (slotId: number) => {
     setActiveSlot(slotId);
     const save = saves[slotId - 1];
     if (save) {
+      populateNameRegistry(save);
       setView((save.lastView as ViewState) || 'home');
     } else {
       setView('yearSelection');
@@ -153,12 +201,13 @@ export const useGameState = () => {
 
   const handleConfirmTeam = () => {
     if (!tempCity || activeSlot === null) return;
-    const initialStandings = generateInitialStandings();
+    const initialStandings = initializeNewLeague();
     const userTeamData = initialStandings.find(t => t.city === tempCity);
     const { opponents, homeStatuses } = generateSchedule(tempCity);
 
     const newSave: GameSave = {
       id: Date.now().toString(),
+      version: 2.0,
       name: `My GM Career - ${tempCity}`,
       slotId: activeSlot,
       city: tempCity,
@@ -416,6 +465,9 @@ export const useGameState = () => {
     const updatedSaves = [...saves];
     const currentSave = updatedSaves[activeSlot - 1];
     if (!currentSave) return;
+
+    // Extra safety: ensure registry is fresh with current names before generating draft pool
+    populateNameRegistry(currentSave);
 
     // Prevent double generation if user backgrounded right at this moment
     if (currentSave.draftState) {

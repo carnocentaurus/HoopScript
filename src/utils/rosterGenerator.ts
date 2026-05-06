@@ -2,6 +2,39 @@ import { Player, SeasonStats } from '../types/save';
 import { LAST_NAMES } from '../data/names';
 import { TEAM_ROSTERS } from '../data/rosters';
 
+// Name Registry to prevent collisions
+const usedNames = new Set<string>();
+
+export const clearNameRegistry = () => {
+  usedNames.clear();
+};
+
+export const registerName = (name: string) => {
+  usedNames.add(name);
+};
+
+export const generateUniqueName = (baseName?: string): string => {
+  const name = baseName || LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+  let uniqueName = name;
+  let suffixIndex = 1;
+
+  const suffixes = ["Jr.", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+
+  while (usedNames.has(uniqueName)) {
+    if (suffixIndex === 1) {
+      uniqueName = `${name} Jr.`;
+    } else if (suffixIndex <= suffixes.length) {
+      uniqueName = `${name} ${suffixes[suffixIndex - 1]}`;
+    } else {
+      uniqueName = `${name} ${suffixIndex}`;
+    }
+    suffixIndex++;
+  }
+
+  usedNames.add(uniqueName);
+  return uniqueName;
+};
+
 // Seeded random for deterministic ratings
 const seededRandom = (seed: string) => {
   let h = 0;
@@ -21,7 +54,7 @@ const POSITIONS = ["PG", "SG", "SF", "PF", "C"] as const;
 export const generateRookie = (lastName?: string): Player => {
   const pos = POSITIONS[Math.floor(Math.random() * 5)];
   const age = 19;
-  const name = lastName || LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+  const name = generateUniqueName(lastName);
   
   const baseOff = Math.floor(Math.random() * 20) + 65;
   const baseDef = Math.floor(Math.random() * 20) + 65;
@@ -141,7 +174,7 @@ export const generateRoster = (city: string): Player[] => {
     let name: string;
 
     if (teamData && teamData[i]) {
-      name = teamData[i].name;
+      name = generateUniqueName(teamData[i].name);
       finalOffense = teamData[i].off;
       finalDefense = teamData[i].def;
     } else {
@@ -159,7 +192,7 @@ export const generateRoster = (city: string): Player[] => {
       finalDefense = Math.min(99, baseDef + defBonus);
       
       const nameIndex = Math.floor(rng() * LAST_NAMES.length);
-      name = LAST_NAMES[nameIndex];
+      name = generateUniqueName(LAST_NAMES[nameIndex]);
     }
 
     const stats: SeasonStats = {

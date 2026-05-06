@@ -183,7 +183,12 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
     };
   }
 };
-import { generateRoster, generateRookie, validateAndFixRoster } from './rosterGenerator';
+import { generateRoster, generateRookie, validateAndFixRoster, clearNameRegistry } from './rosterGenerator';
+
+export const initializeNewLeague = (): TeamStanding[] => {
+  clearNameRegistry();
+  return generateInitialStandings();
+};
 
 export const ALL_CITIES = [
   "Toronto", "Boston", "New York", "Brooklyn", "Philadelphia",

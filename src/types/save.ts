@@ -189,6 +189,7 @@ export interface ScoutReport {
 
 export interface GameSave {
   id: string;
+  version?: number;
   name: string;
   slotId: number;
   city: string;
