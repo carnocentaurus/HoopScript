@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GameSave, SeriesMatchup, Player, TeamStanding } from '../types/save';
-import { validateAndFixRoster, clearNameRegistry, registerName, generateUniqueName } from '../utils/rosterGenerator';
+import { validateAndFixRoster, clearNameRegistry, registerName, generateUniqueName, migrateSaveNames } from '../utils/rosterGenerator';
 import { GameResult, generatePlayerStats, COUNTER_MATRIX, simulateLeagueDay } from '../utils/gameSim';
 import { randomNormal } from '../utils/statsMath';
 import { 
@@ -47,43 +47,16 @@ export const useGameState = () => {
         const storedSaves = await AsyncStorage.getItem(STORAGE_KEY);
         if (storedSaves) {
           const parsed = JSON.parse(storedSaves);
+          let needsReSave = false;
+
           const migrated = parsed.map((s: any) => {
             if (!s) return null;
 
-            // Legacy Migration to Version 2.0 (Unique Names)
-            if (!s.version || s.version < 2.0) {
-              clearNameRegistry();
-              
-              const fixRosterNames = (roster: any[]) => {
-                return roster.map((p: any) => ({
-                  ...p,
-                  lastName: generateUniqueName(p.lastName)
-                }));
-              };
-
-              s.standings = s.standings?.map((t: any) => ({
-                ...t,
-                roster: fixRosterNames(t.roster || [])
-              }));
-
-              // Fix history names
-              s.history = s.history?.map((h: any) => ({
-                ...h,
-                standings: h.standings?.map((t: any) => ({
-                  ...t,
-                  roster: fixRosterNames(t.roster || [])
-                }))
-              }));
-
-              // Sync user roster
-              const myTeam = s.standings?.find((t: any) => t.city === s.city);
-              if (myTeam) s.roster = myTeam.roster;
-
-              if (s.draftState?.pool) {
-                s.draftState.pool = fixRosterNames(s.draftState.pool);
-              }
-
-              s.version = 2.0;
+            // Culture-aware Name Migration (Version 3.0)
+            if (!s.version || s.version < 3.0) {
+              s = migrateSaveNames(s);
+              s.version = 3.0;
+              needsReSave = true;
             }
 
             const migrateRoster = (r: any[]) => r.map((p: any) => ({
@@ -119,6 +92,10 @@ export const useGameState = () => {
               }))
             };
           });
+
+          if (needsReSave) {
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          }
           setSaves(migrated);
         }
       } catch (e) {
@@ -207,7 +184,7 @@ export const useGameState = () => {
 
     const newSave: GameSave = {
       id: Date.now().toString(),
-      version: 2.0,
+      version: 3.0,
       name: `My GM Career - ${tempCity}`,
       slotId: activeSlot,
       city: tempCity,

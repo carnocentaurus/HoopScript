@@ -1,5 +1,5 @@
 import { Player, SeasonStats } from '../types/save';
-import { LAST_NAMES } from '../data/names';
+import { NAME_REGIONS } from '../data/names';
 import { TEAM_ROSTERS } from '../data/rosters';
 
 // Name Registry to prevent collisions
@@ -13,26 +13,125 @@ export const registerName = (name: string) => {
   usedNames.add(name);
 };
 
-export const generateUniqueName = (baseName?: string): string => {
-  const name = baseName || LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-  let uniqueName = name;
-  let suffixIndex = 1;
-
-  const suffixes = ["Jr.", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-
-  while (usedNames.has(uniqueName)) {
-    if (suffixIndex === 1) {
-      uniqueName = `${name} Jr.`;
-    } else if (suffixIndex <= suffixes.length) {
-      uniqueName = `${name} ${suffixes[suffixIndex - 1]}`;
-    } else {
-      uniqueName = `${name} ${suffixIndex}`;
+const getRegionByLastName = (lastName: string) => {
+  for (const [region, data] of Object.entries(NAME_REGIONS)) {
+    if (data.lastNames.includes(lastName)) {
+      return region as keyof typeof NAME_REGIONS;
     }
-    suffixIndex++;
+  }
+  return 'AMERICAN'; // Fallback
+};
+
+export const generateUniqueName = (existingLastName?: string): string => {
+  let region: keyof typeof NAME_REGIONS;
+  let lastName: string;
+
+  if (existingLastName) {
+    lastName = existingLastName;
+    region = getRegionByLastName(lastName);
+  } else {
+    const regions = Object.keys(NAME_REGIONS) as (keyof typeof NAME_REGIONS)[];
+    region = regions[Math.floor(Math.random() * regions.length)];
+    const pool = NAME_REGIONS[region].lastNames;
+    lastName = pool[Math.floor(Math.random() * pool.length)];
   }
 
-  usedNames.add(uniqueName);
-  return uniqueName;
+  const firstNamePool = NAME_REGIONS[region].firstNames;
+  let firstName = firstNamePool[Math.floor(Math.random() * firstNamePool.length)];
+  let fullName = `${firstName} ${lastName}`;
+  let attempts = 0;
+
+  // Try different first names if full name is taken
+  while (usedNames.has(fullName) && attempts < firstNamePool.length) {
+    firstName = firstNamePool[(firstNamePool.indexOf(firstName) + 1) % firstNamePool.length];
+    fullName = `${firstName} ${lastName}`;
+    attempts++;
+  }
+
+  // If still not unique (highly unlikely with first names), add a suffix
+  if (usedNames.has(fullName)) {
+    let suffix = 2;
+    while (usedNames.has(`${fullName} ${suffix}`)) {
+      suffix++;
+    }
+    fullName = `${fullName} ${suffix}`;
+  }
+
+  usedNames.add(fullName);
+  return fullName;
+};
+
+export const migrateSaveNames = (save: any) => {
+  if (!save) return save;
+
+  // 1. Clear registry and register all VALID full names first to avoid collisions
+  clearNameRegistry();
+  
+  const collectValidNames = (roster: any[]) => {
+    roster.forEach(p => {
+      if (p.lastName && p.lastName.includes(" ")) {
+        registerName(p.lastName);
+      }
+    });
+  };
+
+  // Collect from all possible rosters
+  if (save.standings) {
+    save.standings.forEach((t: any) => collectValidNames(t.roster || []));
+  }
+  if (save.history) {
+    save.history.forEach((h: any) => {
+      if (h.standings) {
+        h.standings.forEach((t: any) => collectValidNames(t.roster || []));
+      }
+    });
+  }
+  if (save.draftState?.pool) {
+    collectValidNames(save.draftState.pool);
+  }
+
+  // 2. Fix names that don't have a space
+  const fixRosterNames = (roster: any[]) => {
+    if (!roster) return [];
+    return roster.map((p: any) => {
+      if (p.lastName && !p.lastName.includes(" ")) {
+        return {
+          ...p,
+          lastName: generateUniqueName(p.lastName)
+        };
+      }
+      return p;
+    });
+  };
+
+  if (save.standings) {
+    save.standings = save.standings.map((t: any) => ({
+      ...t,
+      roster: fixRosterNames(t.roster)
+    }));
+  }
+
+  if (save.history) {
+    save.history = save.history.map((h: any) => ({
+      ...h,
+      standings: h.standings?.map((t: any) => ({
+        ...t,
+        roster: fixRosterNames(t.roster)
+      }))
+    }));
+  }
+
+  // Sync user roster
+  const myTeam = save.standings?.find((t: any) => t.city === save.city);
+  if (myTeam) {
+    save.roster = myTeam.roster;
+  }
+
+  if (save.draftState?.pool) {
+    save.draftState.pool = fixRosterNames(save.draftState.pool);
+  }
+
+  return save;
 };
 
 // Seeded random for deterministic ratings
@@ -191,8 +290,7 @@ export const generateRoster = (city: string): Player[] => {
       finalOffense = Math.min(99, baseOff + offBonus);
       finalDefense = Math.min(99, baseDef + defBonus);
       
-      const nameIndex = Math.floor(rng() * LAST_NAMES.length);
-      name = generateUniqueName(LAST_NAMES[nameIndex]);
+      name = generateUniqueName();
     }
 
     const stats: SeasonStats = {
