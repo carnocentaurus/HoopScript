@@ -13,6 +13,15 @@ export const registerName = (name: string) => {
   usedNames.add(name);
 };
 
+const getSeededIndex = (seed: string, max: number): number => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash) % max;
+};
+
 const getRegionByLastName = (lastName: string) => {
   for (const [region, data] of Object.entries(NAME_REGIONS)) {
     if (data.lastNames.includes(lastName)) {
@@ -22,7 +31,7 @@ const getRegionByLastName = (lastName: string) => {
   return 'AMERICAN'; // Fallback
 };
 
-export const generateUniqueName = (existingLastName?: string): string => {
+export const generateUniqueName = (existingLastName?: string, seed?: string): string => {
   let region: keyof typeof NAME_REGIONS;
   let lastName: string;
 
@@ -37,13 +46,19 @@ export const generateUniqueName = (existingLastName?: string): string => {
   }
 
   const firstNamePool = NAME_REGIONS[region].firstNames;
-  let firstName = firstNamePool[Math.floor(Math.random() * firstNamePool.length)];
+  
+  const firstNameIndex = seed 
+    ? getSeededIndex(seed, firstNamePool.length) 
+    : Math.floor(Math.random() * firstNamePool.length);
+
+  let firstName = firstNamePool[firstNameIndex];
   let fullName = `${firstName} ${lastName}`;
   let attempts = 0;
 
   // Try different first names if full name is taken
   while (usedNames.has(fullName) && attempts < firstNamePool.length) {
-    firstName = firstNamePool[(firstNamePool.indexOf(firstName) + 1) % firstNamePool.length];
+    const nextIndex = (firstNameIndex + attempts + 1) % firstNamePool.length;
+    firstName = firstNamePool[nextIndex];
     fullName = `${firstName} ${lastName}`;
     attempts++;
   }
@@ -273,7 +288,8 @@ export const generateRoster = (city: string): Player[] => {
     let name: string;
 
     if (teamData && teamData[i]) {
-      name = generateUniqueName(teamData[i].name);
+      const seed = `${city}-${teamData[i].name}-${i}`;
+      name = generateUniqueName(teamData[i].name, seed);
       finalOffense = teamData[i].off;
       finalDefense = teamData[i].def;
     } else {
