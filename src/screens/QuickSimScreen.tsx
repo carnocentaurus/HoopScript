@@ -84,7 +84,7 @@ const QuickSimScreen = ({
             <View key={`name-${i}`} style={{ 
               paddingVertical: 10, 
               paddingHorizontal: 15, 
-              height: 40,
+              height: 50,
               flexDirection: 'row',
               alignItems: 'center',
               backgroundColor: i % 2 === 0 ? COLORS.secondary : COLORS.grayLight 
@@ -119,7 +119,7 @@ const QuickSimScreen = ({
             return (
               <View key={`stats-${i}`} style={{ 
                 flexDirection: 'row', 
-                height: 40,
+                height: 50,
                 alignItems: 'center',
                 backgroundColor: i % 2 === 0 ? COLORS.card : COLORS.grayLight 
               }}>
