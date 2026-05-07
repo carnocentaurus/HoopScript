@@ -56,20 +56,18 @@ export const generateUniqueName = (existingLastName?: string, seed?: string): st
   let attempts = 0;
 
   // Try different first names if full name is taken
-  while (usedNames.has(fullName) && attempts < firstNamePool.length) {
+  const MAX_ATTEMPTS = 10;
+  while (usedNames.has(fullName) && attempts < Math.min(firstNamePool.length, MAX_ATTEMPTS)) {
     const nextIndex = (firstNameIndex + attempts + 1) % firstNamePool.length;
     firstName = firstNamePool[nextIndex];
     fullName = `${firstName} ${lastName}`;
     attempts++;
   }
 
-  // If still not unique (highly unlikely with first names), add a suffix
+  // If still not unique, append a random 3-digit number
   if (usedNames.has(fullName)) {
-    let suffix = 2;
-    while (usedNames.has(`${fullName} ${suffix}`)) {
-      suffix++;
-    }
-    fullName = `${fullName} ${suffix}`;
+    const randomSuffix = Math.floor(100 + Math.random() * 900);
+    fullName = `${fullName} ${randomSuffix}`;
   }
 
   usedNames.add(fullName);

@@ -55,12 +55,12 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [bgmPlayer]);
 
+  const musicStarted = useRef(false);
+
   const playClickSound = () => {
     if (Platform.OS === 'web' || !clickPlayer) return;
 
     try {
-      // expo-audio play() resets by default if we seek to 0 or it might just work.
-      // The instruction says: "Resets the sound to position 0 (to allow rapid clicking)"
       if (clickPlayer.playing) {
         clickPlayer.seekTo(0);
       } else {
@@ -68,18 +68,21 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
       }
       clickPlayer.play();
     } catch (error) {
-      console.warn('Global SFX Error:', error);
+      console.warn('SFX Play Error:', error);
     }
   };
 
   const startMusic = () => {
-    if (Platform.OS === 'web' || !bgmPlayer) return;
+    if (Platform.OS === 'web' || !bgmPlayer || musicStarted.current) return;
+    
     try {
       if (!bgmPlayer.playing) {
+        musicStarted.current = true;
         bgmPlayer.play();
       }
     } catch (error) {
       console.warn('BGM Play Error:', error);
+      musicStarted.current = false; // Allow retry if it failed
     }
   };
 

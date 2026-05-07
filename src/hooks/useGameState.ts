@@ -52,6 +52,13 @@ export const useGameState = () => {
           const migrated = parsed.map((s: any) => {
             if (!s) return null;
 
+            // Integrity Check: Reset corrupted saves
+            const isCorrupted = !s.city || !s.roster || !s.standings;
+            if (isCorrupted) {
+              console.warn("Detected corrupted save, resetting slot.");
+              return null;
+            }
+
             // Culture-aware Name Migration (Version 3.0)
             if (!s.version || s.version < 3.0) {
               s = migrateSaveNames(s);
@@ -94,9 +101,18 @@ export const useGameState = () => {
           });
 
           if (needsReSave) {
-            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+            try {
+              await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+              setSaves(migrated);
+            } catch (err) {
+              console.error("Atomic Migration Failed, rolling back in-memory state", err);
+              // If write fails, we don't update the in-memory state to the migrated one
+              // but we should still load the original (or whatever was parsed)
+              setSaves(parsed); 
+            }
+          } else {
+            setSaves(migrated);
           }
-          setSaves(migrated);
         }
       } catch (e) {
         console.error("Failed to load saves", e);
