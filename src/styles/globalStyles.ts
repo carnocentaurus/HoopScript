@@ -1105,9 +1105,9 @@ export const globalStyles = StyleSheet.create({
 
   // --- TEAM CARD COMPONENT ---
   tcCard: { flex: 1, alignItems: 'center', margin: 8, paddingVertical: 10 },
-  tcLogoCircle: { width: 50, height: 50, borderRadius: 25, backgroundColor: COLORS.grayLight, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
-  tcLogoLetter: { fontSize: 24, fontFamily: FONTS.primary, color: COLORS.text, textTransform: 'uppercase' },
-  tcLogoImage: { width: 40, height: 40, resizeMode: 'contain' },
+  tcLogoCircle: { width: 80, height: 80, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
+  tcLogoLetter: { fontSize: 32, fontFamily: FONTS.primary, color: COLORS.text, textTransform: 'uppercase' },
+  tcLogoImage: { width: 80, height: 80, resizeMode: 'contain' },
   tcCityText: { fontSize: 12, textAlign: 'center', color: COLORS.text, fontFamily: FONTS.secondary },
 
   // --- DRAFT LOTTERY SCREEN ---
