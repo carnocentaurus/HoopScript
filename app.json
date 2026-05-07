@@ -16,8 +16,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon/hoopscript_icon_resized.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/icon/adaptive_icon.png",
+        "backgroundColor": "#B34726"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
