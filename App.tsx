@@ -24,13 +24,13 @@ import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import DraftScreen from './src/screens/DraftScreen';
 import DraftLotteryScreen from './src/screens/DraftLotteryScreen';
 import CreditsScreen from './src/screens/CreditsScreen';
-import BackgroundMusic from './src/components/BackgroundMusic';
-import { SoundProvider } from './src/context/SoundContext';
+import { AudioProvider, useAudioContext } from './src/context/AudioContext';
 
 SplashScreen.preventAutoHideAsync();
 
 function MainApp() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const { isReady, startMusic } = useAudioContext();
   const {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
@@ -53,6 +53,12 @@ function MainApp() {
     }
     loadFonts();
   }, []);
+
+  useEffect(() => {
+    if (fontsLoaded && isReady && view !== 'loading') {
+      startMusic();
+    }
+  }, [fontsLoaded, isReady, view, startMusic]);
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
@@ -134,10 +140,9 @@ function MainApp() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <SoundProvider>
-        <BackgroundMusic />
+      <AudioProvider>
         <MainApp />
-      </SoundProvider>
+      </AudioProvider>
     </SafeAreaProvider>
   );
 }
