@@ -9,8 +9,9 @@ import { globalStyles } from '../styles/globalStyles';
 import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
-import { getNarrative, GameNarrative as NarrativeType, getPostGameAnalysis, getGameIntensity } from '../utils/narrativeEngine';
+import { getPostGameAnalysis, getGameIntensity } from '../utils/narrativeEngine';
 import { sortRosterByPosition } from '../utils/rosterUtils';
+import { getAdjustmentLevel } from '../utils/coachingUtils';
 
 const QuickSimScreen = ({ 
   save, 
@@ -294,131 +295,77 @@ const QuickSimScreen = ({
                 <View style={globalStyles.scoutModalContent}>
                   <Text style={[globalStyles.scoutModalCity, { fontSize: 18, marginBottom: 20 }]}>Tactical Analysis</Text>
                   
-                  {save.lastScoutReport && (
-                    <View style={globalStyles.coachingHeader}>
-                      <Icon name="person-circle-outline" size={28} color={COLORS.primary} style={{ marginRight: 12 }} />
-                      <View>
-                        <Text style={globalStyles.tacticalLabel}>OPPOSING COACH</Text>
-                        <Text style={[globalStyles.tacticalValue, { color: COLORS.primary, fontSize: 16 }]}>{save.lastScoutReport.coachingProfile}</Text>
+                  {/* ADJUSTMENT TENDENCY */}
+                  <View style={{ 
+                    alignItems: 'center', 
+                    marginBottom: 20, 
+                    borderWidth: 2, 
+                    borderColor: getAdjustmentLevel(opponent.coachingIQ || 0).color,
+                    padding: 10,
+                    borderRadius: 8
+                  }}>
+                    <Text style={[globalStyles.strategyLabel, { textAlign: 'center' }]}>Adjustment Tendency</Text>
+                    <Text style={{ 
+                      color: COLORS.white, 
+                      fontFamily: FONTS.primary, 
+                      fontSize: 14,
+                      textTransform: 'uppercase',
+                      marginTop: 5
+                    }}>
+                      {getAdjustmentLevel(opponent.coachingIQ || 0).label}
+                    </Text>
+                  </View>
+
+                  <View style={{ 
+                    alignItems: 'center', 
+                    marginBottom: 20, 
+                    borderWidth: 1, 
+                    borderColor: COLORS.border, 
+                    padding: 10,
+                    borderRadius: 8
+                  }}>
+                    <Text style={[globalStyles.tacticalLabel]}>
+                      Adjusted: <Text style={{ color: COLORS.white }}>{result?.oppAdjustedMidGame ? 'Yes' : 'No'}</Text>
+                    </Text>
+                  </View>
+
+                  {/* EXPECTED VS ACTUAL TABLE */}
+                  <View style={{ marginBottom: 25, borderWidth: 1, borderColor: COLORS.border, borderRadius: 8, padding: 10 }}>
+                    <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: COLORS.border, paddingBottom: 8, marginBottom: 8 }}>
+                      <View style={{ flex: 1 }}><Text style={[globalStyles.tacticalLabel, { fontSize: 9, textAlign: 'center' }]}>Opponent Expected</Text></View>
+                      <View style={{ flex: 1 }}><Text style={[globalStyles.tacticalLabel, { fontSize: 9, textAlign: 'center' }]}>Opponent Actual</Text></View>
+                    </View>
+                    
+                    {/* Offensive */}
+                    <View style={{ flexDirection: 'row', paddingVertical: 8 }}>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{save.lastScoutReport?.predictedOffense || 'N/A'}</Text>
+                      </View>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.offense}</Text>
                       </View>
                     </View>
-                  )}
 
-                  <View style={{ gap: 12 }}>
-                    <View style={globalStyles.tacticalCard}>
-                       <Text style={globalStyles.tacticalLabel}>OPPONENT EXPECTED</Text>
-                       <View style={{ marginTop: 8 }}>
-                         {save.lastScoutReport?.displayMode === 'dual' && save.lastScoutReport.possibleStrategies ? (
-                           save.lastScoutReport.possibleStrategies.map((strat, idx) => (
-                             <Text key={idx} style={globalStyles.tacticalValue}>
-                               {strat.offense} / {strat.defense}
-                             </Text>
-                           ))
-                         ) : (
-                           <Text style={globalStyles.tacticalValue}>
-                              {save.lastScoutReport?.predictedOffense || 'N/A'} / {save.lastScoutReport?.predictedDefense || 'N/A'}
-                           </Text>
-                         )}
-                       </View>
+                    {/* Defensive */}
+                    <View style={{ flexDirection: 'row', paddingVertical: 8, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{save.lastScoutReport?.predictedDefense || 'N/A'}</Text>
+                      </View>
+                      <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.defense}</Text>
+                      </View>
                     </View>
+                  </View>
 
-                    <View style={globalStyles.tacticalCard}>
-                       <View style={globalStyles.flexRowAlignCenter}>
-                         <Text style={globalStyles.tacticalLabel}>OPPONENT ACTUAL</Text>
-                         {(() => {
-                           const actual = result?.finalOppStrategy;
-                           const report = save.lastScoutReport;
-                           if (!actual || !report) return null;
-                           
-                           let isHit = false;
-                           if (report.displayMode === 'dual' && report.possibleStrategies) {
-                             isHit = report.possibleStrategies.some(s => s.offense === actual.offense && s.defense === actual.defense);
-                           } else {
-                             isHit = report.predictedOffense === actual.offense && report.predictedDefense === actual.defense;
-                           }
-
-                           if (isHit) {
-                             return (
-                               <View style={globalStyles.scoutHitBadge}>
-                                 <Icon name="checkmark" size={10} color={COLORS.white} />
-                                 <Text style={globalStyles.scoutHitText}>SCOUT HIT</Text>
-                               </View>
-                             );
-                           }
-                           return null;
-                         })()}
-                       </View>
-                       <View style={{ marginTop: 8 }}>
-                         <Text style={[globalStyles.tacticalValue, { fontWeight: 'bold' }]}>
-                            {result?.finalOppStrategy.offense} / {result?.finalOppStrategy.defense}
-                         </Text>
-                         {result?.oppAdjustedMidGame && (
-                           <Text style={{ color: COLORS.primary, fontSize: 9, fontFamily: 'Oswald', marginTop: 4 }}>* ADJUSTED DEFENSE IN 2ND HALF</Text>
-                         )}
-                       </View>
-
-                       <View style={[
-                         globalStyles.outcomeBadge, 
-                         { backgroundColor: result?.wasOppCountered ? COLORS.success : COLORS.primary }
-                       ]}>
-                         <Text style={globalStyles.outcomeBadgeText}>
-                           {result?.wasOppCountered 
-                             ? "DEFENSIVE LOCK"
-                             : result?.wasOppExploiting 
-                               ? "DEFENSIVE HOLE"
-                               : "DEFENSIVE STALEMATE"
-                           }
-                         </Text>
-                       </View>
-                       <Text style={[
-                         globalStyles.scoutPredictabilityMonospace, 
-                         { color: COLORS.textMuted, fontSize: 10, marginTop: 8, textTransform: 'uppercase' }
-                       ]}>
-                         {result?.wasOppCountered 
-                           ? `You neutralized their ${result?.finalOppStrategy.offense}`
-                           : result?.wasOppExploiting 
-                             ? `Their ${result?.finalOppStrategy.offense} broke through`
-                             : `Standard coverage execution`
-                         }
-                       </Text>
-                    </View>
-
-                    <View style={globalStyles.tacticalCard}>
-                       <Text style={globalStyles.tacticalLabel}>YOUR SELECTION</Text>
-                       <View style={{ marginTop: 8 }}>
-                         <Text style={[globalStyles.tacticalValue, { fontWeight: 'bold' }]}>
-                            {result?.finalUserStrategy.offense} / {result?.finalUserStrategy.defense}
-                         </Text>
-                         {result?.userAdjustedMidGame && (
-                           <Text style={{ color: COLORS.primary, fontSize: 9, fontFamily: 'Oswald', marginTop: 4 }}>* ADJUSTED DEFENSE IN 2ND HALF</Text>
-                         )}
-                       </View>
-
-                       <View style={[
-                         globalStyles.outcomeBadge, 
-                         { backgroundColor: result?.wasUserExploiting ? COLORS.success : COLORS.primary }
-                       ]}>
-                         <Text style={globalStyles.outcomeBadgeText}>
-                           {result?.wasUserCountered 
-                             ? "OFFENSIVE STALL"
-                             : result?.wasUserExploiting 
-                               ? "OFFENSIVE SUCCESS"
-                               : "OFFENSIVE STALEMATE"
-                           }
-                         </Text>
-                       </View>
-                       <Text style={[
-                         globalStyles.scoutPredictabilityMonospace, 
-                         { color: COLORS.textMuted, fontSize: 10, marginTop: 8, textTransform: 'uppercase' }
-                       ]}>
-                         {result?.wasUserCountered 
-                           ? `Your ${result?.finalUserStrategy.offense} was neutralized`
-                           : result?.wasUserExploiting 
-                             ? `Your ${result?.finalUserStrategy.offense} was effective`
-                             : `Standard offensive execution`
-                         }
-                       </Text>
-                    </View>
+                  {/* YOUR STRATEGY SECTION */}
+                  <View style={globalStyles.tacticalCard}>
+                    <Text style={[globalStyles.tacticalLabel, { marginBottom: 12 }]}>Your Strategy</Text>
+                    <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14, lineHeight: 22, marginBottom: 10 }}>
+                      • Your {result?.finalUserStrategy.offense} was {result?.wasUserExploiting ? 'successful' : `neutralized by their ${result?.finalOppStrategy.defense}`}.
+                    </Text>
+                    <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14, lineHeight: 22 }}>
+                      • Your {result?.finalUserStrategy.defense} was {result?.wasOppCountered ? 'effective' : `broken by their ${result?.finalOppStrategy.offense}`}.
+                    </Text>
                   </View>
 
                   <View style={{ height: 1, backgroundColor: COLORS.border, marginVertical: 20 }} />
