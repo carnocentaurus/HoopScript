@@ -154,7 +154,7 @@ const QuickSimScreen = ({
       userStrategy, 
       cpuStrategy,
       save.coachingIQ,
-      opponent.coachingIQ ?? 60
+      opponent.coachingIQ
     );
 
     // Apply strict positional sorting (Starters first, then PG->C, then OVR)
@@ -339,7 +339,7 @@ const QuickSimScreen = ({
                     {/* Offensive */}
                     <View style={{ flexDirection: 'row', paddingVertical: 8 }}>
                       <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{save.lastScoutReport?.predictedOffense || 'N/A'}</Text>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{result?.expectedOppStrategy.offense || 'N/A'}</Text>
                       </View>
                       <View style={{ flex: 1, alignItems: 'center' }}>
                         <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.offense}</Text>
@@ -349,7 +349,7 @@ const QuickSimScreen = ({
                     {/* Defensive */}
                     <View style={{ flexDirection: 'row', paddingVertical: 8, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
                       <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{save.lastScoutReport?.predictedDefense || 'N/A'}</Text>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{result?.expectedOppStrategy.defense || 'N/A'}</Text>
                       </View>
                       <View style={{ flex: 1, alignItems: 'center' }}>
                         <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.defense}</Text>
@@ -359,12 +359,20 @@ const QuickSimScreen = ({
 
                   {/* YOUR STRATEGY SECTION */}
                   <View style={globalStyles.tacticalCard}>
-                    <Text style={[globalStyles.tacticalLabel, { marginBottom: 12 }]}>Your Strategy</Text>
-                    <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14, lineHeight: 22, marginBottom: 10 }}>
-                      • Your {result?.finalUserStrategy.offense} was {result?.wasUserExploiting ? 'successful' : `neutralized by their ${result?.finalOppStrategy.defense}`}.
+                    <Text style={[globalStyles.tacticalLabel, { marginBottom: 12 }]}>YOUR OFFENSE</Text>
+                    <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14, lineHeight: 22, marginBottom: 20 }}>
+                      Your {result?.finalUserStrategy.offense} was {
+                        result?.wasUserCountered ? 'neutralized' : 
+                        result?.wasUserExploiting ? 'dominant' : 'effective'
+                      } against their {result?.finalOppStrategy.defense}.
                     </Text>
+
+                    <Text style={[globalStyles.tacticalLabel, { marginBottom: 12 }]}>YOUR DEFENSE</Text>
                     <Text style={{ color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14, lineHeight: 22 }}>
-                      • Your {result?.finalUserStrategy.defense} was {result?.wasOppCountered ? 'effective' : `broken by their ${result?.finalOppStrategy.offense}`}.
+                      Your {result?.finalUserStrategy.defense} was {
+                        result?.wasOppCountered ? 'stifling' : 
+                        result?.wasOppExploiting ? 'broken' : 'solid'
+                      } against their {result?.finalOppStrategy.offense}.
                     </Text>
                   </View>
 

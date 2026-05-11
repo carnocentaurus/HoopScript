@@ -104,7 +104,12 @@ function MainApp() {
           isHome = isUserHigh ? [true, true, false, false, true, false, true][idx] : ![true, true, false, false, true, false, true][idx];
         }
 
-        const common = { rank: calculateRank(oppCity, save.standings), roster: opp?.roster || [] };
+        const common = { 
+          rank: calculateRank(oppCity, save.standings), 
+          roster: opp?.roster || [],
+          coachingIQ: opp?.coachingIQ,
+          predictability: opp?.predictability
+        };
 
         return (
           <>

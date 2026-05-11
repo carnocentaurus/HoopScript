@@ -29,13 +29,13 @@ export const shotSuccessCheck = (trueShootingPct: number, strategyMod: number = 
 export type StatType = 'REBOUNDING' | 'ASSISTS' | 'BLOCKS' | 'STEALS' | 'TURNOVERS' | 'THREE_PA' | 'VOLUME';
 
 export const POSITIONAL_PROFILES: Record<StatType, Record<string, number>> = {
-  REBOUNDING: { C: 4.5, PF: 3.5, SF: 1.2, SG: 0.6, PG: 0.4 },
-  ASSISTS: { PG: 5.0, SG: 2.2, SF: 1.5, PF: 0.8, C: 0.5 },
-  STEALS: { PG: 2.5, SG: 2.0, SF: 1.5, PF: 0.8, C: 0.6 },
-  BLOCKS: { C: 5.0, PF: 3.2, SF: 1.2, SG: 0.3, PG: 0.1 },
-  TURNOVERS: { PG: 3.0, SG: 2.0, SF: 1.5, PF: 1.0, C: 0.9 },
-  THREE_PA: { PG: 4.0, SG: 3.5, SF: 2.0, PF: 0.5, C: 0.1 },
-  VOLUME: { PG: 1.2, SG: 1.1, SF: 1.0, PF: 0.9, C: 0.8 }
+  REBOUNDING: { C: 6.0, PF: 4.5, SF: 1.2, SG: 0.4, PG: 0.2 },
+  ASSISTS: { PG: 7.0, SG: 2.5, SF: 1.5, PF: 0.6, C: 0.3 },
+  STEALS: { PG: 3.0, SG: 2.5, SF: 1.5, PF: 0.6, C: 0.4 },
+  BLOCKS: { C: 6.0, PF: 4.0, SF: 1.0, SG: 0.2, PG: 0.1 },
+  TURNOVERS: { PG: 3.5, SG: 2.5, SF: 1.5, PF: 0.8, C: 0.7 },
+  THREE_PA: { PG: 4.5, SG: 4.0, SF: 2.5, PF: 0.4, C: 0.1 },
+  VOLUME: { PG: 1.3, SG: 1.2, SF: 1.0, PF: 0.8, C: 0.7 }
 };
 
 const FG_BIAS: Record<string, number> = {
@@ -44,20 +44,27 @@ const FG_BIAS: Record<string, number> = {
 
 /**
  * Selects a player based on positional weights and overall rating.
+ * Now applies a power-based scaling to overall to favor elite players more heavily.
  */
 export const getWeightedPlayer = (players: Player[], statType: StatType): Player => {
   const weights = POSITIONAL_PROFILES[statType];
   
   const totalWeight = players.reduce((sum, p) => {
     const posWeight = weights[p.position] || 1.0;
-    return sum + (posWeight * (p.overall / 70));
+    // Exponential scaling for overall and a penalty for bench players
+    const qualityMod = Math.pow(p.overall / 75, 2.5);
+    const starterMod = p.isStarter ? 1.0 : 0.6;
+    return sum + (posWeight * qualityMod * starterMod);
   }, 0);
 
   if (totalWeight <= 0) return players[Math.floor(Math.random() * players.length)];
 
   let roll = Math.random() * totalWeight;
   for (const player of players) {
-    const pWeight = (weights[player.position] || 1.0) * (player.overall / 70);
+    const posWeight = weights[player.position] || 1.0;
+    const qualityMod = Math.pow(player.overall / 75, 2.5);
+    const starterMod = player.isStarter ? 1.0 : 0.6;
+    const pWeight = posWeight * qualityMod * starterMod;
     roll -= pWeight;
     if (roll <= 0) return player;
   }

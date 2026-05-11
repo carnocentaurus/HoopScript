@@ -184,6 +184,7 @@ export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, o
   }
 };
 import { generateRoster, generateRookie, validateAndFixRoster, clearNameRegistry } from './rosterGenerator';
+import { generateCoachingIQ } from './coachingUtils';
 
 export const initializeNewLeague = (): TeamStanding[] => {
   clearNameRegistry();
@@ -285,8 +286,8 @@ export const generateInitialStandings = (): TeamStanding[] => {
       losses: 0,
       streak: 0,
       roster,
-      coachingIQ: Math.floor(Math.random() * 51) + 40, // 40 to 90
-      predictability: Math.floor(Math.random() * 51) + 40, // 40 to 90
+      coachingIQ: generateCoachingIQ(),
+      predictability: Math.floor(Math.random() * 100) + 1, // 1 to 100
       pace: Math.floor(Math.random() * 10) + 95 // 95 to 105
     };
   });

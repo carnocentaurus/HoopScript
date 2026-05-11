@@ -126,13 +126,7 @@ export const getTacticalNarrative = (
 ): string => {
   const mapping = TACTICAL_MAP.OFFENSE[userOffense];
   
-  const stalemates = [
-    "Tactical Stalemate: Both teams played to their strengths, but neither side gained a clear schematic advantage.",
-    "Gridlock: The tactical battle ended in a draw, forcing the players to win it on sheer talent.",
-    "Matching Wits: Both coaching staffs anticipated the other's moves, resulting in a wash."
-  ];
-
-  if (!mapping) return pick(stalemates);
+  if (!mapping) return "";
 
   // SCENARIO 1: YOU WERE COUNTERED
   if (oppDefense === mapping.counteredBy) {
@@ -175,7 +169,7 @@ export const getTacticalNarrative = (
     ]);
   }
 
-  return pick(stalemates);
+  return "";
 };
 
 /**
@@ -192,22 +186,25 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   const isLockdown = oppFGPercent < 42 && opp3PPercent < 33;
   const isDefensiveBreach = oppFGPercent > 50;
 
-  // 1. Tactical Reason (Updated to pass userWon and intensity)
-  lines.push(getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName, userWon, intensity));
+  // 1. Tactical Reason (Only if there's a clear advantage)
+  const tacticalLine = getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName, userWon, intensity);
+  if (tacticalLine) lines.push(tacticalLine);
 
-  // 2. Star Player Impact
-  if (userWon) {
-    lines.push(pick([
-      `Maintained Pressure: ${topScorer.lastName} was the difference-maker, dropping ${topScorer.pts} points.`,
-      `Leading the Charge: ${topScorer.lastName} took over when it mattered most, finishing with ${topScorer.pts} points.`,
-      `Elite Execution: A dominant ${topScorer.pts}-point night from ${topScorer.lastName} secured the victory.`
-    ]));
-  } else {
-    lines.push(pick([
-      `${topScorer.lastName} carried the load with ${topScorer.pts} points, but we were outclassed as a unit.`,
-      `Empty Stats: Despite ${topScorer.pts} points from ${topScorer.lastName}, the rest of the roster struggled to contribute.`,
-      `Sole Provider: ${topScorer.lastName} gave us ${topScorer.pts} points, but we couldn't bridge the gap elsewhere.`
-    ]));
+  // 2. Star Player Impact (Only for 25+ points)
+  if (topScorer.pts >= 25) {
+    if (userWon) {
+      lines.push(pick([
+        `Maintained Pressure: ${topScorer.lastName} was the difference-maker, dropping ${topScorer.pts} points.`,
+        `Leading the Charge: ${topScorer.lastName} took over when it mattered most, finishing with ${topScorer.pts} points.`,
+        `Elite Execution: A dominant ${topScorer.pts}-point night from ${topScorer.lastName} secured the victory.`
+      ]));
+    } else {
+      lines.push(pick([
+        `${topScorer.lastName} carried the load with ${topScorer.pts} points, but we were outclassed as a unit.`,
+        `Empty Stats: Despite ${topScorer.pts} points from ${topScorer.lastName}, the rest of the roster struggled to contribute.`,
+        `Sole Provider: ${topScorer.lastName} gave us ${topScorer.pts} points, but we couldn't bridge the gap elsewhere.`
+      ]));
+    }
   }
 
   // 3. Intensity/Differential
@@ -283,17 +280,22 @@ export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
   }
 
   // Defensive Standout
-  const defensiveStandout = userTeamStats.find(p => (p.stl + p.blk) >= 5);
-  if (defensiveStandout) {
-    let defLine = "";
-    if (defensiveStandout.blk >= 3) {
-      defLine = pick(DEFENSIVE_LINES.BLOCKS).replace("${name}", defensiveStandout.lastName).replace("${blocks}", defensiveStandout.blk.toString());
-    } else if (defensiveStandout.stl >= 3) {
-      defLine = pick(DEFENSIVE_LINES.STEALS).replace("${name}", defensiveStandout.lastName).replace("${steals}", defensiveStandout.stl.toString());
-    } else {
-      defLine = pick(DEFENSIVE_LINES.GENERAL).replace("${name}", defensiveStandout.lastName);
+  const eliteDefender = userTeamStats.find(p => p.stl >= 3 && p.blk >= 3);
+  if (eliteDefender) {
+    extraLines.push(`Elite Defensive Performance: ${eliteDefender.lastName} anchored the floor with ${eliteDefender.stl} steals and ${eliteDefender.blk} blocks.`);
+  } else {
+    const defensiveStandout = userTeamStats.find(p => (p.stl + p.blk) >= 5);
+    if (defensiveStandout) {
+      let defLine = "";
+      if (defensiveStandout.blk >= 3) {
+        defLine = pick(DEFENSIVE_LINES.BLOCKS).replace("${name}", defensiveStandout.lastName).replace("${blocks}", defensiveStandout.blk.toString());
+      } else if (defensiveStandout.stl >= 3) {
+        defLine = pick(DEFENSIVE_LINES.STEALS).replace("${name}", defensiveStandout.lastName).replace("${steals}", defensiveStandout.stl.toString());
+      } else {
+        defLine = pick(DEFENSIVE_LINES.GENERAL).replace("${name}", defensiveStandout.lastName);
+      }
+      extraLines.push(defLine);
     }
-    extraLines.push(defLine);
   }
 
   // Ball Security

@@ -31,7 +31,7 @@ export const simulateLeagueDay = (
       let modA = 1.0;
       let modB = 1.0;
 
-      const getAIPenalty = (iq: number) => 0.12 - ((iq / 100) * 0.08);
+      const getAIPenalty = (iq: number) => 0.12 - ((iq / 10) * 0.08);
 
       if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) {
         modA -= getAIPenalty(teamA.coachingIQ);
@@ -81,6 +81,7 @@ export interface GameResult {
   oppPOTGId: string;
   quarterScores: { my: number, opp: number }[];
   counterResults: string[];
+  expectedOppStrategy: Strategy;
   finalUserStrategy: Strategy;
   finalOppStrategy: Strategy;
   efficiencyDelta: number;
@@ -433,6 +434,21 @@ export const simulateGame = (
   const myScore = { val: 0 };
   const oppScore = { val: 0 };
 
+  // Adjustment Logic Pre-calculations
+  const expectedOffFocus = cpuStrategy.offense;
+  const expectedDefFocus = cpuStrategy.defense;
+  
+  const adjustmentRoll = Math.random();
+  let willOppAdjust = false;
+  let threshold = 0;
+
+  if (oppIQ >= 80) threshold = 0.80;
+  else if (oppIQ >= 60) threshold = 0.45;
+  else threshold = 0.15;
+
+  willOppAdjust = adjustmentRoll < threshold;
+
+  const expectedOppStrategy = { ...cpuStrategy };
   let currentMyStrategy = { ...userStrategy };
   let currentOppStrategy = { ...cpuStrategy };
 
@@ -468,17 +484,34 @@ export const simulateGame = (
     for (let i = 0; i < periodPossessions; i++) {
       // Mid-game adjustment logic (Regulation only, 3rd quarter)
       if (!isOvertime && i === 51) {
+        // User Adjustment (Legacy Logic)
         const myMargin = myScore.val - oppScore.val;
-        if (myMargin <= -10 && (Math.random() * 100 < myIQ)) {
+        if (myMargin <= -10 && (Math.random() < (myIQ / 10))) {
           const oldDef = currentMyStrategy.defense;
           currentMyStrategy.defense = COUNTER_MATRIX[currentOppStrategy.offense];
           if (oldDef !== currentMyStrategy.defense) userAdjustedMidGame = true;
         }
-        const oppMargin = oppScore.val - myScore.val;
-        if (oppMargin <= -10 && (Math.random() * 100 < oppIQ)) {
-          const oldDef = currentOppStrategy.defense;
-          currentOppStrategy.defense = COUNTER_MATRIX[currentMyStrategy.offense];
-          if (oldDef !== currentOppStrategy.defense) oppAdjustedMidGame = true;
+
+        // Opponent Adjustment (New Logic)
+        if (willOppAdjust) {
+          const oldOff = expectedOffFocus;
+          const oldDef = expectedDefFocus;
+          const newDef = COUNTER_MATRIX[currentMyStrategy.offense];
+          
+          if (newDef !== oldDef) {
+            currentOppStrategy.defense = newDef;
+            oppAdjustedMidGame = true;
+          } else {
+            const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+            const otherOffenses = offenses.filter(o => o !== oldOff);
+            currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
+            oppAdjustedMidGame = true;
+          }
+        } else {
+          // Force consistency if not adjusting
+          currentOppStrategy.offense = expectedOffFocus;
+          currentOppStrategy.defense = expectedDefFocus;
+          oppAdjustedMidGame = false;
         }
       }
 
@@ -601,6 +634,7 @@ export const simulateGame = (
     oppPOTGId: identifyPOTG(oppStats),
     quarterScores: [],
     counterResults,
+    expectedOppStrategy,
     finalUserStrategy: currentMyStrategy,
     finalOppStrategy: currentOppStrategy,
     efficiencyDelta,

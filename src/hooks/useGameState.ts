@@ -22,6 +22,7 @@ import {
   generateScoutReport,
   initializeNewLeague
 } from '../utils/leagueEngine';
+import { generateCoachingIQ } from '../utils/coachingUtils';
 
 import { useSound } from './useSound';
 import { OffensiveFocus, DefensiveFocus, Strategy, ScoutReport } from '../types/save';
@@ -91,7 +92,7 @@ export const useGameState = () => {
               roster: migrateRoster(s.roster || []),
               standings: s.standings?.map((t: any) => ({
                 ...t,
-                coachingIQ: t.coachingIQ ?? (Math.floor(Math.random() * 51) + 40),
+                coachingIQ: t.coachingIQ ?? generateCoachingIQ(),
                 predictability: t.predictability ?? (Math.floor(Math.random() * 51) + 40),
                 streak: t.streak ?? 0,
                 pace: t.pace ?? 100,
