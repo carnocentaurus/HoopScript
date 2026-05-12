@@ -1138,4 +1138,37 @@ export const globalStyles = StyleSheet.create({
   mainView: {
     flex: 1,
   },
+  // --- LEAGUE HUB ---
+  hubGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    padding: 20,
+    gap: 15,
+  },
+  hubCard: {
+    width: '47%',
+    aspectRatio: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    elevation: 4,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  hubCardIcon: {
+    marginBottom: 12,
+  },
+  hubCardText: {
+    color: COLORS.white,
+    fontFamily: FONTS.primary,
+    fontSize: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
 });

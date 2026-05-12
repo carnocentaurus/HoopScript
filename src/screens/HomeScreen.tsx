@@ -105,7 +105,8 @@ const HomeScreen = ({
   onViewTeam,
   onBackToSaves,
   onScout,
-  onUpdateStrategy
+  onUpdateStrategy,
+  onViewHub
 }: { 
   save: GameSave, 
   userTeam: any, 
@@ -118,7 +119,8 @@ const HomeScreen = ({
   onViewTeam: () => void,
   onBackToSaves: () => void,
   onScout: (city: string) => void,
-  onUpdateStrategy: (s: Strategy) => void
+  onUpdateStrategy: (s: Strategy) => void,
+  onViewHub: () => void
 }) => {
   const { playClickSound } = useSound();
   const [showScoutModal, setShowScoutModal] = useState(false);
@@ -168,15 +170,9 @@ const HomeScreen = ({
         </View>
         <View style={globalStyles.flex1} />
         
-        {/* RIGHT SIDE ICONS */}
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewHistory)}>
-          <Icon name="time-outline" size={32} color="#B34726" />
-        </TouchableOpacity>
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewTeam)}>
-          <Icon name="people-outline" size={32} color="#B34726" />
-        </TouchableOpacity>
-        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewStandings)}>
-          <Icon name="podium-outline" size={32} color="#B34726" />
+        {/* HUB ICON */}
+        <TouchableOpacity style={globalStyles.qsBackBtn} onPress={() => handlePress(onViewHub)}>
+          <Icon name="basketball-outline" size={32} color="#B34726" />
         </TouchableOpacity>
       </View>
 
