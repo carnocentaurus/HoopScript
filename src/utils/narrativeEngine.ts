@@ -23,7 +23,7 @@ export const getNarrative = (params: NarrativeParams): GameNarrative => {
 export const getGameIntensity = (myPts: number, oppPts: number): GameIntensity => {
   const diff = Math.abs(myPts - oppPts);
   if (diff <= 5) return 'clutch';
-  if (diff >= 10) return 'blowout'; // Updated from 15 to 10
+  if (diff >= 10) return 'blowout';
   return 'normal';
 };
 
@@ -37,8 +37,10 @@ export interface AnalysisParams {
   homeStats: PlayerStat[];
   awayStats: PlayerStat[];
   scoreDiff: number;
-  isCountered: boolean;
-  isCountering: boolean;
+  wasUserCountered: boolean;
+  wasUserExploiting: boolean;
+  wasOppCountered: boolean;
+  wasOppExploiting: boolean;
 }
 
 // Helper to grab a random line from a pool
@@ -105,67 +107,59 @@ const TURNOVER_LINES: any = {
   ]
 };
 
-const TACTICAL_MAP: any = {
-  OFFENSE: {
-    [OffensiveFocus.ATTACK_PAINT]: { counteredBy: DefensiveFocus.PROTECT_RIM, exploits: DefensiveFocus.PERIMETER_LOCK },
-    [OffensiveFocus.PACE_SPACE]: { counteredBy: DefensiveFocus.PERIMETER_LOCK, exploits: DefensiveFocus.DOUBLE_TEAM },
-    [OffensiveFocus.ISO_STAR]: { counteredBy: DefensiveFocus.DOUBLE_TEAM, exploits: DefensiveFocus.PROTECT_RIM }
-  }
-};
-
 /**
  * DETERMINES TACTICAL NARRATIVE WITH VARIATION
  */
-export const getTacticalNarrative = (
-  userOffense: string, 
-  oppDefense: string, 
-  starFG: number, 
-  starName: string,
-  userWon: boolean,
-  intensity: GameIntensity
-): string => {
-  const mapping = TACTICAL_MAP.OFFENSE[userOffense];
-  
-  if (!mapping) return "";
+export const getTacticalNarrative = (params: AnalysisParams): string => {
+  const { 
+    userWon, 
+    wasUserCountered, 
+    wasUserExploiting, 
+    wasOppCountered, 
+    wasOppExploiting 
+  } = params;
 
-  // SCENARIO 1: YOU WERE COUNTERED
-  if (oppDefense === mapping.counteredBy) {
-    if (userWon) {
-      if (starFG > 55) {
-        return pick([
-          `Brute Force: They had the right scheme to stop your ${userOffense}, but ${starName} was simply too talented to be contained.`,
-          `Skill Gap: Despite being tactically countered, ${starName} powered through their ${oppDefense} with elite shot-making.`,
-          `Outplaying the Blueprint: The scheme was a failure, but ${starName} saved the day by ignoring the double-teams.`
-        ]);
-      }
-      return pick([
-        `Gritty Survival: Their ${oppDefense} nearly neutralized our ${userOffense}, but we found a way to win the ${intensity} battle anyway.`,
-        `Winning Ugly: We were tactically outmatched by their ${oppDefense}, but pure execution secured the victory.`,
-        `Overcoming the Odds: Despite a schematic disadvantage, the roster powered through to a victory.`
-      ]);
-    }
-    // Lost and countered
+  const userAdvantage = wasUserExploiting || wasOppCountered;
+  const oppAdvantage = wasUserCountered || wasOppExploiting;
+
+  // STALEMATE RULE: No clear advantage or cancel-out results in no narrative
+  if ((userAdvantage && oppAdvantage) || (!userAdvantage && !oppAdvantage)) {
+    return "";
+  }
+
+  // 1. User countered them and WON
+  if (userAdvantage && userWon) {
     return pick([
-      `Tactical Failure: Their ${oppDefense} successfully neutralized your ${userOffense}.`,
-      `Out-Coached: We walked right into their ${oppDefense} and never found an answer.`,
-      `System Shutdown: The coaching staff failed to adjust as the ${oppDefense} stifled our ${userOffense}.`
+      "Tactical Masterclass: Your strategic superiority completely dismantled their game plan, securing a decisive victory.",
+      "Out-Coached: Your scouts nailed the preparation, allowing you to exploit every weakness in their system.",
+      "Schematic Dominance: A flawless execution of your counter-strategy left the opponent without answers tonight."
     ]);
   }
 
-  // SCENARIO 2: YOU COUNTERED THEM
-  if (oppDefense === mapping.exploits) {
-    if (userWon) {
-      return pick([
-        `Tactical Edge: Your ${userOffense} successfully exploited their ${oppDefense}.`,
-        `Schematic Masterclass: We completely dismantled their ${oppDefense} by sticking to our ${userOffense} philosophy.`,
-        `The Right Blueprint: Our scouts nailed it—their ${oppDefense} had no answer for our ${userOffense}.`
-      ]);
-    }
-    // Countered them but lost
+  // 2. User countered them but LOST
+  if (userAdvantage && !userWon) {
     return pick([
-      `Empty Edge: The strategy was perfect, but even exploiting their ${oppDefense} wasn't enough to secure the win.`,
-      `Wasted Blueprint: Our ${userOffense} worked as intended, but we failed to capitalize in the ${intensity} moments.`,
-      `Execution Deficit: We won the coaching battle, but the performance on the floor let us down.`
+      "Wasted Blueprint: Your strategy perfectly countered their setups, but execution on the floor failed to capitalize on the coaching advantage.",
+      "Tactical Edge, Personnel Deficit: Despite holding the schematic upper hand, a lack of execution or talent gap resulted in a frustrating loss.",
+      "System Success, Scoreboard Failure: You won the chess match on the sidelines, but the rims were unkind in a game where the math was on your side."
+    ]);
+  }
+
+  // 3. Opponent countered user and user LOST
+  if (oppAdvantage && !userWon) {
+    return pick([
+      "Tactical Shutdown: The opposing coach anticipated your schemes perfectly, locking down your options and cruising to a win.",
+      "Schematic Failure: You walked right into their traps; their defensive adjustments neutralized your primary weapons.",
+      "Out-Manuevered: They stayed one step ahead of your rotations, forcing you into low-efficiency looks all night."
+    ]);
+  }
+
+  // 4. Opponent countered user but user WON
+  if (oppAdvantage && userWon) {
+    return pick([
+      "Talent over Tactics: You were thoroughly out-coached and countered tactically, but your players' raw grit and talent bailed you out.",
+      "Escaping the Trap: Despite being schemetically dismantled, elite individual performances secured a win you probably didn't deserve.",
+      "Brute Force Victory: The coaching battle was a loss, but your roster's sheer talent powered through their tactical blockade."
     ]);
   }
 
@@ -176,18 +170,17 @@ export const getTacticalNarrative = (
  * GENERATES DYNAMIC ANALYSIS
  */
 export const getPostGameAnalysis = (params: AnalysisParams): string[] => {
-  const { userWon, intensity, userOffense, oppDefense, topScorer, oppBestPlayer, scoreDiff } = params;
+  const { userWon, intensity, topScorer, oppBestPlayer, scoreDiff } = params;
   const lines: string[] = [];
 
   const oppFGPercent = oppBestPlayer.fga > 0 ? (oppBestPlayer.fgm / oppBestPlayer.fga) * 100 : 0;
   const opp3PPercent = oppBestPlayer.threePA > 0 ? (oppBestPlayer.threePM / oppBestPlayer.threePA) * 100 : 0;
-  const starFGPercent = topScorer.fga > 0 ? (topScorer.fgm / topScorer.fga) * 100 : 0;
   
   const isLockdown = oppFGPercent < 42 && opp3PPercent < 33;
   const isDefensiveBreach = oppFGPercent > 50;
 
-  // 1. Tactical Reason (Only if there's a clear advantage)
-  const tacticalLine = getTacticalNarrative(userOffense, oppDefense, starFGPercent, topScorer.lastName, userWon, intensity);
+  // 1. Tactical Reason (4-Variation Matrix)
+  const tacticalLine = getTacticalNarrative(params);
   if (tacticalLine) lines.push(tacticalLine);
 
   // 2. Star Player Impact (Only for 25+ points)

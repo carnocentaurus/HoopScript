@@ -495,15 +495,25 @@ export const simulateGame = (
           const oldOff = expectedOffFocus;
           const oldDef = expectedDefFocus;
           
-          // Ensure the newly picked focus is strictly DIFFERENT from the expected one
           const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
           const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
           
-          const otherOffenses = offenses.filter(o => o !== oldOff);
-          const otherDefenses = defenses.filter(d => d !== oldDef);
+          const adjType = Math.floor(Math.random() * 3); // 0 = Offense Only, 1 = Defense Only, 2 = Both
           
-          currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
-          currentOppStrategy.defense = otherDefenses[Math.floor(Math.random() * otherDefenses.length)];
+          if (adjType === 0) {
+            const otherOffenses = offenses.filter(o => o !== oldOff);
+            currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
+            currentOppStrategy.defense = oldDef;
+          } else if (adjType === 1) {
+            const otherDefenses = defenses.filter(d => d !== oldDef);
+            currentOppStrategy.defense = otherDefenses[Math.floor(Math.random() * otherDefenses.length)];
+            currentOppStrategy.offense = oldOff;
+          } else {
+            const otherOffenses = offenses.filter(o => o !== oldOff);
+            const otherDefenses = defenses.filter(d => d !== oldDef);
+            currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
+            currentOppStrategy.defense = otherDefenses[Math.floor(Math.random() * otherDefenses.length)];
+          }
           
           oppAdjustedMidGame = true;
         } else {

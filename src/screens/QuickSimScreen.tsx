@@ -52,8 +52,10 @@ const QuickSimScreen = ({
         homeStats: result.myTeamStats,
         awayStats: result.oppTeamStats,
         scoreDiff,
-        isCountered: result.wasUserCountered,
-        isCountering: result.wasOppCountered
+        wasUserCountered: result.wasUserCountered,
+        wasUserExploiting: result.wasUserExploiting,
+        wasOppCountered: result.wasOppCountered,
+        wasOppExploiting: result.wasOppExploiting
       });
       setAnalysisLines(lines);
     }
