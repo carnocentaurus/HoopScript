@@ -31,6 +31,7 @@ SplashScreen.preventAutoHideAsync();
 
 function MainApp() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [quickSimParams, setQuickSimParams] = useState<{ expectedOff: OffensiveFocus | null, expectedDef: DefensiveFocus | null } | null>(null);
   const { isReady, startMusic } = useAudioContext();
   const {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
@@ -116,7 +117,12 @@ function MainApp() {
           <>
             {view === 'home' && (
               <HomeScreen 
-                save={save} onQuickSim={() => setView('quickSim')} onSimDay={handleSimulateLeagueDay}
+                save={save} 
+                onQuickSim={(off, def) => {
+                  setQuickSimParams({ expectedOff: off, expectedDef: def });
+                  setView('quickSim');
+                }} 
+                onSimDay={handleSimulateLeagueDay}
                 onViewStandings={() => setView('standings')} onViewBracket={() => setView('bracket')}
                 onViewHistory={() => setView('history')} onBackToSaves={() => setView('saveSelection')}
                 onScout={handleScout} onUpdateStrategy={handleUpdateStrategy}
@@ -134,7 +140,15 @@ function MainApp() {
                 onViewStandings={() => setView('standings')}
               />
             )}
-            {view === 'quickSim' && <QuickSimScreen save={save} opponent={{ city: oppCity, isHome: !isHome, ...common }} onFinish={handleGameFinish} onBack={() => setView('home')} />}
+            {view === 'quickSim' && (
+              <QuickSimScreen 
+                save={save} 
+                opponent={{ city: oppCity, isHome: !isHome, ...common }} 
+                onFinish={handleGameFinish} 
+                onBack={() => setView('home')} 
+                snapshot={quickSimParams}
+              />
+            )}
             {view === 'myTeamOverview' && selectedTeamCity && (() => {
               const data = save.standings.find(t => t.city === selectedTeamCity) || { city: save.city, roster: save.roster };
               return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;

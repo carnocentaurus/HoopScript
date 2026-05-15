@@ -111,7 +111,7 @@ const HomeScreen = ({
   save: GameSave, 
   userTeam: any, 
   opponent: any, 
-  onQuickSim: () => void,
+  onQuickSim: (off: OffensiveFocus | null, def: DefensiveFocus | null) => void,
   onSimDay: () => void,
   onViewStandings: () => void,
   onViewBracket: () => void,
@@ -155,6 +155,18 @@ const HomeScreen = ({
       onScout(opponent.city);
     }
     setShowScoutModal(true);
+  };
+
+  const handleSimulate = () => {
+    playClickSound();
+    if (save.playoffs && isSeriesCompleted) {
+      onSimDay();
+    } else {
+      // CAPTURE SNAPSHOT: Capture what the user currently sees in the scouting report
+      const expectedOff = save.lastScoutReport?.city === opponent.city ? save.lastScoutReport.predictedOffense : null;
+      const expectedDef = save.lastScoutReport?.city === opponent.city ? save.lastScoutReport.predictedDefense : null;
+      onQuickSim(expectedOff, expectedDef);
+    }
   };
 
   return (
@@ -270,7 +282,7 @@ const HomeScreen = ({
         {((save.gamesPlayed < 82) || (save.playoffs && !isEliminated && !isChampion)) && (
           <TouchableOpacity 
             style={globalStyles.homeSimButton} 
-            onPress={() => handlePress(save.playoffs && isSeriesCompleted ? onSimDay : onQuickSim)}
+            onPress={handleSimulate}
           >
             <Text style={globalStyles.homeSimButtonText}>
               {save.playoffs 

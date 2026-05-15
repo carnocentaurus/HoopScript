@@ -402,7 +402,8 @@ export const simulateGame = (
   myTeam: GameSave, 
   opponent: any, 
   userStrategy: Strategy, 
-  cpuStrategy: Strategy,
+  expectedOffFocus: OffensiveFocus,
+  expectedDefFocus: DefensiveFocus,
   myIQ: number = 60,
   oppIQ: number = 60
 ): GameResult => {
@@ -435,9 +436,6 @@ export const simulateGame = (
   const oppScore = { val: 0 };
 
   // Adjustment Logic Pre-calculations
-  const expectedOffFocus = cpuStrategy.offense;
-  const expectedDefFocus = cpuStrategy.defense;
-  
   const adjustmentRoll = Math.random();
   let willOppAdjust = false;
   let threshold = 0;
@@ -448,9 +446,9 @@ export const simulateGame = (
 
   willOppAdjust = adjustmentRoll < threshold;
 
-  const expectedOppStrategy = { ...cpuStrategy };
+  const expectedOppStrategy = { offense: expectedOffFocus, defense: expectedDefFocus };
   let currentMyStrategy = { ...userStrategy };
-  let currentOppStrategy = { ...cpuStrategy };
+  let currentOppStrategy = { offense: expectedOffFocus, defense: expectedDefFocus };
 
   let userAdjustedMidGame = false;
   let oppAdjustedMidGame = false;
@@ -475,8 +473,8 @@ export const simulateGame = (
     
     if (!isOvertime) {
       // Dynamic Pace adjustment only for regulation
-      const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === cpuStrategy.defense;
-      const isOppCountered = COUNTER_MATRIX[cpuStrategy.offense] === userStrategy.defense;
+      const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === expectedDefFocus;
+      const isOppCountered = COUNTER_MATRIX[expectedOffFocus] === userStrategy.defense;
       if (isUserCountered) periodPossessions += 4;
       if (isOppCountered) periodPossessions += 4;
     }
@@ -496,17 +494,18 @@ export const simulateGame = (
         if (willOppAdjust) {
           const oldOff = expectedOffFocus;
           const oldDef = expectedDefFocus;
-          const newDef = COUNTER_MATRIX[currentMyStrategy.offense];
           
-          if (newDef !== oldDef) {
-            currentOppStrategy.defense = newDef;
-            oppAdjustedMidGame = true;
-          } else {
-            const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
-            const otherOffenses = offenses.filter(o => o !== oldOff);
-            currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
-            oppAdjustedMidGame = true;
-          }
+          // Ensure the newly picked focus is strictly DIFFERENT from the expected one
+          const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
+          const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
+          
+          const otherOffenses = offenses.filter(o => o !== oldOff);
+          const otherDefenses = defenses.filter(d => d !== oldDef);
+          
+          currentOppStrategy.offense = otherOffenses[Math.floor(Math.random() * otherOffenses.length)];
+          currentOppStrategy.defense = otherDefenses[Math.floor(Math.random() * otherDefenses.length)];
+          
+          oppAdjustedMidGame = true;
         } else {
           // Force consistency if not adjusting
           currentOppStrategy.offense = expectedOffFocus;

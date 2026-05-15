@@ -17,12 +17,14 @@ const QuickSimScreen = ({
   save, 
   opponent, 
   onFinish, 
-  onBack 
+  onBack,
+  snapshot
 }: { 
   save: GameSave, 
   opponent: any, 
   onFinish: (result: GameResult) => void, 
-  onBack: () => void 
+  onBack: () => void,
+  snapshot: { expectedOff: OffensiveFocus | null, expectedDef: DefensiveFocus | null } | null
 }) => {
   const { playClickSound } = useSound();
   const [myScore, setMyScore] = useState(0);
@@ -148,11 +150,15 @@ const QuickSimScreen = ({
       defense: DefensiveFocus.PROTECT_RIM
     };
 
+    const expectedOff = snapshot?.expectedOff || cpuStrategy.offense;
+    const expectedDef = snapshot?.expectedDef || cpuStrategy.defense;
+
     const gameResult = simulateGame(
       save, 
       opponent, 
       userStrategy, 
-      cpuStrategy,
+      expectedOff,
+      expectedDef,
       save.coachingIQ,
       opponent.coachingIQ
     );
@@ -339,7 +345,9 @@ const QuickSimScreen = ({
                     {/* Offensive */}
                     <View style={{ flexDirection: 'row', paddingVertical: 8 }}>
                       <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{result?.expectedOppStrategy.offense || 'N/A'}</Text>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>
+                          {snapshot?.expectedOff || result?.expectedOppStrategy.offense || 'N/A'}
+                        </Text>
                       </View>
                       <View style={{ flex: 1, alignItems: 'center' }}>
                         <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.offense}</Text>
@@ -349,7 +357,9 @@ const QuickSimScreen = ({
                     {/* Defensive */}
                     <View style={{ flexDirection: 'row', paddingVertical: 8, borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }}>
                       <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>{result?.expectedOppStrategy.defense || 'N/A'}</Text>
+                        <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.white }]}>
+                          {snapshot?.expectedDef || result?.expectedOppStrategy.defense || 'N/A'}
+                        </Text>
                       </View>
                       <View style={{ flex: 1, alignItems: 'center' }}>
                         <Text style={[globalStyles.tacticalValue, { fontSize: 10, color: COLORS.primary }]}>{result?.finalOppStrategy.defense}</Text>
