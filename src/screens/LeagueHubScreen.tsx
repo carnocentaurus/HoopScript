@@ -30,12 +30,14 @@ const LeagueHubScreen = ({
   onBack,
   onViewHistory,
   onViewTeam,
-  onViewStandings
+  onViewStandings,
+  onViewLeaders
 }: { 
   onBack: () => void,
   onViewHistory: () => void,
   onViewTeam: () => void,
-  onViewStandings: () => void
+  onViewStandings: () => void,
+  onViewLeaders: () => void
 }) => {
   const { playClickSound } = useSound();
 
@@ -73,7 +75,7 @@ const LeagueHubScreen = ({
           playClickSound={playClickSound} 
         />
         <HubCard 
-          label="Team Overview" 
+          label="Team" 
           icon="people-outline" 
           onPress={onViewTeam} 
           playClickSound={playClickSound} 
@@ -82,6 +84,12 @@ const LeagueHubScreen = ({
           label="Standings" 
           icon="podium-outline" 
           onPress={onViewStandings} 
+          playClickSound={playClickSound} 
+        />
+        <HubCard 
+          label="Leaders" 
+          icon="trophy-outline" 
+          onPress={onViewLeaders} 
           playClickSound={playClickSound} 
         />
       </ScrollView>

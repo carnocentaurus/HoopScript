@@ -22,6 +22,7 @@ import FullPlayoffBracketScreen from './src/screens/FullPlayoffBracketScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import TeamOverviewScreen from './src/screens/TeamOverviewScreen';
 import LeagueHubScreen from './src/screens/LeagueHubScreen';
+import LeagueLeadersScreen from './src/screens/LeagueLeadersScreen';
 import DraftScreen from './src/screens/DraftScreen';
 import DraftLotteryScreen from './src/screens/DraftLotteryScreen';
 import CreditsScreen from './src/screens/CreditsScreen';
@@ -138,8 +139,10 @@ function MainApp() {
                 onViewHistory={() => setView('history')}
                 onViewTeam={() => { setSelectedTeamCity(save.city); setView('myTeamOverview'); }}
                 onViewStandings={() => setView('standings')}
+                onViewLeaders={() => setView('leagueLeaders')}
               />
             )}
+            {view === 'leagueLeaders' && <LeagueLeadersScreen save={save} onBack={() => setView('leagueHub')} />}
             {view === 'quickSim' && (
               <QuickSimScreen 
                 save={save} 

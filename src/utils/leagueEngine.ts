@@ -552,37 +552,83 @@ export const generateDraftPool = (count: number = 75): Player[] => {
   }).sort((a, b) => b.overall - a.overall);
 };
 
-export const trimRosters = (standings: TeamStanding[]): TeamStanding[] => {
-  return standings.map(team => {
-    if (team.roster.length <= 15) return team;
-
-    // Helper to get position frequency
-    const getPosCount = (roster: Player[], pos: string) => 
-      roster.filter(p => p.position === pos).length;
-
-    // Sort to determine who to KEEP (top 15)
-    const sortedRoster = [...team.roster].sort((a, b) => {
-      // 1. Overall Rating (Higher is better)
-      if (b.overall !== a.overall) return b.overall - a.overall;
-      
-      // 2. Age (Younger is better)
-      if (a.age !== b.age) return a.age - b.age;
-      
-      // 3. Position Density (Rarer position is better)
-      const countA = getPosCount(team.roster, a.position);
-      const countB = getPosCount(team.roster, b.position);
-      if (countA !== countB) return countA - countB;
-      
-      // 4. Random tie-breaker
-      return Math.random() - 0.5;
+export const getLeagueLeadersData = (standings: TeamStanding[], currentSeason: number) => {
+  const allPlayers: { player: Player, teamCity: string, teamWins: number, avgs: any }[] = [];
+  
+  standings.forEach(team => {
+    team.roster.forEach(player => {
+      const avgs = calculateSeasonAverages(player.stats);
+      allPlayers.push({ player, teamCity: team.city, teamWins: team.wins, avgs });
     });
-
-    const trimmedRoster = sortedRoster.slice(0, 15);
-
-    return {
-      ...team,
-      roster: validateAndFixRoster(trimmedRoster)
-    };
   });
+
+  const getTop3 = (stat: string, isDescending: boolean = true) => {
+    return [...allPlayers]
+      .filter(p => Number(p.player.stats.gamesPlayed) > 0)
+      .sort((a, b) => {
+        const valA = Number(a.avgs[stat]);
+        const valB = Number(b.avgs[stat]);
+        return isDescending ? valB - valA : valA - valB;
+      })
+      .slice(0, 3);
+  };
+
+  // MVP Formula: PPG + RPG + APG + SPG + BPG - TOPG + (Team Wins * 0.2)
+  const mvpRace = [...allPlayers]
+    .filter(p => Number(p.player.stats.gamesPlayed) > 0)
+    .map(p => {
+      const score = Number(p.avgs.pts) + Number(p.avgs.reb) + Number(p.avgs.ast) + 
+                    Number(p.avgs.stl) + Number(p.avgs.blk) - Number(p.avgs.tov) + 
+                    (p.teamWins * 0.2);
+      return { ...p, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  // DPOY Formula: SPG * 2 + BPG * 2 + RPG
+  const dpoyRace = [...allPlayers]
+    .filter(p => Number(p.player.stats.gamesPlayed) > 0)
+    .map(p => {
+      const score = (Number(p.avgs.stl) * 2) + (Number(p.avgs.blk) * 2) + Number(p.avgs.reb);
+      return { ...p, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
+
+  // SMOY: Bench players (isStarter === false) sorted by PPG
+  const smoyRace = [...allPlayers]
+    .filter(p => Number(p.player.stats.gamesPlayed) > 0 && !p.player.isStarter)
+    .sort((a, b) => Number(b.avgs.pts) - Number(a.avgs.pts))
+    .slice(0, 3);
+
+  // ROTY: Rookies (isRookie === true) sorted by MVP score (only active after Season 1)
+  const rotyRace = currentSeason >= 2 
+    ? [...allPlayers]
+        .filter(p => Number(p.player.stats.gamesPlayed) > 0 && p.player.isRookie)
+        .map(p => {
+          const score = Number(p.avgs.pts) + Number(p.avgs.reb) + Number(p.avgs.ast) + 
+                        Number(p.avgs.stl) + Number(p.avgs.blk) - Number(p.avgs.tov);
+          return { ...p, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+    : [];
+
+  return {
+    stats: {
+      ppg: getTop3('pts'),
+      rpg: getTop3('reb'),
+      apg: getTop3('ast'),
+      spg: getTop3('stl'),
+      bpg: getTop3('blk'),
+      topg: getTop3('tov')
+    },
+    awards: {
+      mvp: mvpRace,
+      dpoy: dpoyRace,
+      smoy: smoyRace,
+      roty: rotyRace
+    }
+  };
 };
 
