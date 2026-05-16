@@ -226,20 +226,29 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
 };
 
 export const calculateSeasonAverages = (stats: SeasonStats) => {
-  const gp = stats.gamesPlayed || 1;
-  const possessions = stats.possessions || (gp * 75); // Fallback
+  const gp = Number(stats.gamesPlayed) || 0;
+  
+  // Guard clause for zero games played
+  if (gp === 0) {
+    return {
+      pts: "0.0", reb: "0.0", ast: "0.0", stl: "0.0", blk: "0.0", tov: "0.0",
+      fgPct: "0.0", threePct: "0.0", min: "0.0", tsPct: "0.0", usgRate: "0.0"
+    };
+  }
+
+  const possessions = Number(stats.possessions) || (gp * 75); 
   return {
-    pts: (stats.pts / gp).toFixed(1),
-    reb: (stats.reb / gp).toFixed(1),
-    ast: (stats.ast / gp).toFixed(1),
-    stl: (stats.stl / gp).toFixed(1),
-    blk: (stats.blk / gp).toFixed(1),
-    tov: (stats.tov / gp).toFixed(1),
-    fgPct: stats.fga > 0 ? ((stats.fgm / stats.fga) * 100).toFixed(1) : "0.0",
-    threePct: stats.threePA > 0 ? ((stats.threePM / stats.threePA) * 100).toFixed(1) : "0.0",
-    min: (stats.min / gp).toFixed(1),
-    tsPct: stats.fga > 0 ? ((stats.pts / (2 * (stats.fga + 0.44 * (stats.pts * 0.1)))) * 100).toFixed(1) : "0.0", // Simplified TS%
-    usgRate: possessions > 0 ? ((stats.fga + 0.44 * (stats.pts * 0.1) + stats.tov) / possessions * 100).toFixed(1) : "0.0"
+    pts: (Number(stats.pts) / gp).toFixed(1),
+    reb: (Number(stats.reb) / gp).toFixed(1),
+    ast: (Number(stats.ast) / gp).toFixed(1),
+    stl: (Number(stats.stl) / gp).toFixed(1),
+    blk: (Number(stats.blk) / gp).toFixed(1),
+    tov: (Number(stats.tov) / gp).toFixed(1),
+    fgPct: Number(stats.fga) > 0 ? ((Number(stats.fgm) / Number(stats.fga)) * 100).toFixed(1) : "0.0",
+    threePct: Number(stats.threePA) > 0 ? ((Number(stats.threePM) / Number(stats.threePA)) * 100).toFixed(1) : "0.0",
+    min: (Number(stats.min) / gp).toFixed(1),
+    tsPct: Number(stats.fga) > 0 ? ((Number(stats.pts) / (2 * (Number(stats.fga) + 0.44 * (Number(stats.pts) * 0.1)))) * 100).toFixed(1) : "0.0",
+    usgRate: possessions > 0 ? ((Number(stats.fga) + 0.44 * (Number(stats.pts) * 0.1) + Number(stats.tov)) / possessions * 100).toFixed(1) : "0.0"
   };
 };
 

@@ -37,6 +37,23 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
   const bench = sortRosterByPosition(roster.filter(p => !p.isStarter));
   const ratings = calculateTeamRatings(roster);
 
+  // Calculate Team Season Averages
+  const teamTotals = roster.reduce((acc, p) => {
+    acc.pts += Number(p.stats.pts || 0);
+    acc.reb += Number(p.stats.reb || 0);
+    acc.ast += Number(p.stats.ast || 0);
+    acc.blk += Number(p.stats.blk || 0);
+    acc.gp = Math.max(acc.gp, Number(p.stats.gamesPlayed || 0));
+    return acc;
+  }, { pts: 0, reb: 0, ast: 0, blk: 0, gp: 0 });
+
+  const teamAvgs = {
+    ppg: teamTotals.gp > 0 ? (teamTotals.pts / teamTotals.gp).toFixed(1) : '0.0',
+    rpg: teamTotals.gp > 0 ? (teamTotals.reb / teamTotals.gp).toFixed(1) : '0.0',
+    apg: teamTotals.gp > 0 ? (teamTotals.ast / teamTotals.gp).toFixed(1) : '0.0',
+    bpg: teamTotals.gp > 0 ? (teamTotals.blk / teamTotals.gp).toFixed(1) : '0.0',
+  };
+
   const renderPlayerRow = (player: Player) => {
     const avgs = calculateSeasonAverages(player.stats);
     return (
@@ -143,6 +160,14 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
           <View style={globalStyles.tosTeamRatingBox}><Text style={globalStyles.tosTeamRatingVal}>{ratings.offense}</Text><Text style={globalStyles.tosTeamRatingLabel}>OFF</Text></View>
           <View style={globalStyles.tosTeamRatingBox}><Text style={globalStyles.tosTeamRatingVal}>{ratings.defense}</Text><Text style={globalStyles.tosTeamRatingLabel}>DEF</Text></View>
           <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, globalStyles.tosTeamOvrVal]}>{ratings.overall}</Text><Text style={globalStyles.tosTeamRatingLabel}>OVR</Text></View>
+        </View>
+
+        {/* Team Season Averages */}
+        <View style={[globalStyles.tosTeamRatingsRow, { marginTop: -15, borderTopWidth: 1, borderColor: COLORS.border, paddingTop: 15, backgroundColor: 'transparent' }]}>
+          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.ppg}</Text><Text style={globalStyles.tosTeamRatingLabel}>PPG</Text></View>
+          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.rpg}</Text><Text style={globalStyles.tosTeamRatingLabel}>RPG</Text></View>
+          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.apg}</Text><Text style={globalStyles.tosTeamRatingLabel}>APG</Text></View>
+          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.bpg}</Text><Text style={globalStyles.tosTeamRatingLabel}>BPG</Text></View>
         </View>
 
         <Text style={globalStyles.tosSectionHeader}>STARTERS</Text>

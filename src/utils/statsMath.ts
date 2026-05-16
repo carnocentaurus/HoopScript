@@ -181,8 +181,8 @@ export const generateSimulatedStats = (
 
   let reb = (profiles.REBOUNDING[pos] || 1.0) * (player.overall / 70);
   let ast = (profiles.ASSISTS[pos] || 1.0) * (player.overall / 70);
-  let stl = (profiles.STEALS[pos] || 1.0) * (player.overall / 70);
-  let blk = (profiles.BLOCKS[pos] || 1.0) * (player.overall / 70);
+  let stl = (profiles.STEALS[pos] || 1.0) * (player.overall / 70) * 0.45; // Scaled for realism (~2.0 spg max)
+  let blk = (profiles.BLOCKS[pos] || 1.0) * (player.overall / 70) * 0.35; // Scaled for realism (~2.5 bpg max)
   let tov = (profiles.TURNOVERS[pos] || 1.0) * (player.overall / 70);
   let threePA = (profiles.THREE_PA[pos] || 1.0) * (player.overall / 70);
 
