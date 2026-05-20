@@ -25,33 +25,46 @@ export const simulateLeagueDay = (
       const strategyA = selectCPUStrategy(teamA, teamB, isPlayoffs);
       const strategyB = selectCPUStrategy(teamB, teamA, isPlayoffs);
       
-      const teamAStrength = getTeamStrength(teamA.city, standings);
-      const teamBStrength = getTeamStrength(teamB.city, standings);
-      
-      let modA = 1.0;
-      let modB = 1.0;
+      const result = simulateGame(
+        teamA,
+        teamB,
+        strategyA,
+        strategyB.offense,
+        strategyB.defense,
+        teamA.coachingIQ || 60,
+        teamB.coachingIQ || 60
+      );
 
-      const getAIPenalty = (iq: number) => 0.12 - ((iq / 10) * 0.08);
+      const aScore = result.myScore;
+      const bScore = result.oppScore;
+      const aWon = aScore > bScore;
 
-      if (COUNTER_MATRIX[strategyA.offense] === strategyB.defense) {
-        modA -= getAIPenalty(teamA.coachingIQ);
-      }
-      if (COUNTER_MATRIX[strategyB.offense] === strategyA.defense) {
-        modB -= getAIPenalty(teamB.coachingIQ);
-      }
-
-      const finalA = teamAStrength * modA;
-      const finalB = teamBStrength * modB;
-
-      const aWon = Math.random() < (0.5 + (finalA - finalB) / 100);
       dayResults[teamA.city] = aWon ? 'W' : 'L';
       dayResults[teamB.city] = aWon ? 'L' : 'W';
       
-      const aScore = Math.round(randomNormal(110 + (finalA - finalB), 10));
-      const bScore = Math.round(randomNormal(110 + (finalB - finalA), 10));
-      
-      teamA.roster = teamA.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, aWon, 0, aScore, aScore - bScore, strategyA, strategyB, false)));
-      teamB.roster = teamB.roster.map(p => updatePlayerStats(p, generatePlayerStats(p, !aWon, 0, bScore, bScore - aScore, strategyB, strategyA, false)));
+      teamA.roster = teamA.roster.map(p => {
+        const pStat = result.myTeamStats.find(s => s.playerId === p.id);
+        return pStat ? updatePlayerStats(p, pStat) : p;
+      });
+
+      teamB.roster = teamB.roster.map(p => {
+        const pStat = result.oppTeamStats.find(s => s.playerId === p.id);
+        return pStat ? updatePlayerStats(p, pStat) : p;
+      });
+
+      if (!isPlayoffs) {
+        teamA.totalPoints = (teamA.totalPoints || 0) + aScore;
+        teamA.gamesPlayed = (teamA.gamesPlayed || 0) + 1;
+        teamB.totalPoints = (teamB.totalPoints || 0) + bScore;
+        teamB.gamesPlayed = (teamB.gamesPlayed || 0) + 1;
+
+        console.log(`[POST-GAME STANDINGS] Team: ${teamA.city} | Game Score: ${aScore} | New Season Total: ${teamA.totalPoints} over ${teamA.gamesPlayed} games`);
+        console.log(`[POST-GAME STANDINGS] Team: ${teamB.city} | Game Score: ${bScore} | New Season Total: ${teamB.totalPoints} over ${teamB.gamesPlayed} games`);
+      }
+
+      const nameA = (teamA as any).name || teamA.city;
+      const nameB = (teamB as any).name || teamB.city;
+      console.log(`[UNIFIED LEAGUE SIM] ${nameA} ${aScore} - ${bScore} ${nameB}`);
     }
   }
   return dayResults;
@@ -399,8 +412,8 @@ const forceWinner = (
 const BASE_PACE = 102;
 
 export const simulateGame = (
-  myTeam: GameSave, 
-  opponent: any, 
+  myTeam: { roster: Player[] },
+  opponent: { roster: Player[] }, 
   userStrategy: Strategy, 
   expectedOffFocus: OffensiveFocus,
   expectedDefFocus: DefensiveFocus,

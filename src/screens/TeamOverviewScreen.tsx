@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { Player, SeasonHistory } from '../types/save';
+import { Player, SeasonHistory, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
 import { calculateTeamRatings, calculateSeasonAverages } from '../utils/leagueEngine';
 import { sortRosterByPosition } from '../utils/rosterUtils';
@@ -15,10 +15,11 @@ interface TeamOverviewScreenProps {
   city: string;
   roster: Player[];
   history?: SeasonHistory[];
+  teamStanding?: TeamStanding;
   onBack: () => void;
 }
 
-const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScreenProps) => {
+const TeamOverviewScreen = ({ city, roster, history, teamStanding, onBack }: TeamOverviewScreenProps) => {
   const { playClickSound } = useSound();
   const [showChampionships, setShowChampionships] = useState(false);
 
@@ -58,18 +59,20 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
     totalFGA: teamTotals.fga,
     total3PM: teamTotals.threePM,
     total3PA: teamTotals.threePA,
-    gamesPlayed: teamTotals.gp,
+    gamesPlayed: teamStanding?.gamesPlayed !== undefined ? Number(teamStanding.gamesPlayed) : teamTotals.gp,
+    totalPoints: teamStanding?.totalPoints !== undefined ? Number(teamStanding.totalPoints) : teamTotals.pts,
   };
 
+  const teamPPG = team.gamesPlayed > 0 ? (Number(team.totalPoints) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
   const teamSPG = team.gamesPlayed > 0 ? (Number(team.totalSteals) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
   const teamFGpct = team.totalFGA > 0 ? (((Number(team.totalFGM) / Number(team.totalFGA)) * 100).toFixed(1) + '%') : '0.0%';
   const team3Ppct = team.total3PA > 0 ? (((Number(team.total3PM) / Number(team.total3PA)) * 100).toFixed(1) + '%') : '0.0%';
 
   const teamAvgs = {
-    ppg: teamTotals.gp > 0 ? (teamTotals.pts / teamTotals.gp).toFixed(1) : '0.0',
-    rpg: teamTotals.gp > 0 ? (teamTotals.reb / teamTotals.gp).toFixed(1) : '0.0',
-    apg: teamTotals.gp > 0 ? (teamTotals.ast / teamTotals.gp).toFixed(1) : '0.0',
-    bpg: teamTotals.gp > 0 ? (teamTotals.blk / teamTotals.gp).toFixed(1) : '0.0',
+    ppg: teamPPG,
+    rpg: team.gamesPlayed > 0 ? (teamTotals.reb / team.gamesPlayed).toFixed(1) : '0.0',
+    apg: team.gamesPlayed > 0 ? (teamTotals.ast / team.gamesPlayed).toFixed(1) : '0.0',
+    bpg: team.gamesPlayed > 0 ? (teamTotals.blk / team.gamesPlayed).toFixed(1) : '0.0',
     spg: teamSPG,
     fgPct: teamFGpct,
     threePct: team3Ppct,

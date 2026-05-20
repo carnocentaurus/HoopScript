@@ -100,6 +100,8 @@ export interface TeamStanding {
   coachingIQ: number;
   predictability: number;
   pace: number; // Team possessions per game
+  totalPoints?: number;
+  gamesPlayed?: number;
 }
 
 export interface PlayoffSeries {

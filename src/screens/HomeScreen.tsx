@@ -163,8 +163,8 @@ const HomeScreen = ({
       onSimDay();
     } else {
       // CAPTURE SNAPSHOT: Capture what the user currently sees in the scouting report
-      const expectedOff = save.lastScoutReport?.city === opponent.city ? save.lastScoutReport.predictedOffense : null;
-      const expectedDef = save.lastScoutReport?.city === opponent.city ? save.lastScoutReport.predictedDefense : null;
+      const expectedOff = save.lastScoutReport?.city === opponent.city ? (save.lastScoutReport?.predictedOffense ?? null) : null;
+      const expectedDef = save.lastScoutReport?.city === opponent.city ? (save.lastScoutReport?.predictedDefense ?? null) : null;
       onQuickSim(expectedOff, expectedDef);
     }
   };

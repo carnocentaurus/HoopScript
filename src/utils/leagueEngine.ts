@@ -297,7 +297,9 @@ export const generateInitialStandings = (): TeamStanding[] => {
       roster,
       coachingIQ: generateCoachingIQ(),
       predictability: Math.floor(Math.random() * 100) + 1, // 1 to 100
-      pace: Math.floor(Math.random() * 10) + 95 // 95 to 105
+      pace: Math.floor(Math.random() * 10) + 95, // 95 to 105
+      totalPoints: 0,
+      gamesPlayed: 0
     };
   });
 };
@@ -631,4 +633,125 @@ export const getLeagueLeadersData = (standings: TeamStanding[], currentSeason: n
     }
   };
 };
+
+export interface TeamLeaderItem {
+  city: string;
+  value: string;
+}
+
+export interface TeamLeadersData {
+  ppg: TeamLeaderItem[];
+  rpg: TeamLeaderItem[];
+  apg: TeamLeaderItem[];
+  spg: TeamLeaderItem[];
+  bpg: TeamLeaderItem[];
+  topg: TeamLeaderItem[];
+  fgPct: TeamLeaderItem[];
+  threePct: TeamLeaderItem[];
+  wins: TeamLeaderItem[];
+}
+
+export const getTeamLeadersData = (standings: TeamStanding[]): TeamLeadersData => {
+  const teamStats = standings.map(t => {
+    const teamTotals = t.roster.reduce((acc, p) => {
+      acc.pts += Number(p.stats.pts || 0);
+      acc.reb += Number(p.stats.reb || 0);
+      acc.ast += Number(p.stats.ast || 0);
+      acc.blk += Number(p.stats.blk || 0);
+      acc.stl += Number(p.stats.stl || 0);
+      acc.tov += Number(p.stats.tov || 0);
+      acc.fgm += Number(p.stats.fgm || 0);
+      acc.fga += Number(p.stats.fga || 0);
+      acc.threePM += Number(p.stats.threePM || 0);
+      acc.threePA += Number(p.stats.threePA || 0);
+      acc.gp = Math.max(acc.gp, Number(p.stats.gamesPlayed || 0));
+      return acc;
+    }, { pts: 0, reb: 0, ast: 0, blk: 0, stl: 0, tov: 0, fgm: 0, fga: 0, threePM: 0, threePA: 0, gp: 0 });
+
+    const gamesPlayed = t.gamesPlayed !== undefined ? Number(t.gamesPlayed) : teamTotals.gp;
+    const totalPoints = t.totalPoints !== undefined ? Number(t.totalPoints) : teamTotals.pts;
+    
+    const ppgNum = gamesPlayed > 0 ? totalPoints / gamesPlayed : 0;
+    const rpgNum = gamesPlayed > 0 ? teamTotals.reb / gamesPlayed : 0;
+    const apgNum = gamesPlayed > 0 ? teamTotals.ast / gamesPlayed : 0;
+    const spgNum = gamesPlayed > 0 ? teamTotals.stl / gamesPlayed : 0;
+    const bpgNum = gamesPlayed > 0 ? teamTotals.blk / gamesPlayed : 0;
+    const topgNum = gamesPlayed > 0 ? teamTotals.tov / gamesPlayed : 0;
+    const fgPctNum = teamTotals.fga > 0 ? (teamTotals.fgm / teamTotals.fga) * 100 : 0;
+    const threePctNum = teamTotals.threePA > 0 ? (teamTotals.threePM / teamTotals.threePA) * 100 : 0;
+    const winsNum = t.wins;
+    const lossesNum = t.losses;
+
+    const ppgStr = gamesPlayed > 0 ? (totalPoints / gamesPlayed).toFixed(1) : '0.0';
+    const rpgStr = gamesPlayed > 0 ? (teamTotals.reb / gamesPlayed).toFixed(1) : '0.0';
+    const apgStr = gamesPlayed > 0 ? (teamTotals.ast / gamesPlayed).toFixed(1) : '0.0';
+    const bpgStr = gamesPlayed > 0 ? (teamTotals.blk / gamesPlayed).toFixed(1) : '0.0';
+    const topgStr = gamesPlayed > 0 ? (teamTotals.tov / gamesPlayed).toFixed(1) : '0.0';
+    const spgStr = gamesPlayed > 0 ? (teamTotals.stl / gamesPlayed).toFixed(1) : '0.0';
+    const fgPctStr = teamTotals.fga > 0 ? ((teamTotals.fgm / teamTotals.fga) * 100).toFixed(1) + '%' : '0.0%';
+    const threePctStr = teamTotals.threePA > 0 ? ((teamTotals.threePM / teamTotals.threePA) * 100).toFixed(1) + '%' : '0.0%';
+    const winsStr = String(t.wins);
+
+    return {
+      city: t.city,
+      nums: {
+        ppg: ppgNum,
+        rpg: rpgNum,
+        apg: apgNum,
+        spg: spgNum,
+        bpg: bpgNum,
+        topg: topgNum,
+        fgPct: fgPctNum,
+        threePct: threePctNum,
+        wins: winsNum,
+        losses: lossesNum
+      },
+      strs: {
+        ppg: ppgStr,
+        rpg: rpgStr,
+        apg: apgStr,
+        spg: spgStr,
+        bpg: bpgStr,
+        topg: topgStr,
+        fgPct: fgPctStr,
+        threePct: threePctStr,
+        wins: winsStr
+      }
+    };
+  });
+
+  const getTop3 = (key: 'ppg' | 'rpg' | 'apg' | 'spg' | 'bpg' | 'topg' | 'fgPct' | 'threePct'): TeamLeaderItem[] => {
+    return [...teamStats]
+      .sort((a, b) => b.nums[key] - a.nums[key])
+      .slice(0, 3)
+      .map(item => ({ city: item.city, value: item.strs[key] }));
+  };
+
+  const winsTop3 = [...teamStats]
+    .sort((a, b) => b.nums.wins - a.nums.wins || a.nums.losses - b.nums.losses)
+    .slice(0, 3)
+    .map(item => ({ city: item.city, value: item.strs.wins }));
+
+  return {
+    ppg: getTop3('ppg'),
+    rpg: getTop3('rpg'),
+    apg: getTop3('apg'),
+    spg: getTop3('spg'),
+    bpg: getTop3('bpg'),
+    topg: getTop3('topg'),
+    fgPct: getTop3('fgPct'),
+    threePct: getTop3('threePct'),
+    wins: winsTop3
+  };
+};
+
+export const trimRosters = (standings: TeamStanding[]): TeamStanding[] => {
+  return standings.map(team => {
+    const trimmed = [...team.roster]
+      .sort((a, b) => b.overall - a.overall)
+      .slice(0, 15);
+    return { ...team, roster: trimmed };
+  });
+};
+
 

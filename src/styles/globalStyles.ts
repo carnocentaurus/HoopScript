@@ -1185,4 +1185,121 @@ export const globalStyles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
+
+  // --- LEAGUE LEADERS ---
+  llTitle: {
+    color: COLORS.textSub,
+    fontSize: 18,
+    fontFamily: FONTS.primary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginBottom: 0,
+  },
+  llTabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+    marginTop: 10,
+  },
+  llScrollContent: {
+    padding: 20,
+  },
+  llStatBlockWrapper: {
+    marginBottom: 25,
+  },
+  llAwardBlockWrapper: {
+    marginBottom: 30,
+  },
+  llSectionHeader: {
+    color: COLORS.primary,
+    fontFamily: FONTS.primary,
+    fontSize: 12,
+    letterSpacing: 2,
+    marginBottom: 10,
+    marginLeft: 0,
+    textTransform: 'uppercase',
+  },
+  llBlockContainer: {
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  llRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  llAwardRow: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  llRowLast: {
+    borderBottomWidth: 0,
+  },
+  llRowEven: {
+    backgroundColor: COLORS.card,
+  },
+  llRowOdd: {
+    backgroundColor: COLORS.grayLight,
+  },
+  llRankText: {
+    width: 30,
+    fontFamily: FONTS.primary,
+    color: COLORS.textSub,
+  },
+  llLogo: {
+    width: 36,
+    height: 36,
+    marginRight: 12,
+    resizeMode: 'contain',
+  },
+  llNameText: {
+    flex: 1,
+    fontFamily: FONTS.secondary,
+    color: COLORS.white,
+    fontSize: 14,
+  },
+  llStatVal: {
+    fontFamily: FONTS.primary,
+    color: COLORS.primary,
+    fontSize: 14,
+  },
+  llAwardNameText: {
+    flex: 1,
+    fontFamily: FONTS.secondary,
+    color: COLORS.white,
+    fontSize: 16,
+  },
+  llAwardWinsText: {
+    fontFamily: FONTS.primary,
+    color: COLORS.primary,
+    fontSize: 12,
+  },
+  llAwardSubtext: {
+    marginLeft: 64,
+    marginTop: 4,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.secondary,
+    fontSize: 11,
+  },
+  llEmptyContainer: {
+    padding: 20,
+    backgroundColor: COLORS.card,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  llEmptyText: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.secondary,
+    fontSize: 12,
+  },
 });
+

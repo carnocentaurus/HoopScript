@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
-import { getLeagueLeadersData } from '../utils/leagueEngine';
+import { getLeagueLeadersData, getTeamLeadersData } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
-import { COLORS, FONTS } from '../styles/theme';
+import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
@@ -14,12 +14,30 @@ interface LeagueLeadersScreenProps {
   onBack: () => void;
 }
 
+// Since this app uses conditional rendering for screen navigation,
+// mounting acts as the focus event. We use a custom useFocusEffect hook
+// to run the fetch/calculation logic whenever the screen comes into focus (mounts)
+// or when the synchronized save state updates.
+const useFocusEffect = (effect: () => void, dependencies: any[]) => {
+  useEffect(() => {
+    effect();
+  }, dependencies);
+};
+
 const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
   const { playClickSound } = useSound();
-  const [activeTab, setActiveTab] = useState<'STATS' | 'AWARDS'>('STATS');
+  const [activeTab, setActiveTab] = useState<'PLAYERS' | 'AWARDS' | 'TEAMS'>('PLAYERS');
 
-  const leadersData = useMemo(() => {
-    return getLeagueLeadersData(save.standings, save.seasonCount);
+  const [leadersData, setLeadersData] = useState(() =>
+    getLeagueLeadersData(save.standings, save.seasonCount)
+  );
+  const [teamLeadersData, setTeamLeadersData] = useState(() =>
+    getTeamLeadersData(save.standings)
+  );
+
+  useFocusEffect(() => {
+    setLeadersData(getLeagueLeadersData(save.standings, save.seasonCount));
+    setTeamLeadersData(getTeamLeadersData(save.standings));
   }, [save.standings, save.seasonCount]);
 
   const handlePress = (action: () => void) => {
@@ -27,29 +45,27 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
     action();
   };
 
-  const StatBlock = ({ title, data, statKey }: { title: string, data: any[], statKey: string }) => (
-    <View style={{ marginBottom: 25 }}>
-      <Text style={[globalStyles.tosSectionHeader, { marginLeft: 0, color: COLORS.primary }]}>{title}</Text>
-      <View style={{ backgroundColor: COLORS.card, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border }}>
+  const StatBlock = ({ title, data, statKey }: { title: string; data: any[]; statKey: string }) => (
+    <View style={globalStyles.llStatBlockWrapper}>
+      <Text style={globalStyles.llSectionHeader}>{title}</Text>
+      <View style={globalStyles.llBlockContainer}>
         {data.map((item, index) => {
           const logo = TEAM_LOGOS[item.teamCity];
           return (
-            <View key={index} style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              padding: 12, 
-              borderBottomWidth: index === 2 ? 0 : 1, 
-              borderColor: COLORS.border,
-              backgroundColor: index % 2 === 0 ? COLORS.card : COLORS.grayLight
-            }}>
-              <Text style={{ width: 30, fontFamily: FONTS.primary, color: COLORS.textSub }}>#{index + 1}</Text>
-              {logo && <Image source={logo} style={{ width: 36, height: 36, marginRight: 12, resizeMode: 'contain' }} />}
-              <Text style={{ flex: 1, fontFamily: FONTS.secondary, color: COLORS.white, fontSize: 14 }} numberOfLines={1}>
+            <View
+              key={index}
+              style={[
+                globalStyles.llRow,
+                index === 2 && globalStyles.llRowLast,
+                index % 2 === 0 ? globalStyles.llRowEven : globalStyles.llRowOdd,
+              ]}
+            >
+              <Text style={globalStyles.llRankText}>#{index + 1}</Text>
+              {logo && <Image source={logo} style={globalStyles.llLogo} />}
+              <Text style={globalStyles.llNameText} numberOfLines={1}>
                 {item.player.lastName}
               </Text>
-              <Text style={{ fontFamily: FONTS.primary, color: COLORS.primary, fontSize: 14 }}>
-                {item.avgs[statKey]}
-              </Text>
+              <Text style={globalStyles.llStatVal}>{item.avgs[statKey]}</Text>
             </View>
           );
         })}
@@ -57,37 +73,67 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
     </View>
   );
 
-  const AwardBlock = ({ title, data, type }: { title: string, data: any[], type: string }) => (
-    <View style={{ marginBottom: 30 }}>
-      <Text style={[globalStyles.tosSectionHeader, { marginLeft: 0, color: COLORS.primary }]}>{title}</Text>
+  const TeamStatBlock = ({ title, data }: { title: string; data: any[] }) => (
+    <View style={globalStyles.llStatBlockWrapper}>
+      <Text style={globalStyles.llSectionHeader}>{title}</Text>
+      <View style={globalStyles.llBlockContainer}>
+        {data.map((item, index) => {
+          const logo = TEAM_LOGOS[item.city];
+          return (
+            <View
+              key={index}
+              style={[
+                globalStyles.llRow,
+                index === 2 && globalStyles.llRowLast,
+                index % 2 === 0 ? globalStyles.llRowEven : globalStyles.llRowOdd,
+              ]}
+            >
+              <Text style={globalStyles.llRankText}>#{index + 1}</Text>
+              {logo && <Image source={logo} style={globalStyles.llLogo} />}
+              <Text style={globalStyles.llNameText} numberOfLines={1}>
+                {item.city}
+              </Text>
+              <Text style={globalStyles.llStatVal}>{item.value}</Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+
+  const AwardBlock = ({ title, data }: { title: string; data: any[] }) => (
+    <View style={globalStyles.llAwardBlockWrapper}>
+      <Text style={globalStyles.llSectionHeader}>{title}</Text>
       {data.length === 0 ? (
-        <View style={{ padding: 20, backgroundColor: COLORS.card, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: COLORS.border }}>
-          <Text style={{ color: COLORS.textMuted, fontFamily: FONTS.secondary, fontSize: 12 }}>
+        <View style={globalStyles.llEmptyContainer}>
+          <Text style={globalStyles.llEmptyText}>
             Award active starting Season 2
           </Text>
         </View>
       ) : (
-        <View style={{ backgroundColor: COLORS.card, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border }}>
+        <View style={globalStyles.llBlockContainer}>
           {data.map((item, index) => {
             const logo = TEAM_LOGOS[item.teamCity];
             return (
-              <View key={index} style={{ 
-                padding: 15, 
-                borderBottomWidth: index === 2 ? 0 : 1, 
-                borderColor: COLORS.border,
-                backgroundColor: index % 2 === 0 ? COLORS.card : COLORS.grayLight
-              }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ width: 30, fontFamily: FONTS.primary, color: COLORS.textSub }}>#{index + 1}</Text>
-                  {logo && <Image source={logo} style={{ width: 36, height: 36, marginRight: 12, resizeMode: 'contain' }} />}
-                  <Text style={{ flex: 1, fontFamily: FONTS.secondary, color: COLORS.white, fontSize: 16 }} numberOfLines={1}>
+              <View
+                key={index}
+                style={[
+                  globalStyles.llAwardRow,
+                  index === 2 && globalStyles.llRowLast,
+                  index % 2 === 0 ? globalStyles.llRowEven : globalStyles.llRowOdd,
+                ]}
+              >
+                <View style={globalStyles.flexRowAlignCenter}>
+                  <Text style={globalStyles.llRankText}>#{index + 1}</Text>
+                  {logo && <Image source={logo} style={globalStyles.llLogo} />}
+                  <Text style={globalStyles.llAwardNameText} numberOfLines={1}>
                     {item.player.lastName}
                   </Text>
-                  <Text style={{ fontFamily: FONTS.primary, color: COLORS.primary, fontSize: 12 }}>
+                  <Text style={globalStyles.llAwardWinsText}>
                     {item.teamWins} WINS
                   </Text>
                 </View>
-                <Text style={{ marginLeft: 64, marginTop: 4, color: COLORS.textMuted, fontFamily: FONTS.secondary, fontSize: 11 }}>
+                <Text style={globalStyles.llAwardSubtext}>
                   {item.avgs.pts} PPG / {item.avgs.reb} RPG / {item.avgs.ast} APG
                 </Text>
               </View>
@@ -101,35 +147,47 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
   return (
     <Screen>
       <View style={[globalStyles.homeSeasonHeader, globalStyles.flexRowAlignCenter]}>
-        <TouchableOpacity 
-          style={globalStyles.qsBackBtn} 
+        <TouchableOpacity
+          style={globalStyles.qsBackBtn}
           onPress={() => handlePress(onBack)}
         >
           <Icon name="chevron-back" size={32} color={COLORS.primary} />
         </TouchableOpacity>
         <View style={globalStyles.flex1}>
-          <Text style={[globalStyles.tosTitle, { marginBottom: 0, textAlign: 'center' }]}>LEAGUE LEADERS</Text>
+          <Text style={globalStyles.llTitle}>LEAGUE LEADERS</Text>
         </View>
-        <View style={{ width: 60 }} />
+        <View style={globalStyles.headerSpacer} />
       </View>
 
-      <View style={[globalStyles.stTabBar, { marginTop: 10 }]}>
-        <TouchableOpacity 
-          style={[globalStyles.stTab, activeTab === 'STATS' && globalStyles.stActiveTab]} 
-          onPress={() => handlePress(() => setActiveTab('STATS'))}
+      <View style={globalStyles.llTabBar}>
+        <TouchableOpacity
+          style={[globalStyles.stTab, activeTab === 'PLAYERS' && globalStyles.stActiveTab]}
+          onPress={() => handlePress(() => setActiveTab('PLAYERS'))}
         >
-          <Text style={[globalStyles.stTabText, activeTab === 'STATS' && globalStyles.stActiveTabText]}>STATS</Text>
+          <Text style={[globalStyles.stTabText, activeTab === 'PLAYERS' && globalStyles.stActiveTabText]}>
+            PLAYERS
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[globalStyles.stTab, activeTab === 'AWARDS' && globalStyles.stActiveTab]} 
+        <TouchableOpacity
+          style={[globalStyles.stTab, activeTab === 'AWARDS' && globalStyles.stActiveTab]}
           onPress={() => handlePress(() => setActiveTab('AWARDS'))}
         >
-          <Text style={[globalStyles.stTabText, activeTab === 'AWARDS' && globalStyles.stActiveTabText]}>AWARDS</Text>
+          <Text style={[globalStyles.stTabText, activeTab === 'AWARDS' && globalStyles.stActiveTabText]}>
+            AWARDS
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[globalStyles.stTab, activeTab === 'TEAMS' && globalStyles.stActiveTab]}
+          onPress={() => handlePress(() => setActiveTab('TEAMS'))}
+        >
+          <Text style={[globalStyles.stTabText, activeTab === 'TEAMS' && globalStyles.stActiveTabText]}>
+            TEAMS
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        {activeTab === 'STATS' ? (
+      <ScrollView contentContainerStyle={globalStyles.llScrollContent}>
+        {activeTab === 'PLAYERS' && (
           <>
             <StatBlock title="POINTS PER GAME" data={leadersData.stats.ppg} statKey="pts" />
             <StatBlock title="REBOUNDS PER GAME" data={leadersData.stats.rpg} statKey="reb" />
@@ -138,12 +196,26 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
             <StatBlock title="BLOCKS PER GAME" data={leadersData.stats.bpg} statKey="blk" />
             <StatBlock title="TURNOVERS PER GAME" data={leadersData.stats.topg} statKey="tov" />
           </>
-        ) : (
+        )}
+        {activeTab === 'AWARDS' && (
           <>
-            <AwardBlock title="MVP RACE" data={leadersData.awards.mvp} type="MVP" />
-            <AwardBlock title="DPOY RACE" data={leadersData.awards.dpoy} type="DPOY" />
-            <AwardBlock title="SIXTH MAN RACE" data={leadersData.awards.smoy} type="SMOY" />
-            <AwardBlock title="ROOKIE OF THE YEAR" data={leadersData.awards.roty} type="ROTY" />
+            <AwardBlock title="MVP RACE" data={leadersData.awards.mvp} />
+            <AwardBlock title="DPOY RACE" data={leadersData.awards.dpoy} />
+            <AwardBlock title="SIXTH MAN RACE" data={leadersData.awards.smoy} />
+            <AwardBlock title="ROOKIE OF THE YEAR" data={leadersData.awards.roty} />
+          </>
+        )}
+        {activeTab === 'TEAMS' && (
+          <>
+            <TeamStatBlock title="POINTS PER GAME" data={teamLeadersData.ppg} />
+            <TeamStatBlock title="REBOUNDS PER GAME" data={teamLeadersData.rpg} />
+            <TeamStatBlock title="ASSISTS PER GAME" data={teamLeadersData.apg} />
+            <TeamStatBlock title="STEALS PER GAME" data={teamLeadersData.spg} />
+            <TeamStatBlock title="BLOCKS PER GAME" data={teamLeadersData.bpg} />
+            <TeamStatBlock title="TURNOVERS PER GAME" data={teamLeadersData.topg} />
+            <TeamStatBlock title="FIELD GOAL PERCENTAGE" data={teamLeadersData.fgPct} />
+            <TeamStatBlock title="THREE-POINT PERCENTAGE" data={teamLeadersData.threePct} />
+            <TeamStatBlock title="WINS" data={teamLeadersData.wins} />
           </>
         )}
       </ScrollView>

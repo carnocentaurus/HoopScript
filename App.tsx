@@ -8,6 +8,7 @@ import { validateAndFixRoster } from './src/utils/rosterGenerator';
 import { calculateRank } from './src/utils/leagueEngine';
 import { useGameState } from './src/hooks/useGameState';
 import { globalStyles } from './src/styles/globalStyles';
+import { OffensiveFocus, DefensiveFocus } from './src/types/save';
 
 import LoadingScreen from './src/screens/LoadingScreen';
 import SelectSave from './src/screens/SelectSave';
@@ -154,7 +155,7 @@ function MainApp() {
             )}
             {view === 'myTeamOverview' && selectedTeamCity && (() => {
               const data = save.standings.find(t => t.city === selectedTeamCity) || { city: save.city, roster: save.roster };
-              return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;
+              return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} teamStanding={save.standings.find(t => t.city === selectedTeamCity)} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;
             })()}
             {view === 'standings' && <StandingsScreen save={save} onBack={() => setView('leagueHub')} onViewTeam={city => { setSelectedTeamCity(city); setView('myTeamOverview'); }} />}
             {view === 'bracket' && <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} onViewFullBracket={() => setView('fullBracket')} />}

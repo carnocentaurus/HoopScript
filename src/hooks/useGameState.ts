@@ -29,7 +29,7 @@ import { OffensiveFocus, DefensiveFocus, Strategy, ScoutReport } from '../types/
 
 const STORAGE_KEY = '@hoopscript_saves';
 
-export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'fullBracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft' | 'credits' | 'leagueLeaders';
+export type ViewState = 'loading' | 'saveSelection' | 'yearSelection' | 'teamSelection' | 'teamOverview' | 'home' | 'quickSim' | 'standings' | 'bracket' | 'fullBracket' | 'history' | 'myTeamOverview' | 'lottery' | 'draft' | 'credits' | 'leagueLeaders' | 'leagueHub';
 
 export const useGameState = () => {
   const [view, setView] = useState<ViewState>('loading');
@@ -366,11 +366,26 @@ export const useGameState = () => {
           newStreak = newStreak < 0 ? newStreak - 1 : -1;
         }
 
+        let totalPoints = team.totalPoints || 0;
+        let gamesPlayed = team.gamesPlayed || 0;
+
+        if (team.city === currentSave.city) {
+          totalPoints += result.myScore;
+          gamesPlayed += 1;
+          console.log(`[POST-GAME STANDINGS] Team: ${team.city} | Game Score: ${result.myScore} | New Season Total: ${totalPoints} over ${gamesPlayed} games`);
+        } else if (team.city === opponentCity) {
+          totalPoints += result.oppScore;
+          gamesPlayed += 1;
+          console.log(`[POST-GAME STANDINGS] Team: ${team.city} | Game Score: ${result.oppScore} | New Season Total: ${totalPoints} over ${gamesPlayed} games`);
+        }
+
         return { 
           ...team, 
           wins: team.wins + (isWin ? 1 : 0), 
           losses: team.losses + (!isWin ? 1 : 0),
-          streak: newStreak
+          streak: newStreak,
+          totalPoints,
+          gamesPlayed
         };
       });
 
@@ -546,6 +561,8 @@ export const useGameState = () => {
         wins: 0, 
         losses: 0, 
         streak: 0,
+        totalPoints: 0,
+        gamesPlayed: 0,
         roster: newRoster
       };
     });
