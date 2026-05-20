@@ -43,15 +43,36 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
     acc.reb += Number(p.stats.reb || 0);
     acc.ast += Number(p.stats.ast || 0);
     acc.blk += Number(p.stats.blk || 0);
+    acc.stl += Number(p.stats.stl || 0);
+    acc.fgm += Number(p.stats.fgm || 0);
+    acc.fga += Number(p.stats.fga || 0);
+    acc.threePM += Number(p.stats.threePM || 0);
+    acc.threePA += Number(p.stats.threePA || 0);
     acc.gp = Math.max(acc.gp, Number(p.stats.gamesPlayed || 0));
     return acc;
-  }, { pts: 0, reb: 0, ast: 0, blk: 0, gp: 0 });
+  }, { pts: 0, reb: 0, ast: 0, blk: 0, stl: 0, fgm: 0, fga: 0, threePM: 0, threePA: 0, gp: 0 });
+
+  const team = {
+    totalSteals: teamTotals.stl,
+    totalFGM: teamTotals.fgm,
+    totalFGA: teamTotals.fga,
+    total3PM: teamTotals.threePM,
+    total3PA: teamTotals.threePA,
+    gamesPlayed: teamTotals.gp,
+  };
+
+  const teamSPG = team.gamesPlayed > 0 ? (Number(team.totalSteals) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
+  const teamFGpct = team.totalFGA > 0 ? (((Number(team.totalFGM) / Number(team.totalFGA)) * 100).toFixed(1) + '%') : '0.0%';
+  const team3Ppct = team.total3PA > 0 ? (((Number(team.total3PM) / Number(team.total3PA)) * 100).toFixed(1) + '%') : '0.0%';
 
   const teamAvgs = {
     ppg: teamTotals.gp > 0 ? (teamTotals.pts / teamTotals.gp).toFixed(1) : '0.0',
     rpg: teamTotals.gp > 0 ? (teamTotals.reb / teamTotals.gp).toFixed(1) : '0.0',
     apg: teamTotals.gp > 0 ? (teamTotals.ast / teamTotals.gp).toFixed(1) : '0.0',
     bpg: teamTotals.gp > 0 ? (teamTotals.blk / teamTotals.gp).toFixed(1) : '0.0',
+    spg: teamSPG,
+    fgPct: teamFGpct,
+    threePct: team3Ppct,
   };
 
   const renderPlayerRow = (player: Player) => {
@@ -163,11 +184,35 @@ const TeamOverviewScreen = ({ city, roster, history, onBack }: TeamOverviewScree
         </View>
 
         {/* Team Season Averages */}
-        <View style={[globalStyles.tosTeamRatingsRow, { marginTop: -15, borderTopWidth: 1, borderColor: COLORS.border, paddingTop: 15, backgroundColor: 'transparent' }]}>
-          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.ppg}</Text><Text style={globalStyles.tosTeamRatingLabel}>PPG</Text></View>
-          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.rpg}</Text><Text style={globalStyles.tosTeamRatingLabel}>RPG</Text></View>
-          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.apg}</Text><Text style={globalStyles.tosTeamRatingLabel}>APG</Text></View>
-          <View style={globalStyles.tosTeamRatingBox}><Text style={[globalStyles.tosTeamRatingVal, { fontSize: 16 }]}>{teamAvgs.bpg}</Text><Text style={globalStyles.tosTeamRatingLabel}>BPG</Text></View>
+        <View style={globalStyles.tosTeamSeasonAveragesRow}>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.ppg}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>PPG</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.rpg}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>RPG</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.apg}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>APG</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.bpg}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>BPG</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.spg}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>SPG</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.fgPct}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>FG%</Text>
+          </View>
+          <View style={globalStyles.tosTeamRatingBox}>
+            <Text style={globalStyles.tosTeamAverageVal}>{teamAvgs.threePct}</Text>
+            <Text style={globalStyles.tosTeamRatingLabel}>3P%</Text>
+          </View>
         </View>
 
         <Text style={globalStyles.tosSectionHeader}>STARTERS</Text>
