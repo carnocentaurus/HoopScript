@@ -140,7 +140,10 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
                     </Text>
                   </View>
                   <Text style={globalStyles.llAwardSubtext}>
-                    {item.avgs.pts} PPG / {item.avgs.reb} RPG / {item.avgs.ast} APG
+                    {title === "DPOY RACE" 
+                      ? `${item.avgs.reb} RPG / ${item.avgs.stl} SPG / ${item.avgs.blk} BPG`
+                      : `${item.avgs.pts} PPG / ${item.avgs.reb} RPG / ${item.avgs.ast} APG`
+                    }
                   </Text>
                 </View>
               );

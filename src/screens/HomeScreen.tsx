@@ -37,7 +37,10 @@ const SeasonAwardsModal = ({ visible, standings, seasonCount, onDismiss }: { vis
                     <Text style={globalStyles.awardsName}>{award.data.player.lastName}</Text>
                     <Text style={globalStyles.awardsSub}>{award.data.teamCity} | {award.data.player.position}</Text>
                     <Text style={globalStyles.awardsStatLine}>
-                      {award.data.avgs.pts} PPG / {award.data.avgs.reb} RPG / {award.data.avgs.ast} APG
+                      {award.label === "DEFENSIVE PLAYER OF THE YEAR"
+                        ? `${award.data.avgs.reb} RPG / ${award.data.avgs.stl} SPG / ${award.data.avgs.blk} BPG`
+                        : `${award.data.avgs.pts} PPG / ${award.data.avgs.reb} RPG / ${award.data.avgs.ast} APG`
+                      }
                     </Text>
                   </View>
                 </View>

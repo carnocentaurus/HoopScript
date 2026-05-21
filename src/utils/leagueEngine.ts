@@ -587,11 +587,11 @@ export const getLeagueLeadersData = (standings: TeamStanding[], currentSeason: n
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-  // DPOY Formula: SPG * 2 + BPG * 2 + RPG
+  // DPOY Formula: (RPG * 1.0) + (SPG * 2.0) + (BPG * 2.5)
   const dpoyRace = [...allPlayers]
     .filter(p => Number(p.player.stats.gamesPlayed) > 0)
     .map(p => {
-      const score = (Number(p.avgs.stl) * 2) + (Number(p.avgs.blk) * 2) + Number(p.avgs.reb);
+      const score = Number(p.avgs.reb) + (Number(p.avgs.stl) * 2.0) + (Number(p.avgs.blk) * 2.5);
       return { ...p, score };
     })
     .sort((a, b) => b.score - a.score)
