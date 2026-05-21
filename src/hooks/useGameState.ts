@@ -372,11 +372,9 @@ export const useGameState = () => {
         if (team.city === currentSave.city) {
           totalPoints += result.myScore;
           gamesPlayed += 1;
-          console.log(`[POST-GAME STANDINGS] Team: ${team.city} | Game Score: ${result.myScore} | New Season Total: ${totalPoints} over ${gamesPlayed} games`);
         } else if (team.city === opponentCity) {
           totalPoints += result.oppScore;
           gamesPlayed += 1;
-          console.log(`[POST-GAME STANDINGS] Team: ${team.city} | Game Score: ${result.oppScore} | New Season Total: ${totalPoints} over ${gamesPlayed} games`);
         }
 
         return { 

@@ -597,10 +597,16 @@ export const getLeagueLeadersData = (standings: TeamStanding[], currentSeason: n
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-  // SMOY: Bench players (isStarter === false) sorted by PPG
+  // SMOY: Bench players (isStarter === false or gamesStarted < gamesPlayed / 2) sorted by MVP weighted score
   const smoyRace = [...allPlayers]
-    .filter(p => Number(p.player.stats.gamesPlayed) > 0 && !p.player.isStarter)
-    .sort((a, b) => Number(b.avgs.pts) - Number(a.avgs.pts))
+    .filter(p => Number(p.player.stats.gamesPlayed) > 0 && (!p.player.isStarter || p.player.stats.gamesStarted < p.player.stats.gamesPlayed / 2))
+    .map(p => {
+      const score = Number(p.avgs.pts) + Number(p.avgs.reb) + Number(p.avgs.ast) + 
+                    Number(p.avgs.stl) + Number(p.avgs.blk) - Number(p.avgs.tov) + 
+                    (p.teamWins * 0.2);
+      return { ...p, score };
+    })
+    .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
   // ROTY: Rookies (isRookie === true) sorted by MVP score (only active after Season 1)

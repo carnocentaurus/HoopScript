@@ -57,14 +57,7 @@ export const simulateLeagueDay = (
         teamA.gamesPlayed = (teamA.gamesPlayed || 0) + 1;
         teamB.totalPoints = (teamB.totalPoints || 0) + bScore;
         teamB.gamesPlayed = (teamB.gamesPlayed || 0) + 1;
-
-        console.log(`[POST-GAME STANDINGS] Team: ${teamA.city} | Game Score: ${aScore} | New Season Total: ${teamA.totalPoints} over ${teamA.gamesPlayed} games`);
-        console.log(`[POST-GAME STANDINGS] Team: ${teamB.city} | Game Score: ${bScore} | New Season Total: ${teamB.totalPoints} over ${teamB.gamesPlayed} games`);
       }
-
-      const nameA = (teamA as any).name || teamA.city;
-      const nameB = (teamB as any).name || teamB.city;
-      console.log(`[UNIFIED LEAGUE SIM] ${nameA} ${aScore} - ${bScore} ${nameB}`);
     }
   }
   return dayResults;
