@@ -654,7 +654,6 @@ export interface TeamLeadersData {
   topg: TeamLeaderItem[];
   fgPct: TeamLeaderItem[];
   threePct: TeamLeaderItem[];
-  wins: TeamLeaderItem[];
 }
 
 export const getTeamLeadersData = (standings: TeamStanding[]): TeamLeadersData => {
@@ -733,11 +732,6 @@ export const getTeamLeadersData = (standings: TeamStanding[]): TeamLeadersData =
       .map(item => ({ city: item.city, value: item.strs[key] }));
   };
 
-  const winsTop3 = [...teamStats]
-    .sort((a, b) => b.nums.wins - a.nums.wins || a.nums.losses - b.nums.losses)
-    .slice(0, 3)
-    .map(item => ({ city: item.city, value: item.strs.wins }));
-
   return {
     ppg: getTop3('ppg'),
     rpg: getTop3('rpg'),
@@ -746,8 +740,7 @@ export const getTeamLeadersData = (standings: TeamStanding[]): TeamLeadersData =
     bpg: getTop3('bpg'),
     topg: getTop3('topg'),
     fgPct: getTop3('fgPct'),
-    threePct: getTop3('threePct'),
-    wins: winsTop3
+    threePct: getTop3('threePct')
   };
 };
 

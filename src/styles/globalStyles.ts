@@ -1301,5 +1301,15 @@ export const globalStyles = StyleSheet.create({
     fontFamily: FONTS.secondary,
     fontSize: 12,
   },
+  llPlayerPosText: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.primary,
+    fontSize: 11,
+  },
+  llAwardPlayerPosText: {
+    color: COLORS.textMuted,
+    fontFamily: FONTS.primary,
+    fontSize: 12,
+  },
 });
 

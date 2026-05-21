@@ -63,7 +63,7 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
               <Text style={globalStyles.llRankText}>#{index + 1}</Text>
               {logo && <Image source={logo} style={globalStyles.llLogo} />}
               <Text style={globalStyles.llNameText} numberOfLines={1}>
-                {item.player.lastName}
+                {item.player.lastName} <Text style={globalStyles.llPlayerPosText}>{item.player.position}</Text>
               </Text>
               <Text style={globalStyles.llStatVal}>{item.avgs[statKey]}</Text>
             </View>
@@ -127,7 +127,7 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
                   <Text style={globalStyles.llRankText}>#{index + 1}</Text>
                   {logo && <Image source={logo} style={globalStyles.llLogo} />}
                   <Text style={globalStyles.llAwardNameText} numberOfLines={1}>
-                    {item.player.lastName}
+                    {item.player.lastName} <Text style={globalStyles.llAwardPlayerPosText}>{item.player.position}</Text>
                   </Text>
                   <Text style={globalStyles.llAwardWinsText}>
                     {item.teamWins} WINS
@@ -215,7 +215,6 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
             <TeamStatBlock title="TURNOVERS PER GAME" data={teamLeadersData.topg} />
             <TeamStatBlock title="FIELD GOAL PERCENTAGE" data={teamLeadersData.fgPct} />
             <TeamStatBlock title="THREE-POINT PERCENTAGE" data={teamLeadersData.threePct} />
-            <TeamStatBlock title="WINS" data={teamLeadersData.wins} />
           </>
         )}
       </ScrollView>
