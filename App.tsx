@@ -39,7 +39,7 @@ function MainApp() {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
     handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
-    handleScout, handleUpdateStrategy
+    handleScout, handleUpdateStrategy, handleDismissAwardsModal
   } = useGameState();
 
   useEffect(() => {
@@ -132,6 +132,7 @@ function MainApp() {
                 opponent={{ city: oppCity, record: save.playoffs ? `${save.playoffs.oppWins} WINS` : (opp ? `${opp.wins}-${opp.losses}` : "0-0"), ...common, isHome: !isHome, isUser: false }}
                 onViewTeam={() => { setSelectedTeamCity(save.city); setView('myTeamOverview'); }}
                 onViewHub={() => setView('leagueHub')}
+                onDismissAwardsModal={handleDismissAwardsModal}
               />
             )}
             {view === 'leagueHub' && (

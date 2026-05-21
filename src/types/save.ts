@@ -218,4 +218,5 @@ export interface GameSave {
   predictability: number;
   currentStrategy: Strategy;
   lastScoutReport?: ScoutReport | null;
+  hasSeenAwardsModal?: boolean;
 }

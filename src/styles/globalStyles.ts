@@ -1311,5 +1311,64 @@ export const globalStyles = StyleSheet.create({
     fontFamily: FONTS.primary,
     fontSize: 12,
   },
+
+  // --- SEASON AWARDS MODAL ---
+  awardsModalTitle: {
+    fontSize: 24,
+    fontFamily: FONTS.primary,
+    color: COLORS.primary,
+    letterSpacing: 4,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    marginBottom: 20
+  },
+  awardsWinnerBlock: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  awardsWinnerInfo: {
+    flex: 1
+  },
+  awardsLabel: {
+    fontSize: 10,
+    fontFamily: FONTS.primary,
+    color: COLORS.primary,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 4
+  },
+  awardsName: {
+    fontSize: 18,
+    fontFamily: FONTS.primary,
+    color: COLORS.white,
+    textTransform: 'uppercase'
+  },
+  awardsSub: {
+    fontSize: 11,
+    fontFamily: FONTS.secondary,
+    color: COLORS.textMuted,
+    marginTop: 2
+  },
+  awardsStatLine: {
+    fontSize: 10,
+    fontFamily: FONTS.primary,
+    color: COLORS.textSub,
+    marginTop: 4,
+    textTransform: 'uppercase'
+  },
+
+  // --- HIGHLIGHTS ---
+  textTerracottaHighlight: {
+    color: '#E2725B', // Lighter terracotta for visibility
+  },
+  bgTerracottaHighlight: {
+    backgroundColor: 'rgba(179, 71, 38, 0.2)',
+  },
 });
 

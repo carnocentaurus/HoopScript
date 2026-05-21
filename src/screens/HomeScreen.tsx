@@ -3,12 +3,59 @@ import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-na
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import Screen from '../components/Screen';
-import { calculateTeamRatings } from '../utils/leagueEngine';
+import { calculateTeamRatings, getLeagueLeadersData } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 import { getAdjustmentLevel } from '../utils/coachingUtils';
+
+const SeasonAwardsModal = ({ visible, standings, seasonCount, onDismiss }: { visible: boolean, standings: any[], seasonCount: number, onDismiss: () => void }) => {
+  const leadersData = getLeagueLeadersData(standings, seasonCount);
+  const awards = [
+    { label: "MOST VALUABLE PLAYER", data: leadersData.awards.mvp[0] },
+    { label: "DEFENSIVE PLAYER OF THE YEAR", data: leadersData.awards.dpoy[0] },
+    { label: "SIXTH MAN OF THE YEAR", data: leadersData.awards.smoy[0] },
+    { label: "ROOKIE OF THE YEAR", data: leadersData.awards.roty[0] }
+  ];
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={globalStyles.modalOverlay}>
+        <View style={[globalStyles.scoutModalContainer, { maxWidth: 450 }]}>
+          <Text style={globalStyles.awardsModalTitle}>SEASON AWARDS</Text>
+          
+          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 500 }}>
+            {awards.map((award, idx) => {
+              if (!award.data) return null;
+              const logo = TEAM_LOGOS[award.data.teamCity];
+              return (
+                <View key={idx} style={globalStyles.awardsWinnerBlock}>
+                  {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 45, height: 45 }]} />}
+                  <View style={globalStyles.awardsWinnerInfo}>
+                    <Text style={globalStyles.awardsLabel}>{award.label}</Text>
+                    <Text style={globalStyles.awardsName}>{award.data.player.lastName}</Text>
+                    <Text style={globalStyles.awardsSub}>{award.data.teamCity} | {award.data.player.position}</Text>
+                    <Text style={globalStyles.awardsStatLine}>
+                      {award.data.avgs.pts} PPG / {award.data.avgs.reb} RPG / {award.data.avgs.ast} APG
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+
+          <TouchableOpacity 
+            style={[globalStyles.scoutModalCloseBtn, { backgroundColor: COLORS.primary, marginTop: 20 }]}
+            onPress={onDismiss}
+          >
+            <Text style={globalStyles.scoutModalCloseBtnText}>DISMISS</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const TeamMatchupCard = ({ team, onScout, onStrategy, playClickSound }: { team: any, onScout?: () => void, onStrategy?: () => void, playClickSound: () => void }) => {
   const ratings = calculateTeamRatings(team.roster);
@@ -106,7 +153,8 @@ const HomeScreen = ({
   onBackToSaves,
   onScout,
   onUpdateStrategy,
-  onViewHub
+  onViewHub,
+  onDismissAwardsModal
 }: { 
   save: GameSave, 
   userTeam: any, 
@@ -120,13 +168,16 @@ const HomeScreen = ({
   onBackToSaves: () => void,
   onScout: (city: string) => void,
   onUpdateStrategy: (s: Strategy) => void,
-  onViewHub: () => void
+  onViewHub: () => void,
+  onDismissAwardsModal: () => void
 }) => {
   const { playClickSound } = useSound();
   const [showScoutModal, setShowScoutModal] = useState(false);
   const [showStrategyModal, setShowStrategyModal] = useState(false);
 
   const isEndOfSeason = save.gamesPlayed === 82; 
+  const showAwardsModal = isEndOfSeason && !save.hasSeenAwardsModal;
+
   const isEliminated = save.playoffs?.isEliminated;
   const isChampion = save.playoffs?.isChampion;
   const isSeriesCompleted = save.playoffs && (save.playoffs.myWins === 4 || save.playoffs.oppWins === 4);
@@ -171,6 +222,13 @@ const HomeScreen = ({
 
   return (
     <Screen>
+      <SeasonAwardsModal 
+        visible={showAwardsModal} 
+        standings={save.standings} 
+        seasonCount={save.seasonCount} 
+        onDismiss={() => handlePress(onDismissAwardsModal)} 
+      />
+
       {/* --- SEASON & YEAR HEADER --- */}
       <View style={[globalStyles.homeSeasonHeader, globalStyles.flexRowAlignCenter]}>
         <TouchableOpacity onPress={() => handlePress(onBackToSaves)}>

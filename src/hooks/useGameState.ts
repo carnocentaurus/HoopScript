@@ -220,7 +220,8 @@ export const useGameState = () => {
         offense: OffensiveFocus.ATTACK_PAINT,
         defense: DefensiveFocus.PROTECT_RIM
       },
-      lastScoutReport: null
+      lastScoutReport: null,
+      hasSeenAwardsModal: false
     };
 
     const newSaves = [...saves];
@@ -575,8 +576,19 @@ export const useGameState = () => {
     const { opponents, homeStatuses } = generateSchedule(currentSave.city);
     currentSave.schedule = opponents; currentSave.scheduleHomeStatus = homeStatuses;
     currentSave.playoffs = null; currentSave.playoffBracket = null; currentSave.draftState = null;
+    currentSave.hasSeenAwardsModal = false;
 
     saveAndSet(updatedSaves, 'home');
+  };
+
+  const handleDismissAwardsModal = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave) return;
+
+    currentSave.hasSeenAwardsModal = true;
+    saveAndSet(updatedSaves, view);
   };
 
   const saveAndSet = (newSaves: (GameSave | null)[], nextView?: ViewState) => {
@@ -596,6 +608,6 @@ export const useGameState = () => {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
     handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
-    handleScout, handleUpdateStrategy
+    handleScout, handleUpdateStrategy, handleDismissAwardsModal
   };
 };
