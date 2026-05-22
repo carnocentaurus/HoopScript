@@ -42,6 +42,12 @@ export const simulateLeagueDay = (
       dayResults[teamA.city] = aWon ? 'W' : 'L';
       dayResults[teamB.city] = aWon ? 'L' : 'W';
       
+      // Update L10 (Last 10 Games) - removed direct mutation
+      // teamA.recentResults.push(aWon ? 'W' : 'L');
+      // teamB.recentResults.push(aWon ? 'L' : 'W');
+      // if (teamA.recentResults.length > 10) teamA.recentResults.shift();
+      // if (teamB.recentResults.length > 10) teamB.recentResults.shift();
+
       teamA.roster = teamA.roster.map(p => {
         const pStat = result.myTeamStats.find(s => s.playerId === p.id);
         return pStat ? updatePlayerStats(p, pStat) : p;

@@ -299,7 +299,8 @@ export const generateInitialStandings = (): TeamStanding[] => {
       predictability: Math.floor(Math.random() * 100) + 1, // 1 to 100
       pace: Math.floor(Math.random() * 10) + 95, // 95 to 105
       totalPoints: 0,
-      gamesPlayed: 0
+      gamesPlayed: 0,
+      recentResults: []
     };
   });
 };

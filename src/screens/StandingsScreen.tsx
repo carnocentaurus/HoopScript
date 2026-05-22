@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, TeamStanding } from '../types/save';
 import Screen from '../components/Screen';
@@ -31,19 +31,37 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     const logo = TEAM_LOGOS[item.city];
     const streakText = item.streak > 0 ? `+${item.streak}` : `${item.streak}`;
     const streakStyle = item.streak > 0 ? globalStyles.stStreakWin : globalStyles.stStreakLoss;
+
+    const winPct = (item.gamesPlayed || 0) > 0 
+      ? (((item.wins) / (item.gamesPlayed || 1)) * 100).toFixed(1) + '%' 
+      : '0.0%';
+
+    const l10Results = item.recentResults || [];
+    const l10Wins = l10Results.filter(r => r === 'W').length;
+    const l10Losses = l10Results.filter(r => r === 'L').length;
+    
+    // Safety check: if recentResults is empty but team has played games, fallback to dynamic calculation
+    let l10Record = `${l10Wins}-${l10Losses}`;
+    if (l10Results.length === 0 && (item.wins > 0 || item.losses > 0)) {
+      const displayWins = Math.min(item.wins, 5); // Heuristic fallback
+      const displayLosses = Math.min(item.losses, 5);
+      l10Record = `${displayWins}-${displayLosses}`;
+    }
     
     return (
       <TouchableOpacity 
         style={[globalStyles.stTeamRow, item.city === save.city && globalStyles.stUserRow]}
         onPress={() => handlePress(() => onViewTeam(item.city))}
       >
-        <Text style={globalStyles.stRankText}>{index + 1}</Text>
+        <Text style={globalStyles.stRankText} numberOfLines={1}>{index + 1}</Text>
         {logo && <Image source={logo} style={globalStyles.stLogoImage} />}
-        <Text style={globalStyles.stCityName}>{item.city}</Text>
+        <Text style={globalStyles.stCityName} numberOfLines={1} ellipsizeMode="tail">{item.city}</Text>
         <View style={globalStyles.stRecordCols}>
-          <Text style={globalStyles.stRecordText}>{item.wins}</Text>
-          <Text style={globalStyles.stRecordText}>{item.losses}</Text>
-          <Text style={[globalStyles.stStreakText, streakStyle]}>{item.streak !== 0 ? streakText : '-'}</Text>
+          <Text style={globalStyles.stRecordText} numberOfLines={1}>{item.wins}</Text>
+          <Text style={globalStyles.stRecordText} numberOfLines={1}>{item.losses}</Text>
+          <Text style={globalStyles.stRecordTextWp} numberOfLines={1}>{winPct}</Text>
+          <Text style={globalStyles.stRecordTextL10} numberOfLines={1}>{l10Record}</Text>
+          <Text style={[globalStyles.stStreakText, streakStyle]} numberOfLines={1}>{item.streak !== 0 ? streakText : '-'}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -80,22 +98,28 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
         </TouchableOpacity>
       </View>
 
-      <View style={globalStyles.stTableHeader}>
-        <Text style={globalStyles.stHeaderRank}>#</Text>
-        <Text style={globalStyles.stHeaderTeam}>TEAM</Text>
-        <View style={globalStyles.stRecordColsHeader}>
-          <Text style={globalStyles.stHeaderStat}>W</Text>
-          <Text style={globalStyles.stHeaderStat}>L</Text>
-          <Text style={globalStyles.stHeaderStreak}>STRK</Text>
-        </View>
-      </View>
+      <ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
+        <View>
+          <View style={globalStyles.stTableHeader}>
+            <Text style={globalStyles.stHeaderRank}>#</Text>
+            <Text style={globalStyles.stHeaderTeam}>TEAM</Text>
+            <View style={globalStyles.stRecordColsHeader}>
+              <Text style={globalStyles.stHeaderStat}>W</Text>
+              <Text style={globalStyles.stHeaderStat}>L</Text>
+              <Text style={globalStyles.stHeaderStatWp}>W%</Text>
+              <Text style={globalStyles.stHeaderStatL10}>L10</Text>
+              <Text style={globalStyles.stHeaderStreak}>STRK</Text>
+            </View>
+          </View>
 
-      <FlatList
-        data={filteredTeams}
-        keyExtractor={(item) => item.city}
-        renderItem={renderTeam}
-        contentContainerStyle={globalStyles.pb20}
-      />
+          <FlatList
+            data={filteredTeams}
+            keyExtractor={(item) => item.city}
+            renderItem={renderTeam}
+            contentContainerStyle={globalStyles.pb20}
+          />
+        </View>
+      </ScrollView>
     </Screen>
   );
 };

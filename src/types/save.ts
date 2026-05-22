@@ -102,6 +102,7 @@ export interface TeamStanding {
   pace: number; // Team possessions per game
   totalPoints?: number;
   gamesPlayed?: number;
+  recentResults: string[]; // "W" or "L"
 }
 
 export interface PlayoffSeries {

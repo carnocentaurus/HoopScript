@@ -378,13 +378,21 @@ export const useGameState = () => {
           gamesPlayed += 1;
         }
 
+        // Update L10 (Last 10 Games)
+        const updatedRecentResults = [...(team.recentResults || [])];
+        updatedRecentResults.push(isWin ? 'W' : 'L');
+        if (updatedRecentResults.length > 10) {
+          updatedRecentResults.shift();
+        }
+
         return { 
           ...team, 
           wins: team.wins + (isWin ? 1 : 0), 
           losses: team.losses + (!isWin ? 1 : 0),
           streak: newStreak,
           totalPoints,
-          gamesPlayed
+          gamesPlayed,
+          recentResults: updatedRecentResults
         };
       });
 
@@ -562,6 +570,7 @@ export const useGameState = () => {
         streak: 0,
         totalPoints: 0,
         gamesPlayed: 0,
+        recentResults: [],
         roster: newRoster
       };
     });
