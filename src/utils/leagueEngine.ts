@@ -200,8 +200,8 @@ export const ALL_CITIES = [
   "Dallas", "Houston", "Memphis", "New Orleans", "San Antonio"
 ];
 
-export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => {
-  return {
+export const updatePlayerStats = (player: Player, stats: PlayerStat, isFinals: boolean = false): Player => {
+  const updatedPlayer = {
     ...player,
     stats: {
       gamesPlayed: (player.stats.gamesPlayed || 0) + 1,
@@ -223,7 +223,82 @@ export const updatePlayerStats = (player: Player, stats: PlayerStat): Player => 
       possessions: (player.stats.possessions || 0) + (stats.possessions || 0)
     }
   };
+
+  if (isFinals) {
+    const f = player.finalsStats || {
+      totalPoints: 0, totalRebounds: 0, totalAssists: 0,
+      totalSteals: 0, totalBlocks: 0, totalTurnovers: 0,
+      gamesPlayed: 0
+    };
+    updatedPlayer.finalsStats = {
+      totalPoints: f.totalPoints + stats.pts,
+      totalRebounds: f.totalRebounds + stats.reb,
+      totalAssists: f.totalAssists + stats.ast,
+      totalSteals: f.totalSteals + stats.stl,
+      totalBlocks: f.totalBlocks + stats.blk,
+      totalTurnovers: f.totalTurnovers + stats.tov,
+      gamesPlayed: f.gamesPlayed + 1
+    };
+  }
+
+  return updatedPlayer;
 };
+
+export const calculateFinalsMVP = (team: TeamStanding) => {
+  const candidates = team.roster.filter(p => p.finalsStats && p.finalsStats.gamesPlayed > 0);
+  if (candidates.length === 0) return null;
+
+  const results = candidates.map(p => {
+    const s = p.finalsStats!;
+    const gp = s.gamesPlayed;
+    const ppg = s.totalPoints / gp;
+    const rpg = s.totalRebounds / gp;
+    const apg = s.totalAssists / gp;
+    const spg = s.totalSteals / gp;
+    const bpg = s.totalBlocks / gp;
+    const topg = s.totalTurnovers / gp;
+
+    // MVP Formula: PPG + RPG + APG + SPG + BPG - TOPG
+    const score = ppg + rpg + apg + spg + bpg - topg;
+
+    return {
+      player: p,
+      score,
+      avgs: {
+        pts: ppg.toFixed(1),
+        reb: rpg.toFixed(1),
+        ast: apg.toFixed(1),
+        stl: spg.toFixed(1),
+        blk: bpg.toFixed(1),
+        tov: topg.toFixed(1)
+      }
+    };
+  });
+
+  results.sort((a, b) => b.score - a.score);
+  const winner = results[0];
+
+  return {
+    playerId: winner.player.id,
+    lastName: winner.player.lastName,
+    position: winner.player.position,
+    teamCity: team.city,
+    avgs: winner.avgs
+  };
+};
+
+export const resetFinalsStats = (standings: TeamStanding[]) => {
+  standings.forEach(team => {
+    team.roster.forEach(player => {
+      player.finalsStats = {
+        totalPoints: 0, totalRebounds: 0, totalAssists: 0,
+        totalSteals: 0, totalBlocks: 0, totalTurnovers: 0,
+        gamesPlayed: 0
+      };
+    });
+  });
+};
+
 
 export const calculateSeasonAverages = (stats: SeasonStats) => {
   const gp = Number(stats.gamesPlayed) || 0;

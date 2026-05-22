@@ -220,4 +220,19 @@ export interface GameSave {
   currentStrategy: Strategy;
   lastScoutReport?: ScoutReport | null;
   hasSeenAwardsModal?: boolean;
+  hasSeenFinalsMVPModal?: boolean;
+  finalsMVP?: { 
+    playerId: string, 
+    lastName: string, 
+    position: string, 
+    teamCity: string, 
+    avgs: {
+      pts: string,
+      reb: string,
+      ast: string,
+      stl: string,
+      blk: string,
+      tov: string
+    } 
+  } | null;
 }

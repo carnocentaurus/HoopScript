@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave } from '../types/save';
 import Screen from '../components/Screen';
@@ -8,16 +8,55 @@ import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
-// Added onStartNewSeason to the props interface
 interface PlayoffProps {
   save: GameSave;
   onSimDay: () => void;
   onBack: () => void;
   onStartNewSeason: () => void;
   onViewFullBracket: () => void;
+  onDismissFinalsMVPModal: () => void;
 }
 
-const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onViewFullBracket }: PlayoffProps) => {
+const FinalsMVPModal = ({ visible, fmvp, onDismiss }: { visible: boolean, fmvp: any, onDismiss: () => void }) => {
+  if (!fmvp) return null;
+  const logo = TEAM_LOGOS[fmvp.teamCity];
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={globalStyles.modalOverlay}>
+        <View style={[globalStyles.scoutModalContainer, { maxWidth: 450 }]}>
+          <Text style={globalStyles.awardsModalTitle}>FINALS MVP</Text>
+          
+          <View style={[globalStyles.awardsWinnerBlock, { borderBottomWidth: 0, alignItems: 'center' }]}>
+            {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 80, height: 80, marginBottom: 15 }]} />}
+            <View style={[globalStyles.awardsWinnerInfo, { alignItems: 'center' }]}>
+              <Text style={[globalStyles.awardsLabel, { color: COLORS.primary }]}>SERIES CHAMPION</Text>
+              <Text style={[globalStyles.awardsName, { fontSize: 28 }]}>{fmvp.lastName}</Text>
+              <Text style={globalStyles.awardsSub}>{fmvp.teamCity} | {fmvp.position}</Text>
+              <View style={{ marginTop: 15, alignItems: 'center' }}>
+                <Text style={[globalStyles.awardsStatLine, { fontSize: 18, color: COLORS.white }]}>
+                  {fmvp.avgs.pts} PPG / {fmvp.avgs.reb} RPG / {fmvp.avgs.ast} APG
+                </Text>
+                <Text style={[globalStyles.awardsStatLine, { fontSize: 13, color: COLORS.textMuted, marginTop: 5 }]}>
+                  {fmvp.avgs.stl} SPG / {fmvp.avgs.blk} BPG / {fmvp.avgs.tov} TO
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={[globalStyles.scoutModalCloseBtn, { backgroundColor: COLORS.primary, marginTop: 30 }]}
+            onPress={onDismiss}
+          >
+            <Text style={globalStyles.scoutModalCloseBtnText}>DISMISS</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onViewFullBracket, onDismissFinalsMVPModal }: PlayoffProps) => {
   const { playClickSound } = useSound();
 
   const handlePress = (action: () => void) => {
@@ -30,6 +69,8 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
   
   // Check if the Finals (Round 4) are completed
   const isFinalsOver = currentRound === 4 && roundMatchups.length > 0 && roundMatchups[0].isCompleted;
+
+  const showFinalsMVP = isFinalsOver && !save.hasSeenFinalsMVPModal && !!save.finalsMVP;
 
   const getRank = (city: string) => {
     const team = save.standings.find(t => t.city === city);
@@ -94,6 +135,11 @@ const PlayoffBracketScreen = ({ save, onSimDay, onBack, onStartNewSeason, onView
 
   return (
     <Screen>
+      <FinalsMVPModal 
+        visible={showFinalsMVP} 
+        fmvp={save.finalsMVP} 
+        onDismiss={() => handlePress(onDismissFinalsMVPModal)} 
+      />
       <View style={globalStyles.pbHeader}>
         <TouchableOpacity onPress={() => handlePress(onBack)}>
           <Icon name="chevron-back" size={28} color={COLORS.primary} />

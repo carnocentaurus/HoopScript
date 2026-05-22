@@ -20,7 +20,9 @@ import {
   trimRosters,
   selectCPUStrategy,
   generateScoutReport,
-  initializeNewLeague
+  initializeNewLeague,
+  calculateFinalsMVP,
+  resetFinalsStats
 } from '../utils/leagueEngine';
 import { generateCoachingIQ } from '../utils/coachingUtils';
 
@@ -278,18 +280,19 @@ export const useGameState = () => {
     if (currentSave.playoffs) {
       const isUserWin = result.myScore > result.oppScore;
       const opponentCity = currentSave.playoffs.opponentCity;
+      const isFinals = currentSave.playoffs.round === 4;
 
       // Update User Roster
       currentSave.roster = currentSave.roster.map(p => {
         const pStat = result.myTeamStats.find(s => s.playerId === p.id);
-        return pStat ? updatePlayerStats(p, pStat) : p;
+        return pStat ? updatePlayerStats(p, pStat, isFinals) : p;
       });
 
       // Update Opponent Roster
       const oppTeam = currentSave.standings.find(t => t.city === opponentCity);
       if (oppTeam) oppTeam.roster = oppTeam.roster.map(p => {
         const pStat = result.oppTeamStats.find(s => s.playerId === p.id);
-        return pStat ? updatePlayerStats(p, pStat) : p;
+        return pStat ? updatePlayerStats(p, pStat, isFinals) : p;
       });
 
       const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
@@ -297,7 +300,7 @@ export const useGameState = () => {
       )?.id;
 
       // Simulate ALL playoff games for this "day" (one game per series)
-      const playoffResults = simulateLeagueDay(currentSave.standings, currentSave.city, opponentCity, true);
+      const playoffResults = simulateLeagueDay(currentSave.standings, currentSave.city, opponentCity, true, isFinals);
 
       currentSave.playoffBracket = currentSave.playoffBracket?.map((series: SeriesMatchup) => {
         if (series.isCompleted || series.round !== currentSave.playoffs!.round) return series;
@@ -412,13 +415,18 @@ export const useGameState = () => {
   };
 
   const checkAndAdvancePlayoffRound = (currentSave: GameSave) => {
-    // ... checkAndAdvancePlayoffRound logic (unchanged internally)
     if (!currentSave.playoffs || !currentSave.playoffBracket) return;
     const currentRound = currentSave.playoffs.round;
     const roundSeries = currentSave.playoffBracket.filter(s => s.round === currentRound);
     if (roundSeries.every(s => s.isCompleted)) {
       if (currentRound < 4) {
         const nextRound = currentRound + 1;
+        
+        // Reset Finals Stats if we are entering the finals
+        if (nextRound === 4) {
+          resetFinalsStats(currentSave.standings);
+        }
+
         const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
         const nextMatches: SeriesMatchup[] = [];
         for (let i = 0; i < winners.length; i += 2) {
@@ -444,7 +452,13 @@ export const useGameState = () => {
         const lastSeries = roundSeries[0];
         const champion = lastSeries.highSeedWins === 4 ? lastSeries.highSeed : lastSeries.lowSeed;
         currentSave.playoffs.isChampion = (champion === currentSave.city);
-        // alert(`THE ${champion.toUpperCase()} HAVE WON THE CHAMPIONSHIP!`);
+        
+        // Calculate Finals MVP
+        const champTeam = currentSave.standings.find(t => t.city === champion);
+        if (champTeam) {
+          currentSave.finalsMVP = calculateFinalsMVP(champTeam);
+          currentSave.hasSeenFinalsMVPModal = false;
+        }
       }
     }
   };
@@ -457,9 +471,10 @@ export const useGameState = () => {
 
     const round = currentSave.playoffs?.round || 1;
     const isPlayoffs = !!currentSave.playoffs;
+    const isFinals = currentSave.playoffs?.round === 4;
 
     // Use simulateLeagueDay for strategy-aware outcomes
-    const dailyResults = simulateLeagueDay(currentSave.standings, "NONE", "NONE", isPlayoffs);
+    const dailyResults = simulateLeagueDay(currentSave.standings, "NONE", "NONE", isPlayoffs, isFinals);
 
     currentSave.playoffBracket = currentSave.playoffBracket.map(series => {
       if (series.round !== round || series.isCompleted) return series;
@@ -586,6 +601,15 @@ export const useGameState = () => {
     currentSave.schedule = opponents; currentSave.scheduleHomeStatus = homeStatuses;
     currentSave.playoffs = null; currentSave.playoffBracket = null; currentSave.draftState = null;
     currentSave.hasSeenAwardsModal = false;
+    currentSave.hasSeenFinalsMVPModal = false;
+    currentSave.finalsMVP = null;
+
+    // Ensure all players have their finalsStats cleared for the new season
+    currentSave.standings.forEach(team => {
+      team.roster.forEach(player => {
+        player.finalsStats = undefined;
+      });
+    });
 
     saveAndSet(updatedSaves, 'home');
   };
@@ -613,10 +637,20 @@ export const useGameState = () => {
     if (nextView) setView(nextView);
   };
 
+  const handleDismissFinalsMVPModal = () => {
+    if (activeSlot === null) return;
+    const updatedSaves = [...saves];
+    const currentSave = updatedSaves[activeSlot - 1];
+    if (!currentSave) return;
+
+    currentSave.hasSeenFinalsMVPModal = true;
+    saveAndSet(updatedSaves, view);
+  };
+
   return {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
     handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
-    handleScout, handleUpdateStrategy, handleDismissAwardsModal
+    handleScout, handleUpdateStrategy, handleDismissAwardsModal, handleDismissFinalsMVPModal
   };
 };

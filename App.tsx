@@ -39,7 +39,7 @@ function MainApp() {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
     handleDeleteSlot, handleSelectSlot, handleYearSelect, handleTeamSelect, handleConfirmTeam,
     handleGameFinish, handleSimulateLeagueDay, handleStartNewSeason, handleDraftPick, handleDraftComplete,
-    handleScout, handleUpdateStrategy, handleDismissAwardsModal
+    handleScout, handleUpdateStrategy, handleDismissAwardsModal, handleDismissFinalsMVPModal
   } = useGameState();
 
   useEffect(() => {
@@ -159,7 +159,7 @@ function MainApp() {
               return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} teamStanding={save.standings.find(t => t.city === selectedTeamCity)} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;
             })()}
             {view === 'standings' && <StandingsScreen save={save} onBack={() => setView('leagueHub')} onViewTeam={city => { setSelectedTeamCity(city); setView('myTeamOverview'); }} />}
-            {view === 'bracket' && <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} onViewFullBracket={() => setView('fullBracket')} />}
+            {view === 'bracket' && <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} onViewFullBracket={() => setView('fullBracket')} onDismissFinalsMVPModal={handleDismissFinalsMVPModal} />}
             {view === 'fullBracket' && <FullPlayoffBracketScreen save={save} onBack={() => setView('bracket')} />}
             {view === 'history' && <HistoryScreen save={save} onBack={() => setView('leagueHub')} />}
             {view === 'lottery' && save.lotteryResults && <DraftLotteryScreen results={save.lotteryResults} onComplete={() => setView('draft')} />}

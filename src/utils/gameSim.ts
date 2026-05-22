@@ -13,7 +13,8 @@ export const simulateLeagueDay = (
   standings: TeamStanding[],
   userCity: string,
   opponentCity: string,
-  isPlayoffs: boolean = false
+  isPlayoffs: boolean = false,
+  isFinals: boolean = false
 ): Record<string, 'W' | 'L'> => {
   const aiTeams = standings.filter(t => t.city !== userCity && t.city !== opponentCity);
   const dayResults: Record<string, 'W' | 'L'> = {};
@@ -50,12 +51,12 @@ export const simulateLeagueDay = (
 
       teamA.roster = teamA.roster.map(p => {
         const pStat = result.myTeamStats.find(s => s.playerId === p.id);
-        return pStat ? updatePlayerStats(p, pStat) : p;
+        return pStat ? updatePlayerStats(p, pStat, isFinals) : p;
       });
 
       teamB.roster = teamB.roster.map(p => {
         const pStat = result.oppTeamStats.find(s => s.playerId === p.id);
-        return pStat ? updatePlayerStats(p, pStat) : p;
+        return pStat ? updatePlayerStats(p, pStat, isFinals) : p;
       });
 
       if (!isPlayoffs) {
