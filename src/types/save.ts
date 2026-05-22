@@ -168,6 +168,16 @@ export interface HistoricalSeason {
     spg: { name: string; teamLogo: any; pos: string; value: string };
     bpg: { name: string; teamLogo: any; pos: string; value: string };
   };
+  teamLeaders: {
+    ppg: { name: string; teamLogo: any; value: string };
+    rpg: { name: string; teamLogo: any; value: string };
+    apg: { name: string; teamLogo: any; value: string };
+    spg: { name: string; teamLogo: any; value: string };
+    bpg: { name: string; teamLogo: any; value: string };
+    topg: { name: string; teamLogo: any; value: string };
+    fgPct: { name: string; teamLogo: any; value: string };
+    threePPct: { name: string; teamLogo: any; value: string };
+  };
 }
 
 export interface DraftPick {

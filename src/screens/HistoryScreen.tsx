@@ -12,7 +12,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string, name: string, teamCity: string, pos: string, value: string }) => {
+const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string, name: string, teamCity: string, pos?: string, value: string }) => {
   const logo = TEAM_LOGOS[teamCity];
   return (
     <View style={globalStyles.hiRecordRow}>
@@ -20,7 +20,7 @@ const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string
       <View style={globalStyles.hiRecordMain}>
         {logo && <Image source={logo} style={globalStyles.hiRecordLogo} />}
         <Text style={globalStyles.hiRecordName} numberOfLines={1}>{name}</Text>
-        <Text style={globalStyles.hiRecordPos}>{pos}</Text>
+        {pos ? <Text style={globalStyles.hiRecordPos}>{pos}</Text> : null}
         <Text style={globalStyles.hiRecordValue}>{value}</Text>
       </View>
     </View>
@@ -82,6 +82,20 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
           <HistoryRecordRow label="APG" name={item.statLeaders.apg.name} teamCity={item.statLeaders.apg.teamLogo} pos={item.statLeaders.apg.pos} value={item.statLeaders.apg.value} />
           <HistoryRecordRow label="SPG" name={item.statLeaders.spg.name} teamCity={item.statLeaders.spg.teamLogo} pos={item.statLeaders.spg.pos} value={item.statLeaders.spg.value} />
           <HistoryRecordRow label="BPG" name={item.statLeaders.bpg.name} teamCity={item.statLeaders.bpg.teamLogo} pos={item.statLeaders.bpg.pos} value={item.statLeaders.bpg.value} />
+
+          {item.teamLeaders && (
+            <>
+              <Text style={[globalStyles.hiSectionTitle, { marginTop: 20 }]}>TEAM LEADERS</Text>
+              <HistoryRecordRow label="PPG" name={item.teamLeaders.ppg.name} teamCity={item.teamLeaders.ppg.teamLogo} value={item.teamLeaders.ppg.value} />
+              <HistoryRecordRow label="RPG" name={item.teamLeaders.rpg.name} teamCity={item.teamLeaders.rpg.teamLogo} value={item.teamLeaders.rpg.value} />
+              <HistoryRecordRow label="APG" name={item.teamLeaders.apg.name} teamCity={item.teamLeaders.apg.teamLogo} value={item.teamLeaders.apg.value} />
+              <HistoryRecordRow label="SPG" name={item.teamLeaders.spg.name} teamCity={item.teamLeaders.spg.teamLogo} value={item.teamLeaders.spg.value} />
+              <HistoryRecordRow label="BPG" name={item.teamLeaders.bpg.name} teamCity={item.teamLeaders.bpg.teamLogo} value={item.teamLeaders.bpg.value} />
+              <HistoryRecordRow label="TOPG" name={item.teamLeaders.topg.name} teamCity={item.teamLeaders.topg.teamLogo} value={item.teamLeaders.topg.value} />
+              <HistoryRecordRow label="FG%" name={item.teamLeaders.fgPct.name} teamCity={item.teamLeaders.fgPct.teamLogo} value={item.teamLeaders.fgPct.value} />
+              <HistoryRecordRow label="3P%" name={item.teamLeaders.threePPct.name} teamCity={item.teamLeaders.threePPct.teamLogo} value={item.teamLeaders.threePPct.value} />
+            </>
+          )}
         </View>
       )}
 

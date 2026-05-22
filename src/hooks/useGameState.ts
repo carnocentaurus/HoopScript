@@ -22,7 +22,9 @@ import {
   generateScoutReport,
   initializeNewLeague,
   calculateFinalsMVP,
-  resetFinalsStats
+  resetFinalsStats,
+  getLeagueLeadersData,
+  getTeamLeadersData
 } from '../utils/leagueEngine';
 import { generateCoachingIQ } from '../utils/coachingUtils';
 
@@ -516,6 +518,13 @@ export const useGameState = () => {
     
     if (!alreadyArchived) {
       const leadersData = getLeagueLeadersData(currentSave.standings, currentSave.seasonCount);
+      const teamLeadersData = getTeamLeadersData(currentSave.standings);
+
+      const formatTeamLeader = (data: any[]) => ({
+        name: data[0].city,
+        teamLogo: data[0].city,
+        value: data[0].value
+      });
       
       const formatAward = (awardData: any) => ({
         name: awardData.player.lastName,
@@ -563,6 +572,16 @@ export const useGameState = () => {
           apg: { name: leadersData.stats.apg[0].player.lastName, teamLogo: leadersData.stats.apg[0].teamCity, pos: leadersData.stats.apg[0].player.position, value: leadersData.stats.apg[0].avgs.ast },
           spg: { name: leadersData.stats.spg[0].player.lastName, teamLogo: leadersData.stats.spg[0].teamCity, pos: leadersData.stats.spg[0].player.position, value: leadersData.stats.spg[0].avgs.stl },
           bpg: { name: leadersData.stats.bpg[0].player.lastName, teamLogo: leadersData.stats.bpg[0].teamCity, pos: leadersData.stats.bpg[0].player.position, value: leadersData.stats.bpg[0].avgs.blk }
+        },
+        teamLeaders: {
+          ppg: formatTeamLeader(teamLeadersData.ppg),
+          rpg: formatTeamLeader(teamLeadersData.rpg),
+          apg: formatTeamLeader(teamLeadersData.apg),
+          spg: formatTeamLeader(teamLeadersData.spg),
+          bpg: formatTeamLeader(teamLeadersData.bpg),
+          topg: formatTeamLeader(teamLeadersData.topg),
+          fgPct: formatTeamLeader(teamLeadersData.fgPct),
+          threePPct: formatTeamLeader(teamLeadersData.threePct)
         }
       };
 
