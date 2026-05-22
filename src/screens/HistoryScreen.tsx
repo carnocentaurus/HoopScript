@@ -69,6 +69,7 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
         <View style={globalStyles.hiExpandedContent}>
           <Text style={globalStyles.hiSectionTitle}>AWARD WINNERS</Text>
           <HistoryRecordRow label="MVP" name={item.awards.mvp.name} teamCity={item.awards.mvp.teamLogo} pos={item.awards.mvp.pos} value={item.awards.mvp.stats} />
+          <HistoryRecordRow label="FMVP" name={item.awards.finalsMvp ? item.awards.finalsMvp.name : "N/A"} teamCity={item.awards.finalsMvp ? item.awards.finalsMvp.teamLogo : "N/A"} pos={item.awards.finalsMvp ? item.awards.finalsMvp.pos : "-"} value={item.awards.finalsMvp ? item.awards.finalsMvp.stats : "-"} />
           <HistoryRecordRow label="DPOY" name={item.awards.dpoy.name} teamCity={item.awards.dpoy.teamLogo} pos={item.awards.dpoy.pos} value={item.awards.dpoy.stats} />
           <HistoryRecordRow label="6MAN" name={item.awards.smoy.name} teamCity={item.awards.smoy.teamLogo} pos={item.awards.smoy.pos} value={item.awards.smoy.stats} />
           {item.awards.roty && (

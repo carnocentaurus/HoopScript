@@ -549,7 +549,13 @@ export const useGameState = () => {
           mvp: { name: mvp.player.lastName, teamLogo: mvp.teamCity, pos: mvp.player.position, stats: `${mvp.avgs.pts}/${mvp.avgs.reb}/${mvp.avgs.ast}` },
           dpoy: { name: dpoy.player.lastName, teamLogo: dpoy.teamCity, pos: dpoy.player.position, stats: `${dpoy.avgs.reb}/${dpoy.avgs.stl}/${dpoy.avgs.blk}` },
           smoy: { name: smoy.player.lastName, teamLogo: smoy.teamCity, pos: smoy.player.position, stats: `${smoy.avgs.pts}/${smoy.avgs.reb}/${smoy.avgs.ast}` },
-          roty: roty ? { name: roty.player.lastName, teamLogo: roty.teamCity, pos: roty.player.position, stats: `${roty.avgs.pts}/${roty.avgs.reb}/${roty.avgs.ast}` } : null
+          roty: roty ? { name: roty.player.lastName, teamLogo: roty.teamCity, pos: roty.player.position, stats: `${roty.avgs.pts}/${roty.avgs.reb}/${roty.avgs.ast}` } : null,
+          finalsMvp: currentSave.finalsMVP ? { 
+            name: currentSave.finalsMVP.lastName, 
+            teamLogo: currentSave.finalsMVP.teamCity, 
+            pos: currentSave.finalsMVP.position, 
+            stats: `${currentSave.finalsMVP.avgs.pts}/${currentSave.finalsMVP.avgs.reb}/${currentSave.finalsMVP.avgs.ast}` 
+          } : null
         },
         statLeaders: {
           ppg: { name: leadersData.stats.ppg[0].player.lastName, teamLogo: leadersData.stats.ppg[0].teamCity, pos: leadersData.stats.ppg[0].player.position, value: leadersData.stats.ppg[0].avgs.pts },

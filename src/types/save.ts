@@ -159,6 +159,7 @@ export interface HistoricalSeason {
     dpoy: { name: string; teamLogo: any; pos: string; stats: string };
     smoy: { name: string; teamLogo: any; pos: string; stats: string };
     roty: { name: string; teamLogo: any; pos: string; stats: string } | null;
+    finalsMvp: { name: string; teamLogo: any; pos: string; stats: string } | null;
   };
   statLeaders: {
     ppg: { name: string; teamLogo: any; pos: string; value: string };
