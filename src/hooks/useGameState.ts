@@ -213,7 +213,7 @@ export const useGameState = () => {
       schedule: opponents,
       scheduleHomeStatus: homeStatuses,
       standings: initialStandings, 
-      playoffs: null, playoffBracket: null, history: [],
+      playoffs: null, playoffBracket: null, history: [], leagueHistory: [],
       startYear: selectedYear, currentYear: selectedYear, seasonCount: 1,
       lastView: 'home',
       coachingIQ: 60,
@@ -509,6 +509,59 @@ export const useGameState = () => {
     const finalRound = currentSave.playoffBracket?.find(s => s.round === 4);
     const champ = finalRound ? (finalRound.highSeedWins === 4 ? finalRound.highSeed : finalRound.lowSeed) : "N/A";
     const champData = currentSave.standings.find(t => t.city === champ);
+
+    // ARCHIVE LEAGUE HISTORY
+    if (!currentSave.leagueHistory) currentSave.leagueHistory = [];
+    const alreadyArchived = currentSave.leagueHistory.some(h => h.seasonNumber === currentSave.seasonCount);
+    
+    if (!alreadyArchived) {
+      const leadersData = getLeagueLeadersData(currentSave.standings, currentSave.seasonCount);
+      
+      const formatAward = (awardData: any) => ({
+        name: awardData.player.lastName,
+        teamLogo: awardData.teamCity, // We'll store city and map to logo in UI
+        pos: awardData.player.position,
+        stats: awardData.label === "DEFENSIVE PLAYER OF THE YEAR" 
+          ? `${awardData.avgs.reb} / ${awardData.avgs.stl} / ${awardData.avgs.blk}`
+          : `${awardData.avgs.pts} / ${awardData.avgs.reb} / ${awardData.avgs.ast}`
+      });
+
+      const formatLeader = (leaderData: any) => ({
+        name: leaderData.player.lastName,
+        teamLogo: leaderData.teamCity,
+        pos: leaderData.player.position,
+        value: leaderData.avgs[leaderData.statKey] || leaderData.avgs.pts // Fallback for statKey
+      });
+
+      // Map winners from leadersData.awards
+      const mvp = leadersData.awards.mvp[0];
+      const dpoy = leadersData.awards.dpoy[0];
+      const smoy = leadersData.awards.smoy[0];
+      const roty = leadersData.awards.roty[0];
+
+      const historicalSeason: any = {
+        seasonNumber: currentSave.seasonCount,
+        year: currentSave.currentYear,
+        champion: champ,
+        championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
+        userRecord: `${currentSave.wins}-${currentSave.losses}`,
+        awards: {
+          mvp: { name: mvp.player.lastName, teamLogo: mvp.teamCity, pos: mvp.player.position, stats: `${mvp.avgs.pts}/${mvp.avgs.reb}/${mvp.avgs.ast}` },
+          dpoy: { name: dpoy.player.lastName, teamLogo: dpoy.teamCity, pos: dpoy.player.position, stats: `${dpoy.avgs.reb}/${dpoy.avgs.stl}/${dpoy.avgs.blk}` },
+          smoy: { name: smoy.player.lastName, teamLogo: smoy.teamCity, pos: smoy.player.position, stats: `${smoy.avgs.pts}/${smoy.avgs.reb}/${smoy.avgs.ast}` },
+          roty: roty ? { name: roty.player.lastName, teamLogo: roty.teamCity, pos: roty.player.position, stats: `${roty.avgs.pts}/${roty.avgs.reb}/${roty.avgs.ast}` } : null
+        },
+        statLeaders: {
+          ppg: { name: leadersData.stats.ppg[0].player.lastName, teamLogo: leadersData.stats.ppg[0].teamCity, pos: leadersData.stats.ppg[0].player.position, value: leadersData.stats.ppg[0].avgs.pts },
+          rpg: { name: leadersData.stats.rpg[0].player.lastName, teamLogo: leadersData.stats.rpg[0].teamCity, pos: leadersData.stats.rpg[0].player.position, value: leadersData.stats.rpg[0].avgs.reb },
+          apg: { name: leadersData.stats.apg[0].player.lastName, teamLogo: leadersData.stats.apg[0].teamCity, pos: leadersData.stats.apg[0].player.position, value: leadersData.stats.apg[0].avgs.ast },
+          spg: { name: leadersData.stats.spg[0].player.lastName, teamLogo: leadersData.stats.spg[0].teamCity, pos: leadersData.stats.spg[0].player.position, value: leadersData.stats.spg[0].avgs.stl },
+          bpg: { name: leadersData.stats.bpg[0].player.lastName, teamLogo: leadersData.stats.bpg[0].teamCity, pos: leadersData.stats.bpg[0].player.position, value: leadersData.stats.bpg[0].avgs.blk }
+        }
+      };
+
+      currentSave.leagueHistory.push(historicalSeason);
+    }
 
     if (!currentSave.history) currentSave.history = [];
     

@@ -1077,19 +1077,54 @@ export const globalStyles = StyleSheet.create({
   hiHeaderBack: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
   hiHeaderTitle: { color: COLORS.white, fontSize: 18, fontFamily: FONTS.primary, letterSpacing: 2, textTransform: 'uppercase' },
   hiScrollContent: { padding: 15 },
-  hiHistoryCard: { backgroundColor: COLORS.card, borderRadius: 16, marginBottom: 15, padding: 20, borderWidth: 1, borderColor: COLORS.border },
-  hiCardHeader: { flexDirection: 'column' },
-  hiYearText: { color: COLORS.accent, fontSize: 12, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
+  hiHistoryCard: { backgroundColor: COLORS.card, borderRadius: 16, marginBottom: 15, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.border },
+  hiCardHeader: { padding: 20, backgroundColor: 'rgba(255,255,255,0.03)' },
+  hiYearText: { color: COLORS.accent, fontSize: 14, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
   hiLogoImage: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
-  hiChampRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  hiChampRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
   hiChampText: { color: COLORS.white, fontSize: 20, fontFamily: FONTS.primary, flex: 1, flexShrink: 1, textTransform: 'uppercase' },
   hiChampStats: { alignItems: 'flex-end', minWidth: 50 },
   hiChampStatText: { color: COLORS.primary, fontSize: 10, fontFamily: FONTS.primary, textTransform: 'uppercase' },
-  hiUserSummary: { flexDirection: 'row', gap: 10, marginTop: 12, borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 12, alignItems: 'center' },
+  hiUserSummary: { flexDirection: 'row', gap: 10, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.05)', padding: 12, alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)' },
   hiUserLabel: { color: COLORS.textMuted, fontSize: 10, fontFamily: FONTS.primary, letterSpacing: 1, textTransform: 'uppercase' },
-  hiUserStat: { color: COLORS.textSub, fontSize: 13, fontFamily: FONTS.secondary },
+  hiUserStat: { color: COLORS.textSub, fontSize: 12, fontFamily: FONTS.secondary },
   hiEmptyContainer: { padding: 40, alignItems: 'center' },
   hiEmptyText: { color: COLORS.textMuted, fontSize: 16, fontFamily: FONTS.secondary, textAlign: 'center' },
+
+  // --- NEW ACCORDION HISTORY STYLES ---
+  hiExpandedContent: { padding: 15, backgroundColor: 'rgba(0,0,0,0.1)' },
+  hiSectionTitle: { 
+    color: COLORS.primary, 
+    fontFamily: FONTS.primary, 
+    fontSize: 12, 
+    letterSpacing: 2, 
+    marginBottom: 10,
+    marginTop: 5,
+    textTransform: 'uppercase',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingBottom: 4
+  },
+  hiRecordRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: 8, 
+    borderBottomWidth: 1, 
+    borderColor: 'rgba(255,255,255,0.03)' 
+  },
+  hiRecordLabel: { 
+    width: 50, 
+    color: COLORS.textMuted, 
+    fontFamily: FONTS.primary, 
+    fontSize: 9, 
+    textTransform: 'uppercase' 
+  },
+  hiRecordMain: { flex: 1, flexDirection: 'row', alignItems: 'center' },
+  hiRecordLogo: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
+  hiRecordName: { flex: 1, color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14 },
+  hiRecordPos: { width: 25, color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 10, textAlign: 'center' },
+  hiRecordValue: { width: 85, color: COLORS.primary, fontFamily: FONTS.primary, fontSize: 12, textAlign: 'right' },
+
 
   // --- PLAYOFF BRACKET SCREEN ---
   pbHeader: { flexDirection: 'row', justifyContent: 'space-between', padding: 20, alignItems: 'center' },

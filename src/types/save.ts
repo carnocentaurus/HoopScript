@@ -42,6 +42,16 @@ export interface SeasonStats {
   possessions?: number;
 }
 
+export interface FinalsStats {
+  totalPoints: number;
+  totalRebounds: number;
+  totalAssists: number;
+  totalSteals: number;
+  totalBlocks: number;
+  totalTurnovers: number;
+  gamesPlayed: number;
+}
+
 export interface BoxScore {
   gameId: string;
   opponent: string;
@@ -80,6 +90,7 @@ export interface Player {
   speedFactor: number;
   isRookie?: boolean;
   stats: SeasonStats;
+  finalsStats?: FinalsStats;
   gameHistory?: BoxScore[];
   // Simulation Ratings
   usgRate: number;     // 5 to 35
@@ -135,6 +146,27 @@ export interface SeasonHistory {
   userRank: string;   // e.g., "3rd in West"
   standings?: TeamStanding[];
   playoffBracket?: SeriesMatchup[];
+}
+
+export interface HistoricalSeason {
+  seasonNumber: number;
+  year: number;
+  champion: string;
+  championRecord: string;
+  userRecord: string;
+  awards: {
+    mvp: { name: string; teamLogo: any; pos: string; stats: string };
+    dpoy: { name: string; teamLogo: any; pos: string; stats: string };
+    smoy: { name: string; teamLogo: any; pos: string; stats: string };
+    roty: { name: string; teamLogo: any; pos: string; stats: string } | null;
+  };
+  statLeaders: {
+    ppg: { name: string; teamLogo: any; pos: string; value: string };
+    rpg: { name: string; teamLogo: any; pos: string; value: string };
+    apg: { name: string; teamLogo: any; pos: string; value: string };
+    spg: { name: string; teamLogo: any; pos: string; value: string };
+    bpg: { name: string; teamLogo: any; pos: string; value: string };
+  };
 }
 
 export interface DraftPick {
@@ -209,6 +241,7 @@ export interface GameSave {
   playoffs: PlayoffSeries | null;
   playoffBracket: SeriesMatchup[] | null;
   history: SeasonHistory[];
+  leagueHistory?: HistoricalSeason[];
   startYear: number;
   currentYear: number;
   seasonCount: number;

@@ -1,90 +1,98 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
-import { GameSave, SeasonHistory, TeamStanding, SeriesMatchup } from '../types/save';
+import { GameSave, HistoricalSeason } from '../types/save';
 import Screen from '../components/Screen';
-import StandingsScreen from './StandingsScreen';
-import FullPlayoffBracketScreen from './FullPlayoffBracketScreen';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
 import { useSound } from '../hooks/useSound';
 
-const HistoryItem = ({ 
-  item, 
-  onViewStandings, 
-  onViewBracket 
-}: { 
-  item: SeasonHistory, 
-  onViewStandings: () => void, 
-  onViewBracket: () => void 
-}) => {
-  const logo = TEAM_LOGOS[item.champion];
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string, name: string, teamCity: string, pos: string, value: string }) => {
+  const logo = TEAM_LOGOS[teamCity];
+  return (
+    <View style={globalStyles.hiRecordRow}>
+      <Text style={globalStyles.hiRecordLabel}>{label}</Text>
+      <View style={globalStyles.hiRecordMain}>
+        {logo && <Image source={logo} style={globalStyles.hiRecordLogo} />}
+        <Text style={globalStyles.hiRecordName} numberOfLines={1}>{name}</Text>
+        <Text style={globalStyles.hiRecordPos}>{pos}</Text>
+        <Text style={globalStyles.hiRecordValue}>{value}</Text>
+      </View>
+    </View>
+  );
+};
+
+const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const { playClickSound } = useSound();
-  
-  const handlePress = (action: () => void) => {
+  const champLogo = TEAM_LOGOS[item.champion];
+
+  const toggleExpand = () => {
     playClickSound();
-    action();
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsExpanded(!isExpanded);
   };
 
   return (
     <View style={globalStyles.hiHistoryCard}>
-      <View style={globalStyles.hiCardHeader}>
+      <TouchableOpacity style={globalStyles.hiCardHeader} onPress={toggleExpand} activeOpacity={0.7}>
         <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
           <View style={globalStyles.flexRowAlignCenter}>
-            <Text style={globalStyles.hiYearText}>S{item.seasonIndex} - {item.year}</Text>
-            <Image source={require('../../assets/images/trophy.png')} style={{ width: 20, height: 20, resizeMode: 'contain', marginLeft: 8 }} />
+            <Text style={globalStyles.hiYearText}>SEASON {item.seasonNumber} LORE</Text>
+            <Icon 
+              name={isExpanded ? "chevron-up" : "chevron-down"} 
+              size={18} 
+              color={COLORS.primary} 
+              style={{ marginLeft: 10 }}
+            />
           </View>
-          <View style={globalStyles.flexRow}>
-            <TouchableOpacity 
-              style={{ marginLeft: 15 }} 
-              onPress={() => handlePress(onViewStandings)}
-              disabled={!item.standings}
-            >
-              <Icon 
-                name="podium-outline" 
-                size={24} 
-                color={item.standings ? COLORS.primary : COLORS.grayLighter} 
-              />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={{ marginLeft: 15 }} 
-              onPress={() => handlePress(onViewBracket)}
-              disabled={!item.playoffBracket}
-            >
-              <Icon 
-                name="git-network-outline" 
-                size={24} 
-                color={item.playoffBracket ? COLORS.primary : COLORS.grayLighter} 
-              />
-            </TouchableOpacity>
-          </View>
+          <Text style={globalStyles.hiChampStatText}>{item.year}</Text>
         </View>
         
-        <View style={[globalStyles.hiChampRow, { marginTop: 10 }]}>
+        <View style={globalStyles.hiChampRow}>
           <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
-            {logo && <Image source={logo} style={globalStyles.hiLogoImage} />}
+            {champLogo && <Image source={champLogo} style={globalStyles.hiLogoImage} />}
             <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
           </View>
           <View style={globalStyles.hiChampStats}>
             <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
-            <Text style={globalStyles.hiChampStatText}>{item.championRank}</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={globalStyles.hiExpandedContent}>
+          <Text style={globalStyles.hiSectionTitle}>AWARD WINNERS</Text>
+          <HistoryRecordRow label="MVP" name={item.awards.mvp.name} teamCity={item.awards.mvp.teamLogo} pos={item.awards.mvp.pos} value={item.awards.mvp.stats} />
+          <HistoryRecordRow label="DPOY" name={item.awards.dpoy.name} teamCity={item.awards.dpoy.teamLogo} pos={item.awards.dpoy.pos} value={item.awards.dpoy.stats} />
+          <HistoryRecordRow label="6MAN" name={item.awards.smoy.name} teamCity={item.awards.smoy.teamLogo} pos={item.awards.smoy.pos} value={item.awards.smoy.stats} />
+          {item.awards.roty && (
+            <HistoryRecordRow label="ROTY" name={item.awards.roty.name} teamCity={item.awards.roty.teamLogo} pos={item.awards.roty.pos} value={item.awards.roty.stats} />
+          )}
+
+          <Text style={[globalStyles.hiSectionTitle, { marginTop: 20 }]}>STAT LEADERS</Text>
+          <HistoryRecordRow label="PPG" name={item.statLeaders.ppg.name} teamCity={item.statLeaders.ppg.teamLogo} pos={item.statLeaders.ppg.pos} value={item.statLeaders.ppg.value} />
+          <HistoryRecordRow label="RPG" name={item.statLeaders.rpg.name} teamCity={item.statLeaders.rpg.teamLogo} pos={item.statLeaders.rpg.pos} value={item.statLeaders.rpg.value} />
+          <HistoryRecordRow label="APG" name={item.statLeaders.apg.name} teamCity={item.statLeaders.apg.teamLogo} pos={item.statLeaders.apg.pos} value={item.statLeaders.apg.value} />
+          <HistoryRecordRow label="SPG" name={item.statLeaders.spg.name} teamCity={item.statLeaders.spg.teamLogo} pos={item.statLeaders.spg.pos} value={item.statLeaders.spg.value} />
+          <HistoryRecordRow label="BPG" name={item.statLeaders.bpg.name} teamCity={item.statLeaders.bpg.teamLogo} pos={item.statLeaders.bpg.pos} value={item.statLeaders.bpg.value} />
+        </View>
+      )}
 
       <View style={globalStyles.hiUserSummary}>
-        <Text style={globalStyles.hiUserLabel}>YOUR TEAM:</Text>
+        <Text style={globalStyles.hiUserLabel}>YOUR RECORD:</Text>
         <Text style={globalStyles.hiUserStat}>{item.userRecord}</Text>
-        <Text style={globalStyles.hiUserStat}>{item.userRank}</Text>
       </View>
     </View>
   );
 };
 
 const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
-  const [selectedStandings, setSelectedStandings] = useState<TeamStanding[] | null>(null);
-  const [selectedBracket, setSelectedBracket] = useState<SeriesMatchup[] | null>(null);
   const { playClickSound } = useSound();
 
   const handlePress = (action: () => void) => {
@@ -92,53 +100,31 @@ const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void })
     action();
   };
 
+  const displayHistory = save.leagueHistory || [];
+
   return (
     <Screen>
       <View style={globalStyles.hiHeader}>
-        <TouchableOpacity onPress={() => handlePress(onBack)}>
+        <TouchableOpacity onPress={() => handlePress(onBack)} style={globalStyles.hiHeaderBack}>
           <Icon name="chevron-back" size={32} color="#B34726" />
         </TouchableOpacity>
         <Text style={globalStyles.hiHeaderTitle}>LEAGUE HISTORY</Text>
-        <View style={{ width: 32 }} />
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={globalStyles.hiScrollContent}>
-        {save.history.length === 0 ? (
+      <ScrollView contentContainerStyle={globalStyles.hiScrollContent} showsVerticalScrollIndicator={false}>
+        {displayHistory.length === 0 ? (
           <View style={globalStyles.hiEmptyContainer}>
-            <Text style={globalStyles.hiEmptyText}>No finished seasons recorded yet.</Text>
+            <Image source={require('../../assets/images/trophy.png')} style={{ width: 60, height: 60, opacity: 0.2, marginBottom: 20, resizeMode: 'contain' }} />
+            <Text style={globalStyles.hiEmptyText}>The history books are currently empty.</Text>
+            <Text style={[globalStyles.hiEmptyText, { fontSize: 12, marginTop: 5 }]}>Complete your first season to archive records.</Text>
           </View>
         ) : (
-          [...save.history].reverse().map((item, idx) => (
-            <HistoryItem 
-              key={idx} 
-              item={item} 
-              onViewStandings={() => item.standings && setSelectedStandings(item.standings)}
-              onViewBracket={() => item.playoffBracket && setSelectedBracket(item.playoffBracket)}
-            />
+          [...displayHistory].reverse().map((item, idx) => (
+            <HistoricalSeasonItem key={idx} item={item} />
           ))
         )}
       </ScrollView>
-
-      {/* Historical Standings Modal */}
-      <Modal visible={!!selectedStandings} animationType="slide">
-        {selectedStandings && (
-          <StandingsScreen 
-            save={{ ...save, standings: selectedStandings }} 
-            onBack={() => setSelectedStandings(null)} 
-            onViewTeam={() => {}} // Disable team overview in historical view for now
-          />
-        )}
-      </Modal>
-
-      {/* Historical Bracket Modal */}
-      <Modal visible={!!selectedBracket} animationType="slide">
-        {selectedBracket && (
-          <FullPlayoffBracketScreen 
-            save={{ ...save, playoffBracket: selectedBracket }} 
-            onBack={() => setSelectedBracket(null)} 
-          />
-        )}
-      </Modal>
     </Screen>
   );
 };
