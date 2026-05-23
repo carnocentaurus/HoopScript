@@ -303,7 +303,18 @@ const HomeScreen = ({
 
   const handleScoutPress = () => {
     playClickSound();
-    if (!save.lastScoutReport || save.lastScoutReport.city !== opponent.city) {
+    
+    const isPlayoffs = !!save.playoffs;
+    const currentGameNum = save.playoffs ? (save.playoffs.myWins + save.playoffs.oppWins) + 1 : 0;
+    const lastScoutGameNum = (save.lastScoutReport as any)?.gameNum;
+
+    // Call onScout if:
+    // 1. No report exists
+    // 2. Opponent has changed (Regular Season)
+    // 3. We are in Playoffs and the series game number has advanced
+    if (!save.lastScoutReport || 
+        save.lastScoutReport.city !== opponent.city || 
+        (isPlayoffs && lastScoutGameNum !== currentGameNum)) {
       onScout(opponent.city);
     }
     setShowScoutModal(true);

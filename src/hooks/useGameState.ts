@@ -24,7 +24,8 @@ import {
   calculateFinalsMVP,
   resetFinalsStats,
   getLeagueLeadersData,
-  getTeamLeadersData
+  getTeamLeadersData,
+  getPlayoffOpponentStrategy
 } from '../utils/leagueEngine';
 import { generateCoachingIQ } from '../utils/coachingUtils';
 
@@ -243,9 +244,20 @@ export const useGameState = () => {
       ? currentSave.playoffs.opponentCity 
       : currentSave.schedule[currentSave.gamesPlayed];
     
-    // Only generate a new report if we don't already have one for this specific opponent
-    if (currentSave.lastScoutReport && currentSave.lastScoutReport.city === oppCity) {
+    // During regular season, only generate a new report if we don't already have one for this specific opponent
+    // During playoffs, we ALWAYS allow re-scouting if the game number has changed to capture tactical shifts
+    if (!currentSave.playoffs && currentSave.lastScoutReport && currentSave.lastScoutReport.city === oppCity) {
       return;
+    }
+
+    // Playoff-specific check: if we already scouted THIS specific game in the series, skip
+    if (currentSave.playoffs) {
+      const currentGameNum = (currentSave.playoffs.myWins + currentSave.playoffs.oppWins) + 1;
+      if (currentSave.lastScoutReport && 
+          currentSave.lastScoutReport.city === oppCity && 
+          (currentSave.lastScoutReport as any).gameNum === currentGameNum) {
+        return;
+      }
     }
 
     const oppTeam = currentSave.standings.find(t => t.city === oppCity);
@@ -254,10 +266,19 @@ export const useGameState = () => {
     if (!oppTeam || !myTeam) return;
 
     // We pass the context to selectCPUStrategy to see what they are LIKELY to do
-    const oppStrategy = selectCPUStrategy(oppTeam, myTeam, !!currentSave.playoffs); 
+    let oppStrategy: Strategy;
+    let currentGameNum = 1;
+    if (currentSave.playoffs) {
+      currentGameNum = (currentSave.playoffs.myWins + currentSave.playoffs.oppWins) + 1;
+      oppStrategy = getPlayoffOpponentStrategy(oppTeam, myTeam, currentGameNum, currentSave.currentStrategy);
+    } else {
+      oppStrategy = selectCPUStrategy(oppTeam, myTeam, false);
+    }
+
     const report = generateScoutReport(oppStrategy, oppTeam.coachingIQ ?? 60, oppTeam.predictability ?? 60);
     report.city = oppCity;
     report.actualStrategy = oppStrategy;
+    (report as any).gameNum = currentGameNum; // Attach game number to track uniqueness in playoffs
 
     currentSave.lastScoutReport = report;
     saveAndSet(updatedSaves, view);
@@ -476,7 +497,7 @@ export const useGameState = () => {
     const isFinals = currentSave.playoffs?.round === 4;
 
     // Use simulateLeagueDay for strategy-aware outcomes
-    const dailyResults = simulateLeagueDay(currentSave.standings, "NONE", "NONE", isPlayoffs, isFinals);
+    const dailyResults = simulateLeagueDay(currentSave.standings, "NONE", "NONE", isPlayoffs, isFinals, currentSave.playoffBracket);
 
     currentSave.playoffBracket = currentSave.playoffBracket.map(series => {
       if (series.round !== round || series.isCompleted) return series;

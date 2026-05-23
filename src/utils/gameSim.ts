@@ -1,6 +1,6 @@
 import { Player, GameSave, OffensiveFocus, DefensiveFocus, Strategy, TeamStanding, PlayerStat } from '../types/save';
 import { MIN_TEAM_SCORE, MIN_POSSESSIONS } from '../types';
-import { calculateTeamRatings, selectCPUStrategy, updatePlayerStats, getTeamStrength } from './leagueEngine';
+import { calculateTeamRatings, selectCPUStrategy, updatePlayerStats, getTeamStrength, getPlayoffOpponentStrategy } from './leagueEngine';
 import { randomNormal, weightedPlayerSelector, poissonCheck, shotSuccessCheck, getWeightedPlayer, getPositionalFGBias, POSITIONAL_PROFILES, identifyPOTG, calculateShotSuccessRate, generateSimulatedStats } from './statsMath';
 import { calculateGameMinutes } from './rotationMath';
 import { getNarrative, GameNarrative } from './narrativeEngine';
@@ -14,7 +14,8 @@ export const simulateLeagueDay = (
   userCity: string,
   opponentCity: string,
   isPlayoffs: boolean = false,
-  isFinals: boolean = false
+  isFinals: boolean = false,
+  bracket?: any[] // Added to support series-aware adjustments
 ): Record<string, 'W' | 'L'> => {
   const aiTeams = standings.filter(t => t.city !== userCity && t.city !== opponentCity);
   const dayResults: Record<string, 'W' | 'L'> = {};
@@ -23,8 +24,22 @@ export const simulateLeagueDay = (
     const teamA = aiTeams[i];
     const teamB = aiTeams[i + 1];
     if (teamB) {
-      const strategyA = selectCPUStrategy(teamA, teamB, isPlayoffs);
-      const strategyB = selectCPUStrategy(teamB, teamA, isPlayoffs);
+      // For AI games in playoffs, determine game number
+      let gameNum = 1;
+      if (isPlayoffs && bracket) {
+        const series = bracket.find(s => (s.highSeed === teamA.city && s.lowSeed === teamB.city) || (s.highSeed === teamB.city && s.lowSeed === teamA.city));
+        if (series) {
+          gameNum = (series.highSeedWins + series.lowSeedWins) + 1;
+        }
+      }
+
+      const strategyA = isPlayoffs 
+        ? getPlayoffOpponentStrategy(teamA, teamB, gameNum)
+        : selectCPUStrategy(teamA, teamB, false);
+        
+      const strategyB = isPlayoffs
+        ? getPlayoffOpponentStrategy(teamB, teamA, gameNum)
+        : selectCPUStrategy(teamB, teamA, false);
       
       const result = simulateGame(
         teamA,
@@ -33,7 +48,11 @@ export const simulateLeagueDay = (
         strategyB.offense,
         strategyB.defense,
         teamA.coachingIQ || 60,
-        teamB.coachingIQ || 60
+        teamB.coachingIQ || 60,
+        isPlayoffs,
+        gameNum,
+        teamA,
+        teamB
       );
 
       const aScore = result.myScore;
@@ -412,17 +431,27 @@ const forceWinner = (
 const BASE_PACE = 102;
 
 export const simulateGame = (
-  myTeam: { roster: Player[] },
-  opponent: { roster: Player[] }, 
+  myTeam: { roster: Player[], city?: string },
+  opponent: { roster: Player[], city?: string }, 
   userStrategy: Strategy, 
   expectedOffFocus: OffensiveFocus,
   expectedDefFocus: DefensiveFocus,
   myIQ: number = 60,
-  oppIQ: number = 60
+  oppIQ: number = 60,
+  isPlayoffs: boolean = false,
+  seriesGameNumber: number = 1,
+  userTeamStanding?: TeamStanding,
+  oppTeamStanding?: TeamStanding
 ): GameResult => {
   const oppRoster = opponent.roster || [];
   const myRatings = calculateTeamRatings(myTeam.roster);
   const oppRatings = calculateTeamRatings(oppRoster);
+
+  // Enforce Playoff Strategy Adjustment
+  let currentOppStrategy = { offense: expectedOffFocus, defense: expectedDefFocus };
+  if (isPlayoffs && oppTeamStanding && userTeamStanding) {
+    currentOppStrategy = getPlayoffOpponentStrategy(oppTeamStanding, userTeamStanding, seriesGameNumber);
+  }
 
   const myMinuteMap = calculateGameMinutes(myTeam.roster);
   const oppMinuteMap = calculateGameMinutes(oppRoster);
@@ -461,7 +490,6 @@ export const simulateGame = (
 
   const expectedOppStrategy = { offense: expectedOffFocus, defense: expectedDefFocus };
   let currentMyStrategy = { ...userStrategy };
-  let currentOppStrategy = { offense: expectedOffFocus, defense: expectedDefFocus };
 
   let userAdjustedMidGame = false;
   let oppAdjustedMidGame = false;
@@ -486,8 +514,8 @@ export const simulateGame = (
     
     if (!isOvertime) {
       // Dynamic Pace adjustment only for regulation
-      const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === expectedDefFocus;
-      const isOppCountered = COUNTER_MATRIX[expectedOffFocus] === userStrategy.defense;
+      const isUserCountered = COUNTER_MATRIX[userStrategy.offense] === currentOppStrategy.defense;
+      const isOppCountered = COUNTER_MATRIX[currentOppStrategy.offense] === userStrategy.defense;
       if (isUserCountered) periodPossessions += 4;
       if (isOppCountered) periodPossessions += 4;
     }
@@ -504,9 +532,10 @@ export const simulateGame = (
         }
 
         // Opponent Adjustment (New Logic)
-        if (willOppAdjust) {
-          const oldOff = expectedOffFocus;
-          const oldDef = expectedDefFocus;
+        if (willOppAdjust && !isPlayoffs) { // AI adjustments in playoffs are deterministic per game, but mid-game still possible if not already heavily adjusted?
+          // For now, let's allow mid-game adjustments only in regular season or if IQ is very high
+          const oldOff = currentOppStrategy.offense;
+          const oldDef = currentOppStrategy.defense;
           
           const offenses = [OffensiveFocus.ATTACK_PAINT, OffensiveFocus.PACE_SPACE, OffensiveFocus.ISO_STAR];
           const defenses = [DefensiveFocus.PROTECT_RIM, DefensiveFocus.PERIMETER_LOCK, DefensiveFocus.DOUBLE_TEAM];
@@ -529,11 +558,6 @@ export const simulateGame = (
           }
           
           oppAdjustedMidGame = true;
-        } else {
-          // Force consistency if not adjusting
-          currentOppStrategy.offense = expectedOffFocus;
-          currentOppStrategy.defense = expectedDefFocus;
-          oppAdjustedMidGame = false;
         }
       }
 

@@ -89,6 +89,101 @@ export const selectCPUStrategy = (
   return strategy;
 };
 
+/**
+ * Dynamic Playoff Strategy Generator: Adjusts tactics based on the game number in a series.
+ */
+export const getPlayoffOpponentStrategy = (
+  opponentTeam: TeamStanding, 
+  userTeam: TeamStanding,
+  seriesGameNumber: number,
+  userActualStrategy?: Strategy
+): Strategy => {
+  const identity = getTeamIdentity(opponentTeam.roster);
+  // Use actual user strategy if provided, else fall back to roster identity
+  const userTactics = userActualStrategy || getTeamIdentity(userTeam.roster);
+  const coachingIQ = opponentTeam.coachingIQ || 60;
+
+  // Game 1: Base Identity (Feeling out the opponent)
+  if (seriesGameNumber === 1) return identity;
+
+  // Game 2: Counter User Offense (Initial defensive adjustment)
+  if (seriesGameNumber === 2) {
+    let defense = identity.defense;
+    if (userTactics.offense === OffensiveFocus.ATTACK_PAINT) defense = DefensiveFocus.PROTECT_RIM;
+    else if (userTactics.offense === OffensiveFocus.PACE_SPACE) defense = DefensiveFocus.PERIMETER_LOCK;
+    else if (userTactics.offense === OffensiveFocus.ISO_STAR) defense = DefensiveFocus.DOUBLE_TEAM;
+    
+    // If identity already counters, or high IQ coach, double down with a secondary shift
+    let offense = identity.offense;
+    if (coachingIQ >= 75 && defense === identity.defense) {
+       // Also adjust offense if defense was already set
+       offense = userTactics.defense === DefensiveFocus.PROTECT_RIM ? OffensiveFocus.PACE_SPACE : OffensiveFocus.ATTACK_PAINT;
+    }
+    
+    return { offense, defense };
+  }
+
+  // Game 3: Counter User Defense (Optimizing scoring)
+  if (seriesGameNumber === 3) {
+    let offense = identity.offense;
+    if (userTactics.defense === DefensiveFocus.PROTECT_RIM) offense = OffensiveFocus.PACE_SPACE;
+    else if (userTactics.defense === DefensiveFocus.PERIMETER_LOCK) offense = OffensiveFocus.ATTACK_PAINT;
+    else if (userTactics.defense === DefensiveFocus.DOUBLE_TEAM) offense = OffensiveFocus.ISO_STAR;
+    
+    // Ensure it feels different from Game 2
+    let defense = identity.defense;
+    if (coachingIQ >= 65) {
+      // Keep Game 2's defensive counter or try a new one
+      if (userTactics.offense === OffensiveFocus.ISO_STAR) defense = DefensiveFocus.DOUBLE_TEAM;
+      else if (userTactics.offense === OffensiveFocus.PACE_SPACE) defense = DefensiveFocus.PERIMETER_LOCK;
+    }
+
+    return { offense, defense };
+  }
+
+  // Game 4: Hybrid Adjustment (Full tactical pivot)
+  if (seriesGameNumber === 4) {
+    // Aggressive counter-play
+    const offense = userTactics.defense === DefensiveFocus.PROTECT_RIM ? OffensiveFocus.PACE_SPACE : OffensiveFocus.ATTACK_PAINT;
+    const defense = userTactics.offense === OffensiveFocus.PACE_SPACE ? DefensiveFocus.PERIMETER_LOCK : DefensiveFocus.PROTECT_RIM;
+    return { offense, defense };
+  }
+
+  // Game 5-7: High Stakes / Desperation / Elite Tinkering
+  const rosters = opponentTeam.roster;
+  const star = [...rosters].sort((a, b) => b.overall - a.overall)[0];
+  const threePtShooters = rosters.filter(p => p.offense > 85).length;
+
+  if (seriesGameNumber === 5) {
+    // Try to exploit user's weakest rating
+    const userRatings = calculateTeamRatings(userTeam.roster);
+    if (userRatings.defense < userRatings.offense) {
+       return { 
+         offense: threePtShooters >= 2 ? OffensiveFocus.PACE_SPACE : OffensiveFocus.ATTACK_PAINT, 
+         defense: identity.defense 
+       };
+    } else {
+       return { 
+         offense: identity.offense, 
+         defense: userTactics.offense === OffensiveFocus.ISO_STAR ? DefensiveFocus.DOUBLE_TEAM : DefensiveFocus.PERIMETER_LOCK 
+       };
+    }
+  }
+
+  if (seriesGameNumber === 6) {
+    return {
+      offense: star.overall > 88 ? OffensiveFocus.ISO_STAR : OffensiveFocus.PACE_SPACE,
+      defense: DefensiveFocus.DOUBLE_TEAM // Desperate pressure
+    };
+  }
+
+  // Game 7: Total commitment to strengths
+  return {
+    offense: threePtShooters >= 3 ? OffensiveFocus.PACE_SPACE : (star.overall > 90 ? OffensiveFocus.ISO_STAR : OffensiveFocus.ATTACK_PAINT),
+    defense: userTactics.offense === OffensiveFocus.ATTACK_PAINT ? DefensiveFocus.PROTECT_RIM : DefensiveFocus.PERIMETER_LOCK
+  };
+};
+
 export const generateScoutReport = (cpuStrategy: Strategy, opponentIQ: number, opponentPredictability: number): ScoutReport => {
   const accuracyThreshold = (80 - (opponentIQ / 2)); 
   const roll = Math.random() * 100;

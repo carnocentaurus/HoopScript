@@ -155,6 +155,10 @@ const QuickSimScreen = ({
     const expectedOff = snapshot?.expectedOff || cpuStrategy.offense;
     const expectedDef = snapshot?.expectedDef || cpuStrategy.defense;
 
+    const gameNum = save.playoffs ? (save.playoffs.myWins + save.playoffs.oppWins) + 1 : 1;
+    const userTeamStanding = save.standings.find(t => t.city === save.city);
+    const oppTeamStanding = save.standings.find(t => t.city === opponent.city);
+
     const gameResult = simulateGame(
       save, 
       opponent, 
@@ -162,7 +166,11 @@ const QuickSimScreen = ({
       expectedOff,
       expectedDef,
       save.coachingIQ,
-      opponent.coachingIQ
+      opponent.coachingIQ,
+      !!save.playoffs,
+      gameNum,
+      userTeamStanding,
+      oppTeamStanding
     );
 
     // Apply strict positional sorting (Starters first, then PG->C, then OVR)
@@ -321,19 +329,6 @@ const QuickSimScreen = ({
                       marginTop: 5
                     }}>
                       {getAdjustmentLevel(opponent.coachingIQ || 0).label}
-                    </Text>
-                  </View>
-
-                  <View style={{ 
-                    alignItems: 'center', 
-                    marginBottom: 20, 
-                    borderWidth: 1, 
-                    borderColor: COLORS.border, 
-                    padding: 10,
-                    borderRadius: 8
-                  }}>
-                    <Text style={[globalStyles.tacticalLabel]}>
-                      Adjusted: <Text style={{ color: COLORS.white }}>{result?.oppAdjustedMidGame ? 'Yes' : 'No'}</Text>
                     </Text>
                   </View>
 
