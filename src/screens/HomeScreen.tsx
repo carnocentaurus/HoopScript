@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, ScrollView, Modal } from 'react-na
 import { Ionicons as Icon } from '@expo/vector-icons';
 import { GameSave, OffensiveFocus, DefensiveFocus, Strategy } from '../types/save';
 import Screen from '../components/Screen';
-import { calculateTeamRatings, getLeagueLeadersData } from '../utils/leagueEngine';
+import { calculateTeamRatings, getLeagueLeadersData, getTeamLeadersData } from '../utils/leagueEngine';
 import { globalStyles } from '../styles/globalStyles';
 import { COLORS, FONTS } from '../styles/theme';
 import { TEAM_LOGOS } from '../data/teams';
@@ -11,7 +11,17 @@ import { useSound } from '../hooks/useSound';
 import { getAdjustmentLevel } from '../utils/coachingUtils';
 
 const SeasonAwardsModal = ({ visible, standings, seasonCount, onDismiss }: { visible: boolean, standings: any[], seasonCount: number, onDismiss: () => void }) => {
+  const [activeModalTab, setActiveModalTab] = useState<'PLAYERS' | 'AWARDS' | 'TEAMS'>('AWARDS');
+  const { playClickSound } = useSound();
+  
   const leadersData = getLeagueLeadersData(standings, seasonCount);
+  const teamLeadersData = getTeamLeadersData(standings);
+
+  const handleTabPress = (tab: 'PLAYERS' | 'AWARDS' | 'TEAMS') => {
+    playClickSound();
+    setActiveModalTab(tab);
+  };
+
   const awards = [
     { label: "MOST VALUABLE PLAYER", data: leadersData.awards.mvp[0] },
     { label: "DEFENSIVE PLAYER OF THE YEAR", data: leadersData.awards.dpoy[0] },
@@ -19,34 +29,122 @@ const SeasonAwardsModal = ({ visible, standings, seasonCount, onDismiss }: { vis
     { label: "ROOKIE OF THE YEAR", data: leadersData.awards.roty[0] }
   ];
 
+  const playerLeaders = [
+    { label: "SCORING LEADER", data: leadersData.stats.ppg[0], statKey: "pts", unit: "PPG" },
+    { label: "REBOUNDING LEADER", data: leadersData.stats.rpg[0], statKey: "reb", unit: "RPG" },
+    { label: "ASSISTS LEADER", data: leadersData.stats.apg[0], statKey: "ast", unit: "APG" },
+    { label: "STEALS LEADER", data: leadersData.stats.spg[0], statKey: "stl", unit: "SPG" },
+    { label: "BLOCKS LEADER", data: leadersData.stats.bpg[0], statKey: "blk", unit: "BPG" },
+    { label: "TURNOVERS LEADER", data: leadersData.stats.topg[0], statKey: "tov", unit: "TOPG" }
+  ];
+
+  const teamLeaders = [
+    { label: "PPG LEADER", data: teamLeadersData.ppg[0], unit: "PPG" },
+    { label: "RPG LEADER", data: teamLeadersData.rpg[0], unit: "RPG" },
+    { label: "APG LEADER", data: teamLeadersData.apg[0], unit: "APG" },
+    { label: "SPG LEADER", data: teamLeadersData.spg[0], unit: "SPG" },
+    { label: "BPG LEADER", data: teamLeadersData.bpg[0], unit: "BPG" },
+    { label: "TOPG LEADER", data: teamLeadersData.topg[0], unit: "TOPG" },
+    { label: "FG% LEADER", data: teamLeadersData.fgPct[0], unit: "" },
+    { label: "3P% LEADER", data: teamLeadersData.threePct[0], unit: "" }
+  ];
+
+  const renderAwardTab = () => (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 450 }}>
+      {awards.map((award, idx) => {
+        if (!award.data) return null;
+        const logo = TEAM_LOGOS[award.data.teamCity];
+        return (
+          <View key={idx} style={[globalStyles.awardsWinnerBlock, globalStyles.bgTerracottaHighlight, { borderColor: COLORS.primary }]}>
+            {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 45, height: 45 }]} />}
+            <View style={globalStyles.awardsWinnerInfo}>
+              <Text style={[globalStyles.awardsLabel, globalStyles.textTerracottaHighlight]}>{award.label}</Text>
+              <Text style={[globalStyles.awardsName, globalStyles.textTerracottaHighlight]}>{award.data.player.lastName}</Text>
+              <Text style={globalStyles.awardsSub}>{award.data.teamCity} | {award.data.player.position}</Text>
+              <Text style={[globalStyles.awardsStatLine, globalStyles.textTerracottaHighlight]}>
+                {award.label === "DEFENSIVE PLAYER OF THE YEAR"
+                  ? `${award.data.avgs.reb} RPG / ${award.data.avgs.stl} SPG / ${award.data.avgs.blk} BPG`
+                  : `${award.data.avgs.pts} PPG / ${award.data.avgs.reb} RPG / ${award.data.avgs.ast} APG`
+                }
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+    </ScrollView>
+  );
+
+  const renderPlayerTab = () => (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 450 }}>
+      {playerLeaders.map((leader, idx) => {
+        if (!leader.data) return null;
+        const logo = TEAM_LOGOS[leader.data.teamCity];
+        return (
+          <View key={idx} style={[globalStyles.awardsWinnerBlock, globalStyles.bgTerracottaHighlight, { paddingVertical: 10 }]}>
+            {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 35, height: 35 }]} />}
+            <View style={globalStyles.awardsWinnerInfo}>
+              <Text style={[globalStyles.awardsLabel, { fontSize: 9 }]}>{leader.label}</Text>
+              <Text style={[globalStyles.awardsName, globalStyles.textTerracottaHighlight, { fontSize: 16 }]}>
+                {leader.data.player.lastName} ({leader.data.teamCity}) — {leader.data.avgs[leader.statKey]} {leader.unit}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+    </ScrollView>
+  );
+
+  const renderTeamTab = () => (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 450 }}>
+      {teamLeaders.map((leader, idx) => {
+        if (!leader.data) return null;
+        const logo = TEAM_LOGOS[leader.data.city];
+        return (
+          <View key={idx} style={[globalStyles.awardsWinnerBlock, globalStyles.bgTerracottaHighlight, { paddingVertical: 10 }]}>
+            {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 35, height: 35 }]} />}
+            <View style={globalStyles.awardsWinnerInfo}>
+              <Text style={[globalStyles.awardsLabel, { fontSize: 9 }]}>{leader.label}</Text>
+              <Text style={[globalStyles.awardsName, globalStyles.textTerracottaHighlight, { fontSize: 16 }]}>
+                {leader.data.city} — {leader.data.value} {leader.unit}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+    </ScrollView>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={globalStyles.modalOverlay}>
-        <View style={[globalStyles.scoutModalContainer, { maxWidth: 450 }]}>
-          <Text style={globalStyles.awardsModalTitle}>SEASON AWARDS</Text>
+        <View style={[globalStyles.scoutModalContainer, { maxWidth: 450, paddingBottom: 20 }]}>
+          <Text style={globalStyles.awardsModalTitle}>SEASON RECAP</Text>
+
+          {/* TAB BAR */}
+          <View style={[globalStyles.llTabBar, { marginTop: 0, marginBottom: 15 }]}>
+            <TouchableOpacity 
+              style={[globalStyles.stTab, activeModalTab === 'PLAYERS' && globalStyles.stActiveTab]} 
+              onPress={() => handleTabPress('PLAYERS')}
+            >
+              <Text style={[globalStyles.stTabText, activeModalTab === 'PLAYERS' && globalStyles.stActiveTabText, { fontSize: 10 }]}>PLAYERS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[globalStyles.stTab, activeModalTab === 'AWARDS' && globalStyles.stActiveTab]} 
+              onPress={() => handleTabPress('AWARDS')}
+            >
+              <Text style={[globalStyles.stTabText, activeModalTab === 'AWARDS' && globalStyles.stActiveTabText, { fontSize: 10 }]}>AWARDS</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[globalStyles.stTab, activeModalTab === 'TEAMS' && globalStyles.stActiveTab]} 
+              onPress={() => handleTabPress('TEAMS')}
+            >
+              <Text style={[globalStyles.stTabText, activeModalTab === 'TEAMS' && globalStyles.stActiveTabText, { fontSize: 10 }]}>TEAMS</Text>
+            </TouchableOpacity>
+          </View>
           
-          <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 500 }}>
-            {awards.map((award, idx) => {
-              if (!award.data) return null;
-              const logo = TEAM_LOGOS[award.data.teamCity];
-              return (
-                <View key={idx} style={globalStyles.awardsWinnerBlock}>
-                  {logo && <Image source={logo} style={[globalStyles.llLogo, { width: 45, height: 45 }]} />}
-                  <View style={globalStyles.awardsWinnerInfo}>
-                    <Text style={globalStyles.awardsLabel}>{award.label}</Text>
-                    <Text style={globalStyles.awardsName}>{award.data.player.lastName}</Text>
-                    <Text style={globalStyles.awardsSub}>{award.data.teamCity} | {award.data.player.position}</Text>
-                    <Text style={globalStyles.awardsStatLine}>
-                      {award.label === "DEFENSIVE PLAYER OF THE YEAR"
-                        ? `${award.data.avgs.reb} RPG / ${award.data.avgs.stl} SPG / ${award.data.avgs.blk} BPG`
-                        : `${award.data.avgs.pts} PPG / ${award.data.avgs.reb} RPG / ${award.data.avgs.ast} APG`
-                      }
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </ScrollView>
+          {activeModalTab === 'AWARDS' && renderAwardTab()}
+          {activeModalTab === 'PLAYERS' && renderPlayerTab()}
+          {activeModalTab === 'TEAMS' && renderTeamTab()}
 
           <TouchableOpacity 
             style={[globalStyles.scoutModalCloseBtn, { backgroundColor: COLORS.primary, marginTop: 20 }]}
