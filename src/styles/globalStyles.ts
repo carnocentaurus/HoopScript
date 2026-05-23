@@ -1009,6 +1009,11 @@ export const globalStyles = StyleSheet.create({
     borderColor: COLORS.border,
     paddingTop: 20,
   },
+  tosTeamRatingBox: { alignItems: 'center' },
+  tosTeamRatingVal: { fontSize: 22, fontFamily: FONTS.primary, color: COLORS.white },
+  tosTeamAverageVal: { fontSize: 16, fontFamily: FONTS.primary, color: COLORS.white },
+  tosTeamOvrVal: { color: COLORS.primary },
+  tosTeamRatingLabel: { fontSize: 9, color: COLORS.textMuted, fontFamily: FONTS.primary, marginTop: 2, textTransform: 'uppercase' },
   tosTeamStatRowTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
