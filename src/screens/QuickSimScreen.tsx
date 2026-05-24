@@ -170,7 +170,8 @@ const QuickSimScreen = ({
       !!save.playoffs,
       gameNum,
       userTeamStanding,
-      oppTeamStanding
+      oppTeamStanding,
+      !opponent.isHome
     );
 
     // Apply strict positional sorting (Starters first, then PG->C, then OVR)

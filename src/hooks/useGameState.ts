@@ -25,7 +25,8 @@ import {
   resetFinalsStats,
   getLeagueLeadersData,
   getTeamLeadersData,
-  getPlayoffOpponentStrategy
+  getPlayoffOpponentStrategy,
+  determineFinalsHomeCourt
 } from '../utils/leagueEngine';
 import { generateCoachingIQ } from '../utils/coachingUtils';
 
@@ -453,13 +454,25 @@ export const useGameState = () => {
         const winners = roundSeries.map(s => (s.highSeedWins === 4 ? s.highSeed : s.lowSeed));
         const nextMatches: SeriesMatchup[] = [];
         for (let i = 0; i < winners.length; i += 2) {
-          const teamA = winners[i]; const teamB = winners[i + 1];
-          const rankA = parseInt(calculateRank(teamA, currentSave.standings));
-          const rankB = parseInt(calculateRank(teamB, currentSave.standings));
-          const isAFinishedHigh = rankA < rankB;
+          const cityA = winners[i]; const cityB = winners[i + 1];
+          let isAFinishedHigh = false;
+          
+          if (nextRound === 4) {
+            // Finals Home-Court Advantage Logic
+            const teamA = currentSave.standings.find(t => t.city === cityA)!;
+            const teamB = currentSave.standings.find(t => t.city === cityB)!;
+            const homeCourtTeam = determineFinalsHomeCourt(teamA, teamB, currentSave.standings);
+            isAFinishedHigh = (homeCourtTeam.city === cityA);
+          } else {
+            // Regular Conference Playoff Seeding
+            const rankA = parseInt(calculateRank(cityA, currentSave.standings));
+            const rankB = parseInt(calculateRank(cityB, currentSave.standings));
+            isAFinishedHigh = rankA < rankB;
+          }
+
           nextMatches.push({
             id: `R${nextRound}-${i}`, round: nextRound,
-            highSeed: isAFinishedHigh ? teamA : teamB, lowSeed: isAFinishedHigh ? teamB : teamA,
+            highSeed: isAFinishedHigh ? cityA : cityB, lowSeed: isAFinishedHigh ? cityB : cityA,
             highSeedWins: 0, lowSeedWins: 0, isCompleted: false,
             conference: currentRound === 3 ? 'Finals' : roundSeries[i].conference,
           });

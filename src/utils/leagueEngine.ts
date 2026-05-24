@@ -924,4 +924,33 @@ export const trimRosters = (standings: TeamStanding[]): TeamStanding[] => {
   });
 };
 
+// --- HOME COURT LOGIC ---
+
+/**
+ * Determines which team earns home-court advantage for the Finals based on hierarchical rules:
+ * 1. Regular Season Wins
+ * 2. Conference Seed (Tie-breaker 1)
+ * 3. Overall League Standings Rank (Tie-breaker 2)
+ */
+export const determineFinalsHomeCourt = (teamA: TeamStanding, teamB: TeamStanding, allStandings: TeamStanding[]): TeamStanding => {
+  // Rule 1: Regular Season Wins
+  if (teamA.wins > teamB.wins) return teamA;
+  if (teamB.wins > teamA.wins) return teamB;
+
+  // Rule 2: Conference Seed (lower numeric seed value means higher rank)
+  const seedA = parseInt(calculateRank(teamA.city, allStandings));
+  const seedB = parseInt(calculateRank(teamB.city, allStandings));
+
+  if (seedA < seedB) return teamA;
+  if (seedB < seedA) return teamB;
+
+  // Rule 3: Overall League Standings Rank (Higher position in sorted league array)
+  const overallStandings = [...allStandings].sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+  const rankA = overallStandings.findIndex(t => t.city === teamA.city);
+  const rankB = overallStandings.findIndex(t => t.city === teamB.city);
+
+  if (rankA < rankB) return teamA; // Higher rank means lower index
+  return teamB;
+};
+
 

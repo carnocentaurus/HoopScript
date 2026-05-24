@@ -26,11 +26,23 @@ export const simulateLeagueDay = (
     if (teamB) {
       // For AI games in playoffs, determine game number
       let gameNum = 1;
+      let isTeamAHome = false;
       if (isPlayoffs && bracket) {
         const series = bracket.find(s => (s.highSeed === teamA.city && s.lowSeed === teamB.city) || (s.highSeed === teamB.city && s.lowSeed === teamA.city));
         if (series) {
           gameNum = (series.highSeedWins + series.lowSeedWins) + 1;
+          
+          // Playoff Format: 2-2-1-1-1
+          // Games 1, 2, 5, 7: High Seed Home
+          // Games 3, 4, 6: Low Seed Home
+          const isTeamAHighSeed = series.highSeed === teamA.city;
+          const highSeedHomeGames = [1, 2, 5, 7];
+          const isHighSeedHome = highSeedHomeGames.includes(gameNum);
+          isTeamAHome = isTeamAHighSeed ? isHighSeedHome : !isHighSeedHome;
         }
+      } else {
+        // Regular Season AI: Alternating/Random home court (50/50)
+        isTeamAHome = Math.random() > 0.5;
       }
 
       const strategyA = isPlayoffs 
@@ -52,7 +64,8 @@ export const simulateLeagueDay = (
         isPlayoffs,
         gameNum,
         teamA,
-        teamB
+        teamB,
+        isTeamAHome
       );
 
       const aScore = result.myScore;
@@ -441,7 +454,8 @@ export const simulateGame = (
   isPlayoffs: boolean = false,
   seriesGameNumber: number = 1,
   userTeamStanding?: TeamStanding,
-  oppTeamStanding?: TeamStanding
+  oppTeamStanding?: TeamStanding,
+  isMyTeamHome: boolean = false
 ): GameResult => {
   const oppRoster = opponent.roster || [];
   const myRatings = calculateTeamRatings(myTeam.roster);
@@ -496,6 +510,10 @@ export const simulateGame = (
 
   let totalCounterBonus = 0;
   let counteringPossessions = 0;
+
+  // Home Court Advantage: 3% efficiency boost
+  const myHomeMod = isMyTeamHome ? 1.03 : 1.0;
+  const oppHomeMod = !isMyTeamHome ? 1.03 : 1.0;
 
   const myPityMod = myRatings.offense < 75 ? 1.08 : 1.0;
   const oppPityMod = oppRatings.offense < 75 ? 1.08 : 1.0;
@@ -584,8 +602,8 @@ export const simulateGame = (
       }
       counteringPossessions++;
 
-      simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod, myFocusFactor);
-      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod, oppFocusFactor);
+      simulatePossession(myLineup, oppLineup, currentMyStrategy, currentOppStrategy, playerStats, myScore, myMinuteMap, oppRatings.defense, isClutch, myPityMod * myHomeMod, myFocusFactor);
+      simulatePossession(oppLineup, myLineup, currentOppStrategy, currentMyStrategy, playerStats, oppScore, oppMinuteMap, myRatings.defense, isClutch, oppPityMod * oppHomeMod, oppFocusFactor);
     }
 
     // --- 2. APPLY SCORE FLOOR IMMEDIATELY ---
