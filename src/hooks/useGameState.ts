@@ -627,14 +627,34 @@ export const useGameState = () => {
     // Prevent duplicate entries for the same season
     const alreadyRecorded = currentSave.history.some(h => h.seasonIndex === currentSave.seasonCount);
     if (!alreadyRecorded) {
+      // PRUNE STANDINGS AND BRACKET: Save only essential primitives to prevent memory blowout
+      const prunedStandings = currentSave.standings.map(t => ({
+        city: t.city,
+        wins: t.wins,
+        losses: t.losses,
+        conf: t.conf,
+        rank: calculateRank(t.city, currentSave.standings)
+      }));
+
+      const prunedBracket = (currentSave.playoffBracket || []).map(s => ({
+        highSeed: s.highSeed,
+        lowSeed: s.lowSeed,
+        highSeedWins: s.highSeedWins,
+        lowSeedWins: s.lowSeedWins,
+        round: s.round,
+        isCompleted: s.isCompleted
+      }));
+
       currentSave.history.push({
-        seasonIndex: currentSave.seasonCount, year: currentSave.currentYear, champion: champ,
+        seasonIndex: currentSave.seasonCount, 
+        year: currentSave.currentYear, 
+        champion: champ,
         championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
         championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
         userRecord: `${currentSave.wins}-${currentSave.losses}`,
         userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`,
-        standings: JSON.parse(JSON.stringify(currentSave.standings)),
-        playoffBracket: JSON.parse(JSON.stringify(currentSave.playoffBracket || []))
+        standings: prunedStandings as any, // Cast to any to satisfy historical type while being pruned
+        playoffBracket: prunedBracket as any
       });
     }
 

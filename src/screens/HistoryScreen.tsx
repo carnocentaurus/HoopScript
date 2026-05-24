@@ -19,7 +19,7 @@ const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string
       <Text style={globalStyles.hiRecordLabel}>{label}</Text>
       <View style={globalStyles.hiRecordMain}>
         {logo && <Image source={logo} style={globalStyles.hiRecordLogo} />}
-        <Text style={globalStyles.hiRecordName} numberOfLines={1}>{name}</Text>
+        <Text style={globalStyles.hiRecordName} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
         {pos ? <Text style={globalStyles.hiRecordPos}>{pos}</Text> : null}
         <Text style={globalStyles.hiRecordValue}>{value}</Text>
       </View>
@@ -57,7 +57,7 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
         <View style={globalStyles.hiChampRow}>
           <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
             {champLogo && <Image source={champLogo} style={globalStyles.hiLogoImage} />}
-            <Text style={globalStyles.hiChampText}>{item.champion.toUpperCase()}</Text>
+            <Text style={globalStyles.hiChampText} numberOfLines={1} ellipsizeMode="tail">{item.champion.toUpperCase()}</Text>
           </View>
           <View style={globalStyles.hiChampStats}>
             <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>

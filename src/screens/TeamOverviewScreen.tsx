@@ -62,27 +62,27 @@ const TeamOverviewScreen = ({ city, roster, history, teamStanding, onBack }: Tea
   }, { pts: 0, reb: 0, ast: 0, blk: 0, stl: 0, tov: 0, fgm: 0, fga: 0, threePM: 0, threePA: 0, gp: 0 });
 
   const team = {
-    totalSteals: teamTotals.stl,
-    totalTurnovers: teamTotals.tov,
-    totalFGM: teamTotals.fgm,
-    totalFGA: teamTotals.fga,
-    total3PM: teamTotals.threePM,
-    total3PA: teamTotals.threePA,
-    gamesPlayed: teamStanding?.gamesPlayed !== undefined ? Number(teamStanding.gamesPlayed) : teamTotals.gp,
-    totalPoints: teamStanding?.totalPoints !== undefined ? Number(teamStanding.totalPoints) : teamTotals.pts,
+    totalSteals: Number(teamTotals.stl) || 0,
+    totalTurnovers: Number(teamTotals.tov) || 0,
+    totalFGM: Number(teamTotals.fgm) || 0,
+    totalFGA: Number(teamTotals.fga) || 0,
+    total3PM: Number(teamTotals.threePM) || 0,
+    total3PA: Number(teamTotals.threePA) || 0,
+    gamesPlayed: Number(teamStanding?.gamesPlayed ?? teamTotals.gp) || 0,
+    totalPoints: Number(teamStanding?.totalPoints ?? teamTotals.pts) || 0,
   };
 
-  const teamPPG = team.gamesPlayed > 0 ? (Number(team.totalPoints) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
-  const teamSPG = team.gamesPlayed > 0 ? (Number(team.totalSteals) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
-  const teamTOPG = team.gamesPlayed > 0 ? (Number(team.totalTurnovers) / Number(team.gamesPlayed)).toFixed(1) : '0.0';
-  const teamFGpct = team.totalFGA > 0 ? (((Number(team.totalFGM) / Number(team.totalFGA)) * 100).toFixed(1) + '%') : '0.0%';
-  const team3Ppct = team.total3PA > 0 ? (((Number(team.total3PM) / Number(team.total3PA)) * 100).toFixed(1) + '%') : '0.0%';
+  const teamPPG = team.gamesPlayed > 0 ? (team.totalPoints / team.gamesPlayed).toFixed(1) : '0.0';
+  const teamSPG = team.gamesPlayed > 0 ? (team.totalSteals / team.gamesPlayed).toFixed(1) : '0.0';
+  const teamTOPG = team.gamesPlayed > 0 ? (team.totalTurnovers / team.gamesPlayed).toFixed(1) : '0.0';
+  const teamFGpct = team.totalFGA > 0 ? (((team.totalFGM / team.totalFGA) * 100).toFixed(1) + '%') : '0.0%';
+  const team3Ppct = team.total3PA > 0 ? (((team.total3PM / team.total3PA) * 100).toFixed(1) + '%') : '0.0%';
 
   const teamAvgs = {
     ppg: teamPPG,
-    rpg: team.gamesPlayed > 0 ? (teamTotals.reb / team.gamesPlayed).toFixed(1) : '0.0',
-    apg: team.gamesPlayed > 0 ? (teamTotals.ast / team.gamesPlayed).toFixed(1) : '0.0',
-    bpg: team.gamesPlayed > 0 ? (teamTotals.blk / team.gamesPlayed).toFixed(1) : '0.0',
+    rpg: team.gamesPlayed > 0 ? (Number(teamTotals.reb) / team.gamesPlayed).toFixed(1) : '0.0',
+    apg: team.gamesPlayed > 0 ? (Number(teamTotals.ast) / team.gamesPlayed).toFixed(1) : '0.0',
+    bpg: team.gamesPlayed > 0 ? (Number(teamTotals.blk) / team.gamesPlayed).toFixed(1) : '0.0',
     spg: teamSPG,
     topg: teamTOPG,
     fgPct: teamFGpct,
@@ -95,7 +95,7 @@ const TeamOverviewScreen = ({ city, roster, history, teamStanding, onBack }: Tea
       <View style={globalStyles.tosPlayerCard} key={player.id}>
         <View style={globalStyles.tosPlayerHeader}>
           <View style={globalStyles.flexRowAlignCenter}>
-            <Text style={globalStyles.tosPlayerMain}>{player.lastName} <Text style={globalStyles.tosPlayerNum}>#{player.number}</Text></Text>
+            <Text style={globalStyles.tosPlayerMain} numberOfLines={1} ellipsizeMode="tail">{player.lastName} <Text style={globalStyles.tosPlayerNum}>#{player.number}</Text></Text>
             {player.isRookie && (
               <View style={globalStyles.tosRookieBadge}>
                 <Text style={globalStyles.tosRookieBadgeText}>ROOKIE</Text>

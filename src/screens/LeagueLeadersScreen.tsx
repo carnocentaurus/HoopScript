@@ -49,8 +49,10 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
     <View style={globalStyles.llStatBlockWrapper}>
       <Text style={globalStyles.llSectionHeader}>{title}</Text>
       <View style={globalStyles.llBlockContainer}>
-        {data.map((item, index) => {
+        {(data || []).map((item, index) => {
+          if (!item || !item.player) return null;
           const logo = TEAM_LOGOS[item.teamCity];
+          const val = item.avgs?.[statKey] ?? '0.0';
           return (
             <View
               key={index}
@@ -62,10 +64,10 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
             >
               <Text style={globalStyles.llRankText}>#{index + 1}</Text>
               {logo && <Image source={logo} style={globalStyles.llLogo} />}
-              <Text style={globalStyles.llNameText} numberOfLines={1}>
+              <Text style={globalStyles.llNameText} numberOfLines={1} ellipsizeMode="tail">
                 {item.player.lastName} <Text style={globalStyles.llPlayerPosText}>{item.player.position}</Text>
               </Text>
-              <Text style={globalStyles.llStatVal}>{item.avgs[statKey]}</Text>
+              <Text style={globalStyles.llStatVal}>{val}</Text>
             </View>
           );
         })}
@@ -77,7 +79,8 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
     <View style={globalStyles.llStatBlockWrapper}>
       <Text style={globalStyles.llSectionHeader}>{title}</Text>
       <View style={globalStyles.llBlockContainer}>
-        {data.map((item, index) => {
+        {(data || []).map((item, index) => {
+          if (!item) return null;
           const logo = TEAM_LOGOS[item.city];
           return (
             <View
@@ -90,10 +93,10 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
             >
               <Text style={globalStyles.llRankText}>#{index + 1}</Text>
               {logo && <Image source={logo} style={globalStyles.llLogo} />}
-              <Text style={globalStyles.llNameText} numberOfLines={1}>
+              <Text style={globalStyles.llNameText} numberOfLines={1} ellipsizeMode="tail">
                 {item.city}
               </Text>
-              <Text style={globalStyles.llStatVal}>{item.value}</Text>
+              <Text style={globalStyles.llStatVal}>{item.value ?? '0.0'}</Text>
             </View>
           );
         })}
@@ -103,11 +106,12 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
 
   const AwardBlock = ({ title, data }: { title: string; data: any[] }) => {
     const isAwardsSeen = save.hasSeenAwardsModal;
+    const safeData = data || [];
     
     return (
       <View style={globalStyles.llAwardBlockWrapper}>
         <Text style={globalStyles.llSectionHeader}>{title}</Text>
-        {data.length === 0 ? (
+        {safeData.length === 0 ? (
           <View style={globalStyles.llEmptyContainer}>
             <Text style={globalStyles.llEmptyText}>
               Award active starting Season 2
@@ -115,7 +119,8 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
           </View>
         ) : (
           <View style={globalStyles.llBlockContainer}>
-            {data.map((item, index) => {
+            {safeData.map((item, index) => {
+              if (!item || !item.player) return null;
               const logo = TEAM_LOGOS[item.teamCity];
               const isWinner = index === 0 && isAwardsSeen;
               
@@ -132,17 +137,17 @@ const LeagueLeadersScreen = ({ save, onBack }: LeagueLeadersScreenProps) => {
                   <View style={globalStyles.flexRowAlignCenter}>
                     <Text style={[globalStyles.llRankText, isWinner && globalStyles.textTerracottaHighlight]}>#{index + 1}</Text>
                     {logo && <Image source={logo} style={globalStyles.llLogo} />}
-                    <Text style={[globalStyles.llAwardNameText, isWinner && globalStyles.textTerracottaHighlight]} numberOfLines={1}>
+                    <Text style={[globalStyles.llAwardNameText, isWinner && globalStyles.textTerracottaHighlight]} numberOfLines={1} ellipsizeMode="tail">
                       {item.player.lastName} <Text style={globalStyles.llAwardPlayerPosText}>{item.player.position}</Text>
                     </Text>
                     <Text style={[globalStyles.llAwardWinsText, isWinner && globalStyles.textTerracottaHighlight]}>
-                      {item.teamWins} WINS
+                      {item.teamWins ?? 0} WINS
                     </Text>
                   </View>
                   <Text style={globalStyles.llAwardSubtext}>
                     {title === "DPOY RACE" 
-                      ? `${item.avgs.reb} RPG / ${item.avgs.stl} SPG / ${item.avgs.blk} BPG`
-                      : `${item.avgs.pts} PPG / ${item.avgs.reb} RPG / ${item.avgs.ast} APG`
+                      ? `${item.avgs?.reb ?? 0} RPG / ${item.avgs?.stl ?? 0} SPG / ${item.avgs?.blk ?? 0} BPG`
+                      : `${item.avgs?.pts ?? 0} PPG / ${item.avgs?.reb ?? 0} RPG / ${item.avgs?.ast ?? 0} APG`
                     }
                   </Text>
                 </View>

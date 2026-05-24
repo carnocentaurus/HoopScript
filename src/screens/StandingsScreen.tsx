@@ -32,8 +32,10 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     const streakText = item.streak > 0 ? `+${item.streak}` : `${item.streak}`;
     const streakStyle = item.streak > 0 ? globalStyles.stStreakWin : globalStyles.stStreakLoss;
 
-    const winPct = (item.gamesPlayed || 0) > 0 
-      ? (((item.wins) / (item.gamesPlayed || 1)) * 100).toFixed(1) + '%' 
+    const games = Number(item.gamesPlayed) || 0;
+    const wins = Number(item.wins) || 0;
+    const winPct = games > 0 
+      ? ((wins / games) * 100).toFixed(1) + '%' 
       : '0.0%';
 
     const l10Results = item.recentResults || [];
@@ -42,9 +44,9 @@ const StandingsScreen = ({ save, onBack, onViewTeam }: StandingsProps) => {
     
     // Safety check: if recentResults is empty but team has played games, fallback to dynamic calculation
     let l10Record = `${l10Wins}-${l10Losses}`;
-    if (l10Results.length === 0 && (item.wins > 0 || item.losses > 0)) {
-      const displayWins = Math.min(item.wins, 5); // Heuristic fallback
-      const displayLosses = Math.min(item.losses, 5);
+    if (l10Results.length === 0 && (wins > 0 || Number(item.losses) > 0)) {
+      const displayWins = Math.min(wins, 5); // Heuristic fallback
+      const displayLosses = Math.min(Number(item.losses), 5);
       l10Record = `${displayWins}-${displayLosses}`;
     }
     

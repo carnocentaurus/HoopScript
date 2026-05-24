@@ -428,16 +428,17 @@ const forceWinner = (
   if (scoreA.val !== scoreB.val) return;
 
   // Higher Coach IQ or positive efficiency delta wins the tie-breaker
-  const aWins = (iqA + delta) >= iqB;
+  const aWins = (Number(iqA) + Number(delta)) >= Number(iqB);
   const winnerStats = aWins ? teamAStats : teamBStats;
   const winnerScore = aWins ? scoreA : scoreB;
 
   winnerScore.val += 1;
-  const star = [...winnerStats].sort((a, b) => b.overall - a.overall)[0];
+  const sortedStats = [...(winnerStats || [])].sort((a, b) => (b.overall || 0) - (a.overall || 0));
+  const star = sortedStats[0];
   if (star) {
-    star.pts += 1;
-    star.fgm += 1;
-    star.fga += 1;
+    star.pts = (Number(star.pts) || 0) + 1;
+    star.fgm = (Number(star.fgm) || 0) + 1;
+    star.fga = (Number(star.fga) || 0) + 1;
   }
 };
 
@@ -619,7 +620,8 @@ export const simulateGame = (
       otCount++;
       if (otCount >= 3) {
         // Sudden death after 3OTs to prevent infinite loops
-        forceWinner(myStats, oppStats, myScore, oppScore, myIQ, oppIQ, totalCounterBonus / counteringPossessions);
+        const finalDelta = counteringPossessions > 0 ? (totalCounterBonus / counteringPossessions) : 0;
+        forceWinner(myStats, oppStats, myScore, oppScore, myIQ, oppIQ, finalDelta);
         gameIsOver = true;
       }
     }
@@ -628,7 +630,7 @@ export const simulateGame = (
   const myStats = myTeam.roster.map(p => playerStats[p.id]);
   const oppStats = oppRoster.map((p: any) => playerStats[p.id]);
 
-  const efficiencyDelta = (totalCounterBonus / counteringPossessions) * 100;
+  const efficiencyDelta = counteringPossessions > 0 ? (totalCounterBonus / counteringPossessions) * 100 : 0;
 
   const userWon = myScore.val > oppScore.val;
   const tacticsSuccessful = efficiencyDelta > 0;

@@ -46,41 +46,56 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
       clearDraftIntervals();
     }
 
-    if (!isUserTurn && currentPickIndex < picks.length && !simulating && !isCompleted) {
+    const totalPicks = (picks || []).length;
+    if (!isUserTurn && currentPickIndex < totalPicks && !simulating && !isCompleted) {
       // Auto-pick for AI with a slight delay
       timerRef.current = setTimeout(() => {
-        const bestPlayer = [...pool].sort((a, b) => b.overall - a.overall)[0];
-        onPick(bestPlayer);
+        const sortedPool = [...(pool || [])].sort((a, b) => (b.overall || 0) - (a.overall || 0));
+        const bestPlayer = sortedPool[0];
+        if (bestPlayer) {
+          onPick(bestPlayer);
+        } else {
+          // Emergency Fallback: If pool is empty, we must trigger completion or skip
+          console.warn("Draft pool empty during AI turn");
+        }
       }, 800);
     }
 
     return () => clearDraftIntervals();
-  }, [currentPickIndex, isUserTurn, isCompleted, simulating]);
+  }, [currentPickIndex, isUserTurn, isCompleted, simulating, pool, picks]);
 
   const handleSimToUserPick = () => {
     setSimulating(true);
     let nextIndex = currentPickIndex;
-    let currentPool = [...pool];
+    let currentPool = [...(pool || [])];
+    const totalPicks = (picks || []).length;
 
     intervalRef.current = setInterval(() => {
       // MANDATE: Stop immediately if we hit the user's pick (fencepost protection)
-      if (nextIndex >= picks.length || picks[nextIndex].teamCity === userCity) {
+      if (nextIndex >= totalPicks || (picks[nextIndex] && picks[nextIndex].teamCity === userCity)) {
         clearDraftIntervals();
         setSimulating(false);
         return;
       }
 
-      const bestPlayer = currentPool.sort((a, b) => b.overall - a.overall)[0];
-      onPick(bestPlayer);
-      currentPool = currentPool.filter(p => p.id !== bestPlayer.id);
-      nextIndex++;
+      const sortedPool = currentPool.sort((a, b) => (b.overall || 0) - (a.overall || 0));
+      const bestPlayer = sortedPool[0];
+      
+      if (bestPlayer) {
+        onPick(bestPlayer);
+        currentPool = currentPool.filter(p => p.id !== bestPlayer.id);
+        nextIndex++;
+      } else {
+        clearDraftIntervals();
+        setSimulating(false);
+      }
     }, 100);
   };
 
   const renderProspect = ({ item }: { item: Player }) => (
     <View style={globalStyles.drPlayerCard}>
       <View style={globalStyles.drPlayerInfo}>
-        <Text style={globalStyles.drPlayerName}>{item.lastName}</Text>
+        <Text style={globalStyles.drPlayerName} numberOfLines={1} ellipsizeMode="tail">{item.lastName}</Text>
         <Text style={globalStyles.drPlayerSub}>{item.position} | AGE {item.age}</Text>
       </View>
       <View style={globalStyles.drRatingBox}>
@@ -112,9 +127,10 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
         </View>
 
         <FlatList
-          data={picks}
+          data={picks || []}
           keyExtractor={(item) => `final-${item.overall}`}
           renderItem={({ item }) => {
+            if (!item) return null;
             const logo = TEAM_LOGOS[item.teamCity];
 
             return (
@@ -122,13 +138,13 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
                 <Text style={globalStyles.drSummaryPick}>#{item.overall}</Text>
                 {logo && <Image source={logo} style={globalStyles.drLogoImage} />}
                 <View style={globalStyles.drSummaryInfo}>
-                  <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.textTerracotta]}>
+                  <Text style={[globalStyles.drSummaryTeam, item.teamCity === userCity && globalStyles.textTerracotta]} numberOfLines={1} ellipsizeMode="tail">
                     {item.teamCity.toUpperCase()}
                   </Text>
-                  <Text style={globalStyles.drSummaryPlayer}>{item.player?.lastName}</Text>
+                  <Text style={globalStyles.drSummaryPlayer} numberOfLines={1} ellipsizeMode="tail">{item.player?.lastName || "N/A"}</Text>
                 </View>
                 <View style={globalStyles.drSummaryRating}>
-                  <Text style={globalStyles.drSummaryRatingVal}>{item.player?.overall}</Text>
+                  <Text style={globalStyles.drSummaryRatingVal}>{item.player?.overall || "-"}</Text>
                   <Text style={globalStyles.drSummaryRatingLabel}>OVR</Text>
                 </View>
               </View>
