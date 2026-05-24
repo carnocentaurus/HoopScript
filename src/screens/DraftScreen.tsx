@@ -18,25 +18,43 @@ interface DraftScreenProps {
 const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: DraftScreenProps) => {
   const { currentPickIndex, picks, pool, isCompleted } = draftState;
   const currentPick = picks[currentPickIndex];
-  const isUserTurn = currentPick?.teamCity === userCity;
+  
+  // MANDATE: Strict team ID check to protect user turn
+  const isUserTurn = currentPick && currentPick.teamCity === userCity;
+  
   const { playClickSound } = useSound();
+  const [simulating, setSimulating] = useState(false);
+  
+  // Refs to manage intervals/timeouts safely
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
-  const handlePress = (action: () => void) => {
-    playClickSound();
-    action();
+  const clearDraftIntervals = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   };
 
-  const [simulating, setSimulating] = useState(false);
-
   useEffect(() => {
+    // If it's the user's turn, immediately kill any background loops
+    if (isUserTurn) {
+      clearDraftIntervals();
+    }
+
     if (!isUserTurn && currentPickIndex < picks.length && !simulating && !isCompleted) {
       // Auto-pick for AI with a slight delay
-      const timer = setTimeout(() => {
-        const bestPlayer = pool.sort((a, b) => b.overall - a.overall)[0];
+      timerRef.current = setTimeout(() => {
+        const bestPlayer = [...pool].sort((a, b) => b.overall - a.overall)[0];
         onPick(bestPlayer);
       }, 800);
-      return () => clearTimeout(timer);
     }
+
+    return () => clearDraftIntervals();
   }, [currentPickIndex, isUserTurn, isCompleted, simulating]);
 
   const handleSimToUserPick = () => {
@@ -44,9 +62,10 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
     let nextIndex = currentPickIndex;
     let currentPool = [...pool];
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
+      // MANDATE: Stop immediately if we hit the user's pick (fencepost protection)
       if (nextIndex >= picks.length || picks[nextIndex].teamCity === userCity) {
-        clearInterval(interval);
+        clearDraftIntervals();
         setSimulating(false);
         return;
       }
