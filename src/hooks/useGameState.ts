@@ -582,12 +582,16 @@ export const useGameState = () => {
       const smoy = leadersData.awards.smoy[0];
       const roty = leadersData.awards.roty[0];
 
-      const historicalSeason: any = {
+      const historicalSeason: HistoricalSeason = {
         seasonNumber: currentSave.seasonCount,
         year: currentSave.currentYear,
         champion: champ,
         championRecord: champData ? `${champData.wins}-${champData.losses}` : "N/A",
+        championSeed: champData ? calculateRank(champ, currentSave.standings) : undefined,
+        championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
         userRecord: `${currentSave.wins}-${currentSave.losses}`,
+        userTeamSeed: calculateRank(currentSave.city, currentSave.standings),
+        userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`,
         awards: {
           mvp: { name: mvp.player.lastName, teamLogo: mvp.teamCity, pos: mvp.player.position, stats: `${mvp.avgs.pts}/${mvp.avgs.reb}/${mvp.avgs.ast}` },
           dpoy: { name: dpoy.player.lastName, teamLogo: dpoy.teamCity, pos: dpoy.player.position, stats: `${dpoy.avgs.reb}/${dpoy.avgs.stl}/${dpoy.avgs.blk}` },

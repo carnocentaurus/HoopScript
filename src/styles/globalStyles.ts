@@ -1134,6 +1134,17 @@ export const globalStyles = StyleSheet.create({
     borderBottomColor: 'rgba(255,255,255,0.05)',
     paddingBottom: 4
   },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  iconActionGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
   hiRecordRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 

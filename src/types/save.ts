@@ -153,7 +153,11 @@ export interface HistoricalSeason {
   year: number;
   champion: string;
   championRecord: string;
+  championSeed?: number;
+  championRank?: string;
   userRecord: string;
+  userTeamSeed?: number;
+  userRank?: string;
   awards: {
     mvp: { name: string; teamLogo: any; pos: string; stats: string };
     dpoy: { name: string; teamLogo: any; pos: string; stats: string };

@@ -27,7 +27,7 @@ const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string
   );
 };
 
-const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
+const HistoricalSeasonItem = ({ item, onViewStandings, onViewBracket }: { item: HistoricalSeason, onViewStandings: (s: number) => void, onViewBracket: (s: number) => void }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { playClickSound } = useSound();
   const champLogo = TEAM_LOGOS[item.champion];
@@ -38,12 +38,17 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
     setIsExpanded(!isExpanded);
   };
 
+  const handleAction = (action: () => void) => {
+    playClickSound();
+    action();
+  };
+
   return (
     <View style={globalStyles.hiHistoryCard}>
       <TouchableOpacity style={globalStyles.hiCardHeader} onPress={toggleExpand} activeOpacity={0.7}>
-        <View style={[globalStyles.flexRowAlignCenter, { justifyContent: 'space-between' }]}>
+        <View style={globalStyles.cardHeaderRow}>
           <View style={globalStyles.flexRowAlignCenter}>
-            <Text style={globalStyles.hiYearText}>SEASON {item.seasonNumber} LORE</Text>
+            <Text style={globalStyles.hiYearText}>S{item.seasonNumber} - {item.year} 🏆</Text>
             <Icon 
               name={isExpanded ? "chevron-up" : "chevron-down"} 
               size={18} 
@@ -51,16 +56,27 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
               style={{ marginLeft: 10 }}
             />
           </View>
-          <Text style={globalStyles.hiChampStatText}>{item.year}</Text>
+          
+          <View style={globalStyles.iconActionGroup}>
+            <TouchableOpacity onPress={() => handleAction(() => onViewStandings(item.seasonNumber))}>
+              <Icon name="podium-outline" size={22} color="#E2725B" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleAction(() => onViewBracket(item.seasonNumber))}>
+              <Icon name="git-network-outline" size={22} color="#E2725B" />
+            </TouchableOpacity>
+          </View>
         </View>
         
         <View style={globalStyles.hiChampRow}>
           <View style={[globalStyles.flexRowAlignCenter, globalStyles.flex1]}>
             {champLogo && <Image source={champLogo} style={globalStyles.hiLogoImage} />}
-            <Text style={globalStyles.hiChampText} numberOfLines={1} ellipsizeMode="tail">{item.champion.toUpperCase()}</Text>
+            <Text style={globalStyles.hiChampText} numberOfLines={1} ellipsizeMode="tail">
+              {item.champion.toUpperCase()}
+            </Text>
           </View>
           <View style={globalStyles.hiChampStats}>
             <Text style={globalStyles.hiChampStatText}>{item.championRecord}</Text>
+            {item.championRank && <Text style={[globalStyles.hiChampStatText, { fontSize: 8, color: COLORS.textMuted }]}>{item.championRank}</Text>}
           </View>
         </View>
       </TouchableOpacity>
@@ -101,13 +117,15 @@ const HistoricalSeasonItem = ({ item }: { item: HistoricalSeason }) => {
 
       <View style={globalStyles.hiUserSummary}>
         <Text style={globalStyles.hiUserLabel}>YOUR RECORD:</Text>
-        <Text style={globalStyles.hiUserStat}>{item.userRecord}</Text>
+        <Text style={globalStyles.hiUserStat}>
+          {item.userRecord} {item.userRank ? `- ${item.userRank}` : (item.userTeamSeed ? `(#${item.userTeamSeed})` : '')}
+        </Text>
       </View>
     </View>
   );
 };
 
-const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void }) => {
+const HistoryScreen = ({ save, onBack, onViewStandings, onViewBracket }: { save: GameSave, onBack: () => void, onViewStandings: (s?: number) => void, onViewBracket: (s?: number) => void }) => {
   const { playClickSound } = useSound();
 
   const handlePress = (action: () => void) => {
@@ -136,7 +154,12 @@ const HistoryScreen = ({ save, onBack }: { save: GameSave, onBack: () => void })
           </View>
         ) : (
           [...displayHistory].reverse().map((item, idx) => (
-            <HistoricalSeasonItem key={idx} item={item} />
+            <HistoricalSeasonItem 
+              key={idx} 
+              item={item} 
+              onViewStandings={onViewStandings} 
+              onViewBracket={onViewBracket} 
+            />
           ))
         )}
       </ScrollView>

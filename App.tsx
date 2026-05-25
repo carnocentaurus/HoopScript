@@ -34,6 +34,7 @@ SplashScreen.preventAutoHideAsync();
 function MainApp() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [quickSimParams, setQuickSimParams] = useState<{ expectedOff: OffensiveFocus | null, expectedDef: DefensiveFocus | null } | null>(null);
+  const [historicalSeasonIndex, setHistoricalSeasonIndex] = useState<number | null>(null);
   const { isReady, startMusic } = useAudioContext();
   const {
     view, setView, saves, activeSlot, tempCity, selectedTeamCity, setSelectedTeamCity,
@@ -158,10 +159,59 @@ function MainApp() {
               const data = save.standings.find(t => t.city === selectedTeamCity) || { city: save.city, roster: save.roster };
               return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} teamStanding={save.standings.find(t => t.city === selectedTeamCity)} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;
             })()}
-            {view === 'standings' && <StandingsScreen save={save} onBack={() => setView('leagueHub')} onViewTeam={city => { setSelectedTeamCity(city); setView('myTeamOverview'); }} />}
-            {view === 'bracket' && <PlayoffBracketScreen save={save} onSimDay={handleSimulateLeagueDay} onBack={() => setView('home')} onStartNewSeason={handleStartNewSeason} onViewFullBracket={() => setView('fullBracket')} onDismissFinalsMVPModal={handleDismissFinalsMVPModal} />}
-            {view === 'fullBracket' && <FullPlayoffBracketScreen save={save} onBack={() => setView('bracket')} />}
-            {view === 'history' && <HistoryScreen save={save} onBack={() => setView('leagueHub')} />}
+            {view === 'standings' && (() => {
+              const displaySave = historicalSeasonIndex 
+                ? { ...save, standings: save.history.find(h => h.seasonIndex === historicalSeasonIndex)?.standings || save.standings } 
+                : save;
+              return (
+                <StandingsScreen 
+                  save={displaySave as any} 
+                  onBack={() => {
+                    setView(historicalSeasonIndex ? 'history' : 'leagueHub');
+                    setHistoricalSeasonIndex(null);
+                  }} 
+                  onViewTeam={city => { setSelectedTeamCity(city); setView('myTeamOverview'); }} 
+                />
+              );
+            })()}
+            {view === 'bracket' && (() => {
+              const displaySave = historicalSeasonIndex 
+                ? { ...save, playoffBracket: save.history.find(h => h.seasonIndex === historicalSeasonIndex)?.playoffBracket || save.playoffBracket } 
+                : save;
+              return (
+                <PlayoffBracketScreen 
+                  save={displaySave as any} 
+                  onSimDay={handleSimulateLeagueDay} 
+                  onBack={() => {
+                    setView(historicalSeasonIndex ? 'history' : 'home');
+                    setHistoricalSeasonIndex(null);
+                  }} 
+                  onStartNewSeason={handleStartNewSeason} 
+                  onViewFullBracket={() => setView('fullBracket')} 
+                  onDismissFinalsMVPModal={handleDismissFinalsMVPModal} 
+                />
+              );
+            })()}
+            {view === 'fullBracket' && (() => {
+              const displaySave = historicalSeasonIndex 
+                ? { ...save, playoffBracket: save.history.find(h => h.seasonIndex === historicalSeasonIndex)?.playoffBracket || save.playoffBracket } 
+                : save;
+              return <FullPlayoffBracketScreen save={displaySave as any} onBack={() => setView('bracket')} />;
+            })()}
+            {view === 'history' && (
+              <HistoryScreen 
+                save={save} 
+                onBack={() => setView('leagueHub')} 
+                onViewStandings={(s) => {
+                  setHistoricalSeasonIndex(s ?? null);
+                  setView('standings');
+                }} 
+                onViewBracket={(s) => {
+                  setHistoricalSeasonIndex(s ?? null);
+                  setView('bracket');
+                }} 
+              />
+            )}
             {view === 'lottery' && save.lotteryResults && <DraftLotteryScreen results={save.lotteryResults} onComplete={() => setView('draft')} />}
             {view === 'draft' && save.draftState && <DraftScreen userCity={save.city} draftState={save.draftState} onPick={handleDraftPick} onComplete={handleDraftComplete} onViewTeam={() => { setSelectedTeamCity(save.city); setView('myTeamOverview'); }} />}
           </>
