@@ -24,41 +24,42 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
   
   const { playClickSound } = useSound();
   const [simulating, setSimulating] = useState(false);
+
+  const handlePress = (action: () => void) => {
+    playClickSound();
+    action();
+  };
   
   // Refs to manage intervals/timeouts safely
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const clearDraftIntervals = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
   };
 
   useEffect(() => {
-    // If it's the user's turn, immediately kill any background loops
-    if (isUserTurn) {
-      clearDraftIntervals();
+    // Safety: If it's the user's turn or draft is done, stop simulating
+    if (isUserTurn || isCompleted) {
+      setSimulating(false);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      return;
     }
 
     const totalPicks = (picks || []).length;
-    if (!isUserTurn && currentPickIndex < totalPicks && !simulating && !isCompleted) {
-      // Auto-pick for AI with a slight delay
+    if (!isUserTurn && currentPickIndex < totalPicks && !isCompleted) {
+      // Use a much faster delay if simulating, otherwise use natural AI delay
+      const delay = simulating ? 50 : 800;
+
       timerRef.current = setTimeout(() => {
         const sortedPool = [...(pool || [])].sort((a, b) => (b.overall || 0) - (a.overall || 0));
         const bestPlayer = sortedPool[0];
         if (bestPlayer) {
           onPick(bestPlayer);
-        } else {
-          // Emergency Fallback: If pool is empty, we must trigger completion or skip
-          console.warn("Draft pool empty during AI turn");
         }
-      }, 800);
+      }, delay);
     }
 
     return () => clearDraftIntervals();
@@ -66,30 +67,6 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
 
   const handleSimToUserPick = () => {
     setSimulating(true);
-    let nextIndex = currentPickIndex;
-    let currentPool = [...(pool || [])];
-    const totalPicks = (picks || []).length;
-
-    intervalRef.current = setInterval(() => {
-      // MANDATE: Stop immediately if we hit the user's pick (fencepost protection)
-      if (nextIndex >= totalPicks || (picks[nextIndex] && picks[nextIndex].teamCity === userCity)) {
-        clearDraftIntervals();
-        setSimulating(false);
-        return;
-      }
-
-      const sortedPool = currentPool.sort((a, b) => (b.overall || 0) - (a.overall || 0));
-      const bestPlayer = sortedPool[0];
-      
-      if (bestPlayer) {
-        onPick(bestPlayer);
-        currentPool = currentPool.filter(p => p.id !== bestPlayer.id);
-        nextIndex++;
-      } else {
-        clearDraftIntervals();
-        setSimulating(false);
-      }
-    }, 100);
   };
 
   const renderProspect = ({ item }: { item: Player }) => (
@@ -196,7 +173,7 @@ const DraftScreen = ({ userCity, draftState, onPick, onComplete, onViewTeam }: D
 
       {isUserTurn && !simulating && !isCompleted && (
         <FlatList
-          data={pool.sort((a, b) => b.overall - a.overall)}
+          data={[...pool].sort((a, b) => b.overall - a.overall)}
           keyExtractor={(item) => item.id}
           renderItem={renderProspect}
           contentContainerStyle={globalStyles.drListContainer}
