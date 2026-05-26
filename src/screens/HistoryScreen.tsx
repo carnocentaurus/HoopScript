@@ -12,13 +12,45 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const HistoryRecordRow = ({ label, name, teamCity, pos, value }: { label: string, name: string, teamCity: string, pos?: string, value: string }) => {
+const HistoryRecordRow = ({ 
+  label, 
+  name, 
+  teamCity, 
+  pos, 
+  value, 
+  isAward = false 
+}: { 
+  label: string, 
+  name: string, 
+  teamCity: string, 
+  pos?: string, 
+  value: string,
+  isAward?: boolean
+}) => {
   const logo = TEAM_LOGOS[teamCity];
+
+  if (isAward) {
+    if (name === "N/A") return null;
+    return (
+      <View style={globalStyles.hiAwardRow}>
+        <View style={globalStyles.hiAwardTopLine}>
+          {logo && <Image source={logo} style={globalStyles.hiRecordLogoLarge} />}
+          <Text style={globalStyles.hiAwardLabel}>{label}</Text>
+          <Text style={globalStyles.hiRecordName} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
+          {pos ? <Text style={globalStyles.hiRecordPos}>{pos}</Text> : null}
+        </View>
+        <View style={globalStyles.hiAwardBottomLine}>
+          <Text style={globalStyles.hiAwardStats}>Stats: {value}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={globalStyles.hiRecordRow}>
       <Text style={globalStyles.hiRecordLabel}>{label}</Text>
       <View style={globalStyles.hiRecordMain}>
-        {logo && <Image source={logo} style={globalStyles.hiRecordLogo} />}
+        {logo && <Image source={logo} style={globalStyles.hiRecordLogoLarge} />}
         <Text style={globalStyles.hiRecordName} numberOfLines={1} ellipsizeMode="tail">{name}</Text>
         {pos ? <Text style={globalStyles.hiRecordPos}>{pos}</Text> : null}
         <Text style={globalStyles.hiRecordValue}>{value}</Text>
@@ -84,12 +116,12 @@ const HistoricalSeasonItem = ({ item, onViewStandings, onViewBracket }: { item: 
       {isExpanded && (
         <View style={globalStyles.hiExpandedContent}>
           <Text style={globalStyles.hiSectionTitle}>AWARD WINNERS</Text>
-          <HistoryRecordRow label="MVP" name={item.awards.mvp.name} teamCity={item.awards.mvp.teamLogo} pos={item.awards.mvp.pos} value={item.awards.mvp.stats} />
-          <HistoryRecordRow label="FMVP" name={item.awards.finalsMvp ? item.awards.finalsMvp.name : "N/A"} teamCity={item.awards.finalsMvp ? item.awards.finalsMvp.teamLogo : "N/A"} pos={item.awards.finalsMvp ? item.awards.finalsMvp.pos : "-"} value={item.awards.finalsMvp ? item.awards.finalsMvp.stats : "-"} />
-          <HistoryRecordRow label="DPOY" name={item.awards.dpoy.name} teamCity={item.awards.dpoy.teamLogo} pos={item.awards.dpoy.pos} value={item.awards.dpoy.stats} />
-          <HistoryRecordRow label="6MAN" name={item.awards.smoy.name} teamCity={item.awards.smoy.teamLogo} pos={item.awards.smoy.pos} value={item.awards.smoy.stats} />
+          <HistoryRecordRow label="MVP" name={item.awards.mvp.name} teamCity={item.awards.mvp.teamLogo} pos={item.awards.mvp.pos} value={item.awards.mvp.stats} isAward />
+          <HistoryRecordRow label="FMVP" name={item.awards.finalsMvp ? item.awards.finalsMvp.name : "N/A"} teamCity={item.awards.finalsMvp ? item.awards.finalsMvp.teamLogo : "N/A"} pos={item.awards.finalsMvp ? item.awards.finalsMvp.pos : "-"} value={item.awards.finalsMvp ? item.awards.finalsMvp.stats : "-"} isAward />
+          <HistoryRecordRow label="DPOY" name={item.awards.dpoy.name} teamCity={item.awards.dpoy.teamLogo} pos={item.awards.dpoy.pos} value={item.awards.dpoy.stats} isAward />
+          <HistoryRecordRow label="6MAN" name={item.awards.smoy.name} teamCity={item.awards.smoy.teamLogo} pos={item.awards.smoy.pos} value={item.awards.smoy.stats} isAward />
           {item.awards.roty && (
-            <HistoryRecordRow label="ROTY" name={item.awards.roty.name} teamCity={item.awards.roty.teamLogo} pos={item.awards.roty.pos} value={item.awards.roty.stats} />
+            <HistoryRecordRow label="ROTY" name={item.awards.roty.name} teamCity={item.awards.roty.teamLogo} pos={item.awards.roty.pos} value={item.awards.roty.stats} isAward />
           )}
 
           <Text style={[globalStyles.hiSectionTitle, { marginTop: 20 }]}>STAT LEADERS</Text>

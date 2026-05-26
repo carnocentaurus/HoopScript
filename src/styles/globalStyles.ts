@@ -1148,7 +1148,7 @@ export const globalStyles = StyleSheet.create({
   hiRecordRow: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    paddingVertical: 8, 
+    paddingVertical: 10, 
     borderBottomWidth: 1, 
     borderColor: 'rgba(255,255,255,0.03)' 
   },
@@ -1161,9 +1161,44 @@ export const globalStyles = StyleSheet.create({
   },
   hiRecordMain: { flex: 1, flexDirection: 'row', alignItems: 'center' },
   hiRecordLogo: { width: 20, height: 20, marginRight: 8, resizeMode: 'contain' },
+  hiRecordLogoLarge: { 
+    width: 28, 
+    height: 28, 
+    marginRight: 12, 
+    resizeMode: 'contain' 
+  },
   hiRecordName: { flex: 1, color: COLORS.white, fontFamily: FONTS.secondary, fontSize: 14 },
   hiRecordPos: { width: 25, color: COLORS.textMuted, fontFamily: FONTS.primary, fontSize: 10, textAlign: 'center' },
   hiRecordValue: { width: 85, color: COLORS.primary, fontFamily: FONTS.primary, fontSize: 12, textAlign: 'right' },
+
+  // Award Winners Specific
+  hiAwardRow: { 
+    paddingVertical: 12, 
+    borderBottomWidth: 1, 
+    borderColor: 'rgba(255,255,255,0.03)' 
+  },
+  hiAwardTopLine: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginBottom: 4
+  },
+  hiAwardBottomLine: { 
+    paddingLeft: 90, // Align with name (Logo 28 + Margin 12 + Label 50)
+  },
+  hiAwardStats: { 
+    color: '#B34726', 
+    fontFamily: FONTS.primary, 
+    fontSize: 11,
+    letterSpacing: 0.5,
+    opacity: 0.9
+  },
+  hiAwardLabel: {
+    width: 50,
+    color: COLORS.textMuted,
+    fontFamily: FONTS.primary,
+    fontSize: 9,
+    textTransform: 'uppercase'
+  },
 
 
   // --- PLAYOFF BRACKET SCREEN ---

@@ -319,6 +319,12 @@ export const useGameState = () => {
         return pStat ? updatePlayerStats(p, pStat, isFinals) : p;
       });
 
+      // Update user team in standings to keep rosters in sync
+      const userTeamInStandings = currentSave.standings.find(t => t.city === currentSave.city);
+      if (userTeamInStandings) {
+        userTeamInStandings.roster = currentSave.roster;
+      }
+
       const userSeriesId = currentSave.playoffBracket?.find((s: SeriesMatchup) => 
         (s.highSeed === currentSave.city || s.lowSeed === currentSave.city) && s.round === currentSave.playoffs!.round
       )?.id;
@@ -631,22 +637,18 @@ export const useGameState = () => {
     // Prevent duplicate entries for the same season
     const alreadyRecorded = currentSave.history.some(h => h.seasonIndex === currentSave.seasonCount);
     if (!alreadyRecorded) {
-      // PRUNE STANDINGS AND BRACKET: Save only essential primitives to prevent memory blowout
-      const prunedStandings = currentSave.standings.map(t => ({
-        city: t.city,
-        wins: t.wins,
-        losses: t.losses,
-        conf: t.conf,
-        rank: calculateRank(t.city, currentSave.standings)
+      // Archive STANDINGS AND BRACKET with sufficient detail for full UI parity
+      // We prune gameHistory from rosters to prevent massive save file growth
+      const archivedStandings = currentSave.standings.map(t => ({
+        ...t,
+        roster: t.roster.map(p => ({
+          ...p,
+          gameHistory: [] // Clear heavy game history for archives
+        }))
       }));
 
-      const prunedBracket = (currentSave.playoffBracket || []).map(s => ({
-        highSeed: s.highSeed,
-        lowSeed: s.lowSeed,
-        highSeedWins: s.highSeedWins,
-        lowSeedWins: s.lowSeedWins,
-        round: s.round,
-        isCompleted: s.isCompleted
+      const archivedBracket = (currentSave.playoffBracket || []).map(s => ({
+        ...s
       }));
 
       currentSave.history.push({
@@ -657,8 +659,8 @@ export const useGameState = () => {
         championRank: champData ? `${calculateRank(champ, currentSave.standings)} in ${champData.conf}` : "N/A",
         userRecord: `${currentSave.wins}-${currentSave.losses}`,
         userRank: `${calculateRank(currentSave.city, currentSave.standings)} in ${currentSave.conference}`,
-        standings: prunedStandings as any, // Cast to any to satisfy historical type while being pruned
-        playoffBracket: prunedBracket as any
+        standings: archivedStandings,
+        playoffBracket: archivedBracket
       });
     }
 

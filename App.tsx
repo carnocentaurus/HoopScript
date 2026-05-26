@@ -156,8 +156,18 @@ function MainApp() {
               />
             )}
             {view === 'myTeamOverview' && selectedTeamCity && (() => {
-              const data = save.standings.find(t => t.city === selectedTeamCity) || { city: save.city, roster: save.roster };
-              return <TeamOverviewScreen city={data.city} roster={data.roster} history={save.history} teamStanding={save.standings.find(t => t.city === selectedTeamCity)} onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? 'leagueHub' : 'standings'))} />;
+              const historicalData = historicalSeasonIndex ? save.history.find(h => h.seasonIndex === historicalSeasonIndex) : null;
+              const standingsToSearch = historicalData?.standings || save.standings;
+              const data = standingsToSearch.find(t => t.city === selectedTeamCity) || { city: save.city, roster: save.roster };
+              return (
+                <TeamOverviewScreen 
+                  city={data.city} 
+                  roster={data.roster} 
+                  history={save.history} 
+                  teamStanding={standingsToSearch.find(t => t.city === selectedTeamCity)} 
+                  onBack={() => setView(save.draftState && !save.draftState.isCompleted ? 'draft' : (selectedTeamCity === save.city ? (historicalSeasonIndex ? 'standings' : 'leagueHub') : 'standings'))} 
+                />
+              );
             })()}
             {view === 'standings' && (() => {
               const displaySave = historicalSeasonIndex 
@@ -175,8 +185,9 @@ function MainApp() {
               );
             })()}
             {view === 'bracket' && (() => {
-              const displaySave = historicalSeasonIndex 
-                ? { ...save, playoffBracket: save.history.find(h => h.seasonIndex === historicalSeasonIndex)?.playoffBracket || save.playoffBracket } 
+              const historicalData = historicalSeasonIndex ? save.history.find(h => h.seasonIndex === historicalSeasonIndex) : null;
+              const displaySave = historicalData 
+                ? { ...save, standings: historicalData.standings || save.standings, playoffBracket: historicalData.playoffBracket || save.playoffBracket } 
                 : save;
               return (
                 <PlayoffBracketScreen 
@@ -189,12 +200,14 @@ function MainApp() {
                   onStartNewSeason={handleStartNewSeason} 
                   onViewFullBracket={() => setView('fullBracket')} 
                   onDismissFinalsMVPModal={handleDismissFinalsMVPModal} 
+                  isHistorical={!!historicalSeasonIndex}
                 />
               );
             })()}
             {view === 'fullBracket' && (() => {
-              const displaySave = historicalSeasonIndex 
-                ? { ...save, playoffBracket: save.history.find(h => h.seasonIndex === historicalSeasonIndex)?.playoffBracket || save.playoffBracket } 
+              const historicalData = historicalSeasonIndex ? save.history.find(h => h.seasonIndex === historicalSeasonIndex) : null;
+              const displaySave = historicalData 
+                ? { ...save, standings: historicalData.standings || save.standings, playoffBracket: historicalData.playoffBracket || save.playoffBracket } 
                 : save;
               return <FullPlayoffBracketScreen save={displaySave as any} onBack={() => setView('bracket')} />;
             })()}
