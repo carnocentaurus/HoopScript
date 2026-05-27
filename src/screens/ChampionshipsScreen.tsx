@@ -40,7 +40,7 @@ const ChampionshipsScreen = ({ city, history, onBack }: ChampionshipsScreenProps
           <View style={globalStyles.flexRowWrapBetween}>
             {teamChampionships.map((h, index) => (
               <View key={index} style={[globalStyles.homeMatchupCard, { width: '48%', marginBottom: 15, paddingVertical: 20 }]}>
-                <Image source={require('../../assets/images/trophy.png')} style={{ width: 60, height: 60, resizeMode: 'contain', marginBottom: 10 }} />
+                <Image source={require('../../assets/images/trophy.webp')} style={{ width: 60, height: 60, resizeMode: 'contain', marginBottom: 10 }} />
                 <Text style={globalStyles.homeMatchupCity}>{h.year}</Text>
               </View>
             ))}

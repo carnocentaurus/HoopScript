@@ -1,7 +1,7 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const ICON_PATH = IS_DEV 
   ? './assets/images/icon/dev_icon.jpg' 
-  : './assets/images/icon/hoopscript_icon_resized.png';
+  : './assets/images/icon/hoopscript_icon_resized.webp';
 
 module.exports = {
   expo: {
@@ -13,7 +13,7 @@ module.exports = {
     jsEngine: 'hermes',
     userInterfaceStyle: 'light',
     splash: {
-      image: './assets/images/icon/hoopscript_icon_resized.png',
+      image: './assets/images/icon/hoopscript_icon_resized.webp',
       resizeMode: 'contain',
       backgroundColor: '#ffffff'
     },
@@ -39,7 +39,7 @@ module.exports = {
         : 'com.carnocentaurus.hoopscript'
     },
     web: {
-      favicon: './assets/images/icon/hoopscript_icon_resized.png'
+      favicon: './assets/images/icon/hoopscript_icon_resized.webp'
     },
     plugins: [
       'expo-font',

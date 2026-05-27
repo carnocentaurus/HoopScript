@@ -180,7 +180,7 @@ const HistoryScreen = ({ save, onBack, onViewStandings, onViewBracket }: { save:
       <ScrollView contentContainerStyle={globalStyles.hiScrollContent} showsVerticalScrollIndicator={false}>
         {displayHistory.length === 0 ? (
           <View style={globalStyles.hiEmptyContainer}>
-            <Image source={require('../../assets/images/trophy.png')} style={{ width: 60, height: 60, opacity: 0.2, marginBottom: 20, resizeMode: 'contain' }} />
+            <Image source={require('../../assets/images/trophy.webp')} style={{ width: 60, height: 60, opacity: 0.2, marginBottom: 20, resizeMode: 'contain' }} />
             <Text style={globalStyles.hiEmptyText}>The history books are currently empty.</Text>
             <Text style={[globalStyles.hiEmptyText, { fontSize: 12, marginTop: 5 }]}>Complete your first season to archive records.</Text>
           </View>
