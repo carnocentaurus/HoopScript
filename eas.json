@@ -12,6 +12,7 @@
       }
     },
     "preview": {
+      "developmentClient": false,
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "production"
@@ -22,6 +23,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "developmentClient": false,
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "production"

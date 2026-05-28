@@ -1,7 +1,7 @@
 const IS_DEV = process.env.APP_VARIANT === 'development';
 const ICON_PATH = IS_DEV 
   ? './assets/images/icon/dev_icon.jpg' 
-  : './assets/images/icon/hoopscript_icon_resized.webp';
+  : './assets/images/icon/hoopscript_icon_resized.png';
 
 module.exports = {
   expo: {
@@ -13,7 +13,7 @@ module.exports = {
     jsEngine: 'hermes',
     userInterfaceStyle: 'light',
     splash: {
-      image: './assets/images/icon/hoopscript_icon_resized.webp',
+      image: './assets/images/icon/hoopscript_icon_resized.png',
       resizeMode: 'contain',
       backgroundColor: '#ffffff'
     },
@@ -21,8 +21,8 @@ module.exports = {
       supportsTablet: true,
       jsEngine: 'hermes',
       bundleIdentifier: IS_DEV 
-        ? 'com.carnocentaurus.hoopscript.dev' 
-        : 'com.carnocentaurus.hoopscript'
+        ? 'com.carnocentaurus.HoopScript.dev' 
+        : 'com.carnocentaurus.HoopScript'
     },
     android: {
       adaptiveIcon: {
@@ -31,15 +31,15 @@ module.exports = {
       },
       jsEngine: 'hermes',
       softwareKeyboardLayoutMode: 'pan',
-      versionCode: 2,
+      versionCode: 3,
       predictiveBackGestureEnabled: false,
       permissions: [],
       package: IS_DEV 
-        ? 'com.carnocentaurus.hoopscript.dev' 
-        : 'com.carnocentaurus.hoopscript'
+        ? 'com.carnocentaurus.HoopScript.dev' 
+        : 'com.carnocentaurus.HoopScript'
     },
     web: {
-      favicon: './assets/images/icon/hoopscript_icon_resized.webp'
+      favicon: './assets/images/icon/hoopscript_icon_resized.png'
     },
     plugins: [
       'expo-font',
