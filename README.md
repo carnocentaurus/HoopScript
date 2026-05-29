@@ -44,7 +44,6 @@ src/
 └── utils/          # Core logic (Simulation, League Engine, Stats)
 ```
 
----
-**Start Date** - April 5, 2026
-**Version 1.0.1** - May 8, 2026
-**Version 1.1.0** - May 28, 2026
+- **Start Date** - April 5, 2026
+- **Version 1.0.1** - May 8, 2026
+- **Version 1.1.0** - May 28, 2026
