@@ -7,21 +7,22 @@ Most basketball sims focus on the action on the court. **HoopScript** focuses on
 
 ## Key Features
 
-### Engine & Simulation
-- **Dynamic Simulation Engine**: A sophisticated play-by-play engine (`gameSim.ts`) that calculates outcomes based on granular player attributes, fatigue, and coaching tendencies.
-- **Narrative Engine**: Context-aware descriptions (`narrativeEngine.ts`) that bring every turnover, buzzer-beater, and blowout to life with descriptive commentary.
-- **Procedural Roster Generation**: A "living world" (`rosterGenerator.ts`) that populates the league with unique players, each with distinct potential and career trajectories.
+### Engine & Tactical Depth
+- **Dynamic RPS Simulation**: A play-by-play engine (`gameSim.ts`) built on a "Tactical Matrix." Offenses like **Pace & Space** can be neutralized by **Perimeter Lock**, creating a Rock-Paper-Scissors layer to every game.
+- **Adaptive Coaching AI**: CPU coaches aren't static. High-IQ opponents will scout your tendencies and shift tactics mid-series during the playoffs (`leagueEngine.ts`).
+- **Narrative Analysis**: Post-game reports go beyond the box score, explaining *why* you won or lost based on efficiency deltas and coaching IQ.
+- **Scouting Reports**: Predict opponent strategies based on coach predictability and historical data.
 
 ### League Operations
-- **Full Season Lifecycle**: Manage your team through the regular season, trade deadline, and into the playoffs.
-- **Playoff Ecosystem**: Interactive playoff brackets with full series tracking and championship history.
-- **Draft & Lottery**: Experience the tension of the Draft Lottery and the strategic depth of the Rookie Draft.
-- **Stat Tracking**: Comprehensive tracking of team and player statistics throughout the history of your save.
+- **Advanced Stat Tracking**: Granular tracking including **TS% (True Shooting)**, **Usage Rate**, and **Per-Possession efficiency**.
+- **Playoff Ecosystem**: 2-2-1-1-1 series format with home-court advantage logic and championship history.
+- **Draft & Lottery**: Authentic lottery odds based on the 2019 NBA model, followed by a multi-round procedural draft.
+- **Roster Management**: Manage 15-man rosters with progression/regression cycles based on age and potential.
 
 ### User Experience
 - **Minimalist UI**: A flat, 2D aesthetic designed for clarity and speed, using a signature **Terracotta (#B34726)** branding.
 - **Snappy Performance**: Optimized for mobile with low overhead and quick simulation times.
-- **Multiple Save Slots**: Manage different franchises or eras simultaneously.
+- **Save Integrity**: Robust save slot system allowing multiple simultaneous league histories.
 
 ## Tech Stack
 - **Framework**: [Expo](https://expo.dev/) (SDK 55) / React Native
@@ -29,7 +30,7 @@ Most basketball sims focus on the action on the court. **HoopScript** focuses on
 - **State & Storage**: React Hooks & AsyncStorage
 - **Audio**: Expo Audio for immersive game atmosphere
 - **Icons**: @expo/vector-icons
-- **Fonts**: Custom typography (Oswald and Roboto Condensed)
+- **Fonts**: Custom typography (Oswald, Roboto Condensed, and Inter)
 
 ## Project Structure
 ```text
@@ -43,19 +44,7 @@ src/
 └── utils/          # Core logic (Simulation, League Engine, Stats)
 ```
 
-## Development Guidelines
-
-### Styling Rules
-To maintain the minimalist aesthetic and codebase health, we follow strict styling rules defined in `GEMINI.md`:
-- **No Inline Styles**: All styles must be defined in `src/styles/globalStyles.ts` or `src/styles/theme.ts`.
-- **Branding**: Use the centralized theme variables for colors (especially the **Terracotta #B34726**).
-- **Typography**: Always use the project's custom fonts via the global style system.
-
-### Getting Started
-1. **Clone the repo**: `git clone https://github.com/yourusername/hoopscript.git`
-2. **Install dependencies**: `npm install`
-3. **Start the development server**: `npx expo start`
-
 ---
 **Start Date** - April 5, 2026
-**Current Version** - 1.0.1 (May 8, 2026)
+**Version 1.0.1** - May 8, 2026
+**Version 1.1.0** - May 28, 2026
