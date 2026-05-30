@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Linking, Alert } from 'react-native';
 import { Ionicons as Icon } from '@expo/vector-icons';
 import Screen from '../components/Screen';
 import { globalStyles } from '../styles/globalStyles';
@@ -46,6 +46,21 @@ const LeagueHubScreen = ({
     onBack();
   };
 
+  const handleSupport = async () => {
+    playClickSound();
+    const url = 'https://ko-fi.com/carnocentaurus';
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Browser Error", "Unable to open the donation link. Please visit ko-fi.com/carnocentaurus manually.");
+      }
+    } catch (error) {
+      Alert.alert("Redirection Failed", "An unexpected error occurred while trying to open the web browser.");
+    }
+  };
+
   return (
     <Screen>
       <View style={[globalStyles.homeSeasonHeader, globalStyles.flexRowAlignCenter]}>
@@ -56,15 +71,6 @@ const LeagueHubScreen = ({
         >
           <Icon name="chevron-back" size={32} color={COLORS.primary} />
         </TouchableOpacity>
-        
-        <View style={globalStyles.flex1} />
-        
-        <Text style={globalStyles.tosTitle}>LEAGUE HUB</Text>
-        
-        <View style={globalStyles.flex1} />
-        
-        {/* Spacer to perfectly center the title by matching the back button's width */}
-        <View style={{ width: 60 }} />
       </View>
 
       <ScrollView contentContainerStyle={globalStyles.hubGrid}>
@@ -90,6 +96,12 @@ const LeagueHubScreen = ({
           label="Leaders" 
           icon="trophy-outline" 
           onPress={onViewLeaders} 
+          playClickSound={playClickSound} 
+        />
+        <HubCard 
+          label="Support" 
+          icon="heart-outline" 
+          onPress={handleSupport} 
           playClickSound={playClickSound} 
         />
       </ScrollView>
