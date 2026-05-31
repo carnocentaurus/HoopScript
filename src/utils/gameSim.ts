@@ -344,8 +344,14 @@ const simulatePossession = (
   }
 
   function handleMissedShot() {
+    // --- REALISM CALIBRATION ---
+    // Not every miss results in a player-tracked rebound (Team Rebounds, OOB, etc.)
+    // Target: Team RPG ~44. Avg Misses ~52. Prob ~0.85 assigned to players.
+    const teamRebProb = 0.15; // 15% are 'Team Rebounds'
+    if (Math.random() < teamRebProb) return;
+
     // Rebound Check
-    const offRebProb = 0.25; 
+    const offRebProb = 0.23; // Adjusted for modern offensive rebounding rates
     if (Math.random() < offRebProb) {
       const rebber = getWeightedPlayer(offLineup, 'REBOUNDING');
       stats[rebber.id].reb++;

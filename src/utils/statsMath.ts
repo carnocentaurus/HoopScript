@@ -29,7 +29,7 @@ export const shotSuccessCheck = (trueShootingPct: number, strategyMod: number = 
 export type StatType = 'REBOUNDING' | 'ASSISTS' | 'BLOCKS' | 'STEALS' | 'TURNOVERS' | 'THREE_PA' | 'VOLUME';
 
 export const POSITIONAL_PROFILES: Record<StatType, Record<string, number>> = {
-  REBOUNDING: { C: 6.0, PF: 4.5, SF: 1.2, SG: 0.4, PG: 0.2 },
+  REBOUNDING: { C: 4.2, PF: 3.4, SF: 1.8, SG: 1.0, PG: 0.7 },
   ASSISTS: { PG: 7.0, SG: 2.5, SF: 1.5, PF: 0.6, C: 0.3 },
   STEALS: { PG: 3.0, SG: 2.5, SF: 1.5, PF: 0.6, C: 0.4 },
   BLOCKS: { C: 6.0, PF: 4.0, SF: 1.0, SG: 0.2, PG: 0.1 },
