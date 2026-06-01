@@ -69,7 +69,14 @@ export const globalStyles = StyleSheet.create({
   mb20: { marginBottom: 20 },
   mb30: { marginBottom: 30 },
   mb0: { marginBottom: 0 },
+  mt5: { marginTop: 5 },
+  mt10: { marginTop: 10 },
+  mt20: { marginTop: 20 },
   mr8: { marginRight: 8 },
+  p10: { padding: 10 },
+  p15: { padding: 15 },
+  p20: { padding: 20 },
+  w40: { width: 40 },
   pb20: { paddingBottom: 20 },
   fs12: { fontSize: 12 },
   fw900: { fontWeight: '900' },
@@ -79,6 +86,11 @@ export const globalStyles = StyleSheet.create({
   textBlackBold: { color: COLORS.black, fontFamily: FONTS.primary, textTransform: 'uppercase' },
   textSuccess: { color: COLORS.success },
   textError: { color: COLORS.error },
+  textCenter: { textAlign: 'center' },
+  textUnderline: { textDecorationLine: 'underline' },
+  alignCenter: { alignItems: 'center' },
+  opacity60: { opacity: 0.6 },
+  fontSecondary: { fontFamily: FONTS.secondary },
 
   // --- APP / YEAR SELECTION ---
   appScrollList: {

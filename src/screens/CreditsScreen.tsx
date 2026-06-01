@@ -30,35 +30,35 @@ const CreditsScreen = ({ onBack }: CreditsScreenProps) => {
           <Ionicons name="chevron-back" size={32} color={COLORS.primary} />
         </TouchableOpacity>
         <Text style={globalStyles.hiHeaderTitle}>Credits</Text>
-        <View style={{ width: 40 }} />
+        <View style={globalStyles.w40} />
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 20 }}>
-        <View style={[globalStyles.hiHistoryCard, { marginBottom: 30 }]}>
-          <Text style={[globalStyles.hiYearText, { marginBottom: 10 }]}>Sound Effects</Text>
+      <ScrollView contentContainerStyle={globalStyles.p20}>
+        <View style={[globalStyles.hiHistoryCard, globalStyles.p20, globalStyles.mb30]}>
+          <Text style={[globalStyles.hiYearText, globalStyles.mb10]}>Sound Effects</Text>
           <Text style={globalStyles.hiChampText}>Click Tick 2</Text>
-          <Text style={[globalStyles.hiUserStat, { marginTop: 5, fontFamily: FONTS.secondary }]}>by malle99</Text>
+          <Text style={[globalStyles.hiUserStat, globalStyles.mt5, globalStyles.fontSecondary]}>by malle99</Text>
           <TouchableOpacity onPress={() => openUrl('https://freesound.org/s/496760/')}>
-            <Text style={[globalStyles.textTerracotta, { marginTop: 10, textDecorationLine: 'underline', fontFamily: FONTS.secondary }]}>Source: Freesound.org</Text>
+            <Text style={[globalStyles.textTerracotta, globalStyles.mt10, globalStyles.textUnderline, globalStyles.fontSecondary]}>Source: Freesound.org</Text>
           </TouchableOpacity>
-          <Text style={[globalStyles.hiUserLabel, { marginTop: 10 }]}>License: Creative Commons 0</Text>
+          <Text style={[globalStyles.hiUserLabel, globalStyles.mt10]}>License: Creative Commons 0</Text>
         </View>
 
-        <View style={globalStyles.hiHistoryCard}>
-          <Text style={[globalStyles.hiYearText, { marginBottom: 10 }]}>Background Music</Text>
+        <View style={[globalStyles.hiHistoryCard, globalStyles.p20]}>
+          <Text style={[globalStyles.hiYearText, globalStyles.mb10]}>Background Music</Text>
           <Text style={globalStyles.hiChampText}>Basketball - NBA Basketball Music</Text>
-          <Text style={[globalStyles.hiUserStat, { marginTop: 5, fontFamily: FONTS.secondary }]}>by Andrii Poradovskyi</Text>
+          <Text style={[globalStyles.hiUserStat, globalStyles.mt5, globalStyles.fontSecondary]}>by Andrii Poradovskyi</Text>
           <TouchableOpacity onPress={() => openUrl('https://pixabay.com/users/poradovskyi-52868186/')}>
-            <Text style={[globalStyles.textTerracotta, { marginTop: 10, textDecorationLine: 'underline', fontFamily: FONTS.secondary }]}>Artist: Pixabay Profile</Text>
+            <Text style={[globalStyles.textTerracotta, globalStyles.mt10, globalStyles.textUnderline, globalStyles.fontSecondary]}>Artist: Pixabay Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => openUrl('https://pixabay.com/music/beats-basketball-nba-basketball-music-426800/')}>
-            <Text style={[globalStyles.textTerracotta, { marginTop: 5, textDecorationLine: 'underline', fontFamily: FONTS.secondary }]}>Source: Pixabay Music</Text>
+            <Text style={[globalStyles.textTerracotta, globalStyles.mt5, globalStyles.textUnderline, globalStyles.fontSecondary]}>Source: Pixabay Music</Text>
           </TouchableOpacity>
-          <Text style={[globalStyles.hiUserLabel, { marginTop: 10 }]}>License: Pixabay License</Text>
+          <Text style={[globalStyles.hiUserLabel, globalStyles.mt10]}>License: Pixabay License</Text>
         </View>
         
-        <View style={{ marginTop: 20, alignItems: 'center' }}>
-          <Text style={[globalStyles.hiUserLabel, { textAlign: 'center', opacity: 0.6 }]}>
+        <View style={[globalStyles.mt20, globalStyles.alignCenter]}>
+          <Text style={[globalStyles.hiUserLabel, globalStyles.textCenter, globalStyles.opacity60]}>
             All rights reserved to their respective owners.
           </Text>
         </View>
