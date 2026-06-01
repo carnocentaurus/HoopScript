@@ -7,7 +7,7 @@ module.exports = {
   expo: {
     name: IS_DEV ? 'Dev' : 'HoopScript',
     slug: 'HoopScript',
-    version: '1.0.1',
+    version: '1.1.1',
     orientation: 'portrait',
     icon: ICON_PATH,
     jsEngine: 'hermes',
@@ -31,7 +31,7 @@ module.exports = {
       },
       jsEngine: 'hermes',
       softwareKeyboardLayoutMode: 'pan',
-      versionCode: 3,
+      versionCode: 4,
       predictiveBackGestureEnabled: false,
       permissions: [],
       package: IS_DEV 
